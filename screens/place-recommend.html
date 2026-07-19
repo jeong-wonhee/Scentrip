@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scentrip — 탐색 · 장소 추천</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="../reference/tokens.css">
+<style>
+/* ============================================================
+   Scentrip — 탐색 · 장소 추천 (Figma node 33:103 그대로 이식)
+   색/라운드는 tokens.css var()만 사용. 28·36·44·56·60·200 등
+   토큰 스케일에 없는 값만 Figma 수치를 그대로 px로 적음.
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing);
+  color: var(--color-content-default);
+  background: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+img { display: block; max-width: 100%; }
+button { font-family: inherit; letter-spacing: inherit; cursor: pointer; }
+
+.page { display: flex; flex-direction: column; align-items: stretch; width: 100%; min-height: 100vh; }
+
+/* ---------- 브랜드 로고 (Nav·Footer 공용) ---------- */
+.brand { display: flex; align-items: center; gap: var(--space-6); height: 56px; width: 128px; text-decoration: none; }
+.brand-bars { display: flex; align-items: center; gap: var(--space-2); height: 24px; }
+.brand-bars i { display: block; width: 4px; border-radius: var(--radius-full); background: linear-gradient(180deg, #31493a, #418a8b); }
+.brand-bars i:nth-child(1) { height: 8px; }
+.brand-bars i:nth-child(2) { height: 18px; opacity: .7; }
+.brand-bars i:nth-child(3) { height: 12px; opacity: .4; }
+.brand-name {
+  font-size: var(--text-heading-20); font-weight: 600; line-height: 1.25;
+  background: linear-gradient(180deg, #31493a, #418a8b);
+  -webkit-background-clip: text; background-clip: text; color: transparent; white-space: nowrap;
+}
+
+/* ---------- Nav ---------- */
+.nav { display: flex; align-items: center; height: 56px; padding: 0 28px; width: 100%; background: var(--color-surface-overlay); position: relative; z-index: 10; }
+.nav-center { flex: 1 0 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 0; }
+.nav-list { display: flex; align-items: center; justify-content: center; gap: var(--space-32); }
+.nav-link { display: flex; align-items: center; justify-content: center; height: 56px; font-size: var(--text-body-16); line-height: 1.5; font-weight: 500; color: var(--color-content-nav); text-decoration: none; }
+.nav-link.is-selected { font-weight: 600; color: var(--color-content-nav-selected); }
+.nav-right { display: flex; align-items: center; }
+
+/* 프로필 칩 + 팝오버 */
+.profile { position: relative; }
+.type-pill { display: flex; align-items: center; gap: var(--space-8); padding: 4px 4px 4px 12px; background: var(--color-surface-01); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-full); transition: background .18s ease, border-color .18s ease; }
+.type-pill:hover { background: var(--color-surface-02); border-color: var(--color-border-default); }
+.type-pill[aria-expanded="true"] { background: var(--color-surface-02); border-color: var(--color-border-default); }
+.type-pill > span:first-child { font-size: 13px; font-weight: 600; line-height: 1.5; color: var(--color-content-muted); white-space: nowrap; }
+.avatar { width: 28px; height: 28px; border-radius: var(--radius-full); background: var(--color-surface-04); display: flex; align-items: center; justify-content: center; color: var(--color-surface-overlay); flex: none; }
+.avatar svg { width: 14px; height: 14px; }
+.popover { position: absolute; top: calc(100% + 10px); right: 0; width: 288px; background: var(--color-surface-overlay); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); box-shadow: var(--elevation-lg); padding: var(--space-8); z-index: 300; opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity .18s ease, transform .18s ease, visibility .18s; }
+.popover.is-open { opacity: 1; visibility: visible; transform: none; }
+.pop-profile { display: flex; gap: var(--space-12); align-items: center; padding: var(--space-12); border-radius: var(--radius-md); text-decoration: none; }
+.pop-profile:hover { background: var(--color-neutral-subtle); }
+.pop-avatar { width: 48px; height: 48px; border-radius: var(--radius-full); background: var(--color-surface-04); display: flex; align-items: center; justify-content: center; color: var(--color-surface-overlay); flex: none; }
+.pop-avatar svg { width: 26px; height: 26px; }
+.pop-arrow { flex: none; color: var(--color-content-neutral-subtle); display: flex; }
+.pop-arrow svg { width: 18px; height: 18px; }
+.pop-id { flex: 1 0 0; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.pop-name { font-size: var(--text-body-16); font-weight: 600; line-height: 1.3; color: var(--color-content-default); }
+.pop-handle { font-size: var(--text-body-14); font-weight: 500; line-height: 1.3; color: var(--color-content-neutral-subtle); }
+.pop-divider { height: 1px; background: var(--color-border-subtle); margin: var(--space-6) var(--space-8); }
+.pop-taste { padding: var(--space-12); display: flex; align-items: center; gap: var(--space-12); }
+.pop-taste-info { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
+.pop-taste-label { font-size: var(--text-caption-12); font-weight: 500; color: var(--color-content-neutral-subtle); }
+.pop-taste-value { font-size: var(--text-body-14); font-weight: 600; line-height: 1.3; color: var(--color-content-subtle); }
+.pop-menu { display: flex; flex-direction: column; }
+.pop-item { display: flex; align-items: center; gap: var(--space-10); padding: var(--space-12); border-radius: var(--radius-md); font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-default); text-decoration: none; background: none; border: 0; text-align: left; }
+.pop-item:hover { background: var(--color-neutral-subtle); }
+.pop-item svg { width: 18px; height: 18px; color: var(--color-content-neutral-muted); flex: none; }
+.pop-item.logout { color: var(--color-content-neutral-muted); }
+
+/* ---------- 탭 (여행 장소 / 여행 동선) ---------- */
+.tabs { display: flex; gap: 28px; align-items: flex-start; padding: 36px 60px; width: 100%; font-size: var(--text-title-32); font-weight: 600; line-height: 1.25; white-space: nowrap; }
+.tabs .tab { color: var(--color-content-neutral-disabled); text-decoration: none; }
+.tabs .tab.is-active { color: var(--color-primary); }
+
+/* ---------- 콘텐츠 영역 ---------- */
+.content { display: flex; flex-direction: column; gap: 28px; align-items: center; padding: 20px 60px 36px; width: 100%; background: var(--color-background); }
+
+/* 필터 바 */
+.filterbar { display: flex; gap: var(--space-24); align-items: center; width: 100%; }
+.filter-left { flex: 1 0 0; display: flex; gap: var(--space-24); align-items: center; min-width: 0; }
+.segmented { position: relative; display: flex; gap: var(--space-4); padding: var(--space-4); background: var(--color-neutral-subtle); border-radius: 999px; }
+.seg { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; height: 36px; padding: 0 var(--space-16); border-radius: 999px; border: 0; background: none; font-size: var(--text-body-16); font-weight: 600; line-height: 1.5; color: var(--color-content-neutral-subtle); white-space: nowrap; transition: color .2s ease; }
+.seg.is-active { color: var(--color-content-default); }
+.seg-thumb { position: absolute; top: var(--space-4); bottom: var(--space-4); left: 0; width: 0; border-radius: 999px; background: var(--color-surface-overlay); box-shadow: var(--elevation-xs); z-index: 0; pointer-events: none; transition: transform .28s cubic-bezier(.22,.61,.36,1), width .28s cubic-bezier(.22,.61,.36,1); }
+.divider-v { width: 1px; height: 20px; background: var(--color-neutral-border); flex: none; }
+.filter-chips { display: flex; gap: var(--space-8); align-items: center; }
+.chip-btn {
+  display: flex; align-items: center; justify-content: center; gap: var(--space-6);
+  height: 44px; padding: 0 var(--space-16); border-radius: 999px;
+  background: var(--color-surface-overlay); border: 1px solid var(--color-neutral-border);
+  font-size: var(--text-body-16); font-weight: 600; line-height: 1.5; color: var(--color-content-neutral-muted); white-space: nowrap;
+}
+.chip-btn svg { width: 16px; height: 16px; }
+.chip-btn.is-active { border: 2px solid var(--color-content-muted); color: var(--color-content-default); }
+.chip-btn.is-active svg { width: 20px; height: 20px; }
+.count { font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; color: var(--color-content-neutral-muted); white-space: nowrap; flex: none; }
+.seg { cursor: pointer; }
+
+/* 필터 드롭다운 (라운드 그림자 셀렉트 팝오버) */
+.filter { position: relative; }
+.chip-btn { cursor: pointer; }
+.chip-btn .caret { display: inline-flex; transition: transform .18s ease; }
+.chip-btn[aria-expanded="true"] .caret { transform: rotate(180deg); }
+.filter-pop { position: absolute; top: calc(100% + 8px); left: 0; min-width: 180px; background: var(--color-surface-overlay); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); box-shadow: var(--elevation-lg); padding: var(--space-6); z-index: 200; opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity .16s ease, transform .16s ease, visibility .16s; }
+.filter-pop.is-open { opacity: 1; visibility: visible; transform: none; }
+.filter-opt { display: flex; align-items: center; justify-content: space-between; gap: var(--space-12); width: 100%; padding: var(--space-10) var(--space-12); border: 0; background: none; border-radius: var(--radius-md); font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-default); text-align: left; white-space: nowrap; cursor: pointer; }
+.filter-opt:hover { background: var(--color-neutral-subtle); }
+.filter-opt.is-selected { color: var(--color-content-subtle); font-weight: 600; }
+.filter-opt .check { width: 16px; height: 16px; color: var(--color-content-subtle); opacity: 0; flex: none; }
+.filter-opt.is-selected .check { opacity: 1; }
+
+/* 카드 그리드 */
+.grid { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: var(--space-24); row-gap: var(--space-48); transition: opacity .18s ease; }
+.card { display: flex; flex-direction: column; gap: var(--space-24); }
+.card-photo {
+  position: relative; height: 200px; overflow: hidden;
+  border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl);
+  padding: var(--space-12); display: flex; flex-direction: column;
+}
+.card-photo .bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.card-top { position: relative; display: flex; gap: var(--space-8); align-items: flex-start; justify-content: flex-end; width: 100%; }
+.badge-wrap { flex: 1 0 0; display: flex; min-width: 0; }
+.badge { display: inline-flex; align-items: center; gap: var(--space-6); padding: var(--space-4) var(--space-10); border-radius: var(--radius-full); background: var(--color-surface-overlay); border: 1px solid var(--color-border-default); }
+.badge svg { width: 14px; height: 14px; color: var(--color-content-subtle); }
+.badge span { font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; color: var(--color-content-subtle); white-space: nowrap; }
+.heart { width: 28px; height: 28px; color: var(--color-surface-overlay); filter: drop-shadow(0 1px 2px rgba(0,0,0,.04)) drop-shadow(0 2px 4px rgba(0,0,0,.08)); flex: none; }
+.card-body { display: flex; flex-direction: column; gap: var(--space-8); }
+.card-name { font-size: var(--text-heading-20); font-weight: 600; line-height: 1.25; color: var(--color-content-neutral); }
+.card-desc { font-size: var(--text-body-16); font-weight: 400; line-height: 1.5; color: var(--color-content-neutral-muted); }
+.card-meta { display: flex; gap: var(--space-8); font-size: var(--text-body-16); font-weight: 500; line-height: 1.5; color: var(--color-content-neutral-subtle); }
+
+/* ---------- Footer ---------- */
+.footer { padding-top: 36px; width: 100%; }
+.footer-inner { background: var(--color-neutral-bg); padding: 48px 60px; display: flex; flex-direction: column; gap: var(--space-40); overflow: hidden; }
+.footer-top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-24); width: 100%; }
+.footer-brand-col { display: flex; flex-direction: column; gap: var(--space-20); width: 300px; flex: none; }
+.footer-brand { display: flex; align-items: center; gap: var(--space-6); }
+.footer-desc { font-size: var(--text-body-14); font-weight: 500; line-height: 1.5; letter-spacing: -0.42px; color: var(--color-content-neutral-muted); }
+.footer-nav { flex: 1 0 0; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: var(--space-12); font-size: var(--text-body-14); font-weight: 500; line-height: 1.5; letter-spacing: -0.42px; color: var(--color-content-neutral-muted); text-align: right; }
+.footer-nav a { color: inherit; text-decoration: none; white-space: nowrap; }
+.footer-nav a:hover { color: var(--color-content-neutral); }
+.footer-bottom { display: flex; align-items: center; justify-content: space-between; gap: var(--space-24); width: 100%; padding-top: var(--space-40); border-top: 1px solid var(--color-neutral-border); font-size: var(--text-caption-12); font-weight: 600; line-height: 1.5; letter-spacing: -0.36px; white-space: nowrap; }
+.footer-copy { color: var(--color-content-neutral-subtle); }
+.footer-legal { display: flex; gap: var(--space-20); }
+.footer-legal a { text-decoration: none; white-space: nowrap; }
+.footer-legal .lgl-muted { color: var(--color-content-neutral-subtle); }
+.footer-legal .lgl-strong { color: var(--color-content-neutral); }
+
+/* ---------- 반응형 (Figma는 데스크톱 기준 · 좁은 폭 우아하게 축소) ---------- */
+@media (max-width: 1120px) {
+  .tabs, .content, .footer-inner { padding-left: 32px; padding-right: 32px; }
+  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 820px) {
+  .nav { padding: 0 20px; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .filterbar { flex-wrap: wrap; }
+  .filter-left { flex-wrap: wrap; }
+}
+@media (max-width: 560px) {
+  .nav-center { display: none; }
+  .grid { grid-template-columns: 1fr; }
+  .tabs { font-size: var(--text-title-28); }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ============ Nav ============ -->
+  <nav class="nav">
+    <a class="brand" href="home.html" aria-label="Scentrip 홈">
+      <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="brand-name">Scentrip</span>
+    </a>
+    <div class="nav-center">
+      <div class="nav-list">
+        <a class="nav-link" href="#">소식</a>
+        <a class="nav-link is-selected" href="#">탐색</a>
+        <a class="nav-link" href="#">내 여행</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="profile">
+        <button class="type-pill" id="profilePill" type="button" aria-haspopup="true" aria-expanded="false">
+          <span>이서연</span>
+          <span class="avatar" aria-hidden="true">
+            <svg viewBox="0 0 256 256" fill="currentColor"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg>
+          </span>
+        </button>
+        <div class="popover" id="profilePop" role="menu">
+          <a class="pop-profile" href="#" role="menuitem">
+            <span class="pop-avatar" aria-hidden="true">
+              <svg viewBox="0 0 256 256" fill="currentColor"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg>
+            </span>
+            <div class="pop-id">
+              <p class="pop-name">이서연</p>
+              <p class="pop-handle">@seoyeon</p>
+              <p class="pop-taste-value">시간을 수집하는 감성가</p>
+            </div>
+          </a>
+          <div class="pop-divider"></div>
+          <div class="pop-menu">
+            <a class="pop-item" href="#" role="menuitem">
+              <svg viewBox="0 0 256 256" fill="currentColor"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg>
+              마이페이지
+            </a>
+            <button class="pop-item logout" type="button" role="menuitem">
+              <svg viewBox="0 0 256 256" fill="currentColor"><path d="M124,216a12,12,0,0,1-12,12H48a12,12,0,0,1-12-12V40A12,12,0,0,1,48,28h64a12,12,0,0,1,0,24H60V204h52A12,12,0,0,1,124,216Zm108.49-96.49-40-40a12,12,0,0,0-17,17L195,116H112a12,12,0,0,0,0,24h83l-19.52,19.51a12,12,0,0,0,17,17l40-40A12,12,0,0,0,232.49,119.51Z"/></svg>
+              로그아웃
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ 탭 ============ -->
+  <div class="tabs">
+    <a class="tab is-active" href="place-recommend.html">여행 장소</a>
+    <a class="tab" href="route.html">여행 동선</a>
+  </div>
+
+  <!-- ============ 콘텐츠 ============ -->
+  <div class="content">
+
+    <!-- 필터 바 -->
+    <div class="filterbar">
+      <div class="filter-left">
+        <div class="segmented" id="sortSeg" role="tablist">
+          <button class="seg is-active" type="button" data-sort="match">취향 매칭순</button>
+          <button class="seg" type="button" data-sort="pop">인기순</button>
+          <button class="seg" type="button" data-sort="dist" title="위치 정보 수집 필요">거리순</button>
+        </div>
+        <div class="divider-v" aria-hidden="true"></div>
+        <div class="filter-chips" id="filterChips"></div>
+      </div>
+      <p class="count" id="count">총 24개 장소</p>
+    </div>
+
+    <!-- 카드 그리드 -->
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <!-- ============ Footer ============ -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-brand-col">
+          <span class="footer-brand">
+            <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="brand-name">Scentrip</span>
+          </span>
+          <p class="footer-desc">나만의 취향을 찾아 떠나는 특별한 여행,<br>센트립이 당신의 여정을 함께합니다.</p>
+        </div>
+        <nav class="footer-nav">
+          <a href="#">센트립 소개</a>
+          <a href="#">공지사항</a>
+          <a href="#">FAQ</a>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <span class="footer-copy">email · contact</span>
+        <div class="footer-legal">
+          <a href="#" class="lgl-muted">이용약관</a>
+          <a href="#" class="lgl-strong">개인정보처리방침</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+/* 카드 12장 — Figma의 이미지 순환 순서를 그대로 재현.
+   텍스트는 Figma 플레이스홀더(여행장소명 / Description / 지역 특징 취향 / AI 매칭 88%)를 동일하게 유지. */
+const starFour = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg>';
+const heart = '<svg class="heart" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M178,32c-20.65,0-38.73,8.88-50,23.89C116.73,40.88,98.65,32,78,32A62.07,62.07,0,0,0,16,94c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,220.66,240,164,240,94A62.07,62.07,0,0,0,178,32Zm-50,174c-18.26-11.06-96-64.11-96-112A46.06,46.06,0,0,1,78,48c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0C142.22,58.36,158.55,48,178,48a46.06,46.06,0,0,1,46,46C224,141.87,146.24,194.93,128,206Z"/></svg>';
+const caret = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></svg>';
+const xCircle = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm37.66,130.34a8,8,0,0,1-11.32,11.32L128,139.31l-26.34,26.35a8,8,0,0,1-11.32-11.32L116.69,128,90.34,101.66a8,8,0,0,1,11.32-11.32L128,116.69l26.34-26.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>';
+const check = '<svg class="check" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/></svg>';
+
+/* 장소 데이터 — match(취향 매칭%)·pop(인기)·dist(거리km)로 정렬이 실제로 보이게 */
+const PLACES = [
+  { img:"frame9",  match:96, pop:1200, dist:2.4 },
+  { img:"frame10", match:88, pop:4200, dist:8.1 },
+  { img:"frame11", match:93, pop:2050, dist:1.2 },
+  { img:"frame11", match:85, pop:3100, dist:5.6 },
+  { img:"frame11", match:91, pop:880,  dist:12.3 },
+  { img:"frame9",  match:82, pop:2700, dist:3.9 },
+  { img:"frame10", match:95, pop:1580, dist:0.8 },
+  { img:"frame11", match:87, pop:990,  dist:7.2 },
+  { img:"frame10", match:90, pop:2300, dist:4.5 },
+  { img:"frame11", match:83, pop:5100, dist:9.8 },
+  { img:"frame11", match:89, pop:1720, dist:6.1 },
+  { img:"frame9",  match:94, pop:6400, dist:11.0 },
+];
+function placeCard(p) {
+  return `
+  <article class="card" data-match="${p.match}" data-pop="${p.pop}" data-dist="${p.dist}">
+    <div class="card-photo">
+      <img class="bg" src="../assets/place/${p.img}.jpg" alt="">
+      <div class="card-top">
+        <div class="badge-wrap"><span class="badge">${starFour}<span>AI 매칭 ${p.match}%</span></span></div>
+        ${heart}
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="card-name">여행장소명</p>
+      <p class="card-desc">Description</p>
+      <div class="card-meta"><span>지역</span><span>특징</span><span>취향</span></div>
+    </div>
+  </article>`;
+}
+const grid = document.getElementById("grid");
+grid.innerHTML = PLACES.map(placeCard).join("");
+
+/* ---------- 필터 칩 (다중선택 드롭다운) ----------
+   모든 필터는 여러 개 선택 가능. 취향타입은 기본적으로 본인 타입(나무 향)이 선택된 상태이고,
+   X를 누르면 아무것도 선택되지 않은 '취향타입' 필터 슬롯이 남아 다시 선택할 수 있다. */
+const FILTERS = [
+  { key: "region", label: "지역", opts: ["서울", "강원", "경상", "전라", "충청", "제주"] },
+  { key: "feature", label: "특징", opts: ["자연경관", "감성 카페", "전시·예술", "액티비티", "포토스팟"] },
+  { key: "taste", label: "취향", opts: ["감성가 타입", "큐레이터 타입", "개척자 타입", "사색가 타입", "낭만가 타입", "미학가 타입", "방랑자 타입", "노마드 타입"], preset: ["감성가 타입"] },
+];
+const applied = {};
+FILTERS.forEach((f) => { applied[f.key] = f.preset ? [...f.preset] : []; });
+
+const chipsWrap = document.getElementById("filterChips");
+chipsWrap.innerHTML = FILTERS.map((f) => `
+  <div class="filter" data-key="${f.key}">
+    <button class="chip-btn" type="button" aria-expanded="false"><span class="chip-label"></span><span class="caret"></span></button>
+    <div class="filter-pop" role="listbox">
+      ${f.opts.map((o) => `<button class="filter-opt" type="button" data-value="${o}">${o}${check}</button>`).join("")}
+    </div>
+  </div>`).join("");
+
+function summary(vals, label) { return !vals.length ? label : (vals.length === 1 ? vals[0] : `${vals[0]} 외 ${vals.length - 1}`); }
+function updateChip(key) {
+  const f = FILTERS.find((x) => x.key === key);
+  const el = chipsWrap.querySelector(`.filter[data-key="${key}"]`);
+  const vals = applied[key];
+  const has = vals.length > 0;
+  el.querySelector(".chip-label").textContent = summary(vals, f.label);
+  el.querySelector(".caret").innerHTML = has ? xCircle : caret;
+  el.querySelector(".chip-btn").classList.toggle("is-active", has);
+  el.querySelectorAll(".filter-opt").forEach((o) => o.classList.toggle("is-selected", vals.includes(o.dataset.value)));
+}
+FILTERS.forEach((f) => updateChip(f.key));
+
+const countEl = document.getElementById("count");
+function closePops() {
+  chipsWrap.querySelectorAll(".filter-pop.is-open").forEach((p) => p.classList.remove("is-open"));
+  chipsWrap.querySelectorAll('.chip-btn[aria-expanded="true"]').forEach((b) => b.setAttribute("aria-expanded", "false"));
+}
+function hashCount(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return 4 + (h % 17); }
+
+let sortKey = "match";
+function applyView() {
+  grid.style.opacity = "0";
+  setTimeout(() => {
+    const asc = sortKey === "dist";
+    const cards = [...grid.children].sort((a, b) => asc ? a.dataset[sortKey] - b.dataset[sortKey] : b.dataset[sortKey] - a.dataset[sortKey]);
+    // 취향타입은 개인화 기준값이라 개수에 영향 X, 나머지 필터가 결과를 좁힌다
+    const active = FILTERS.filter((f) => f.key !== "taste" && applied[f.key].length).map((f) => applied[f.key].join(",")).join("|");
+    const n = active ? hashCount(active) : 24;
+    const shown = Math.min(n, cards.length);
+    cards.forEach((c, i) => { c.style.display = i < shown ? "" : "none"; grid.appendChild(c); });
+    countEl.textContent = `총 ${n}개 장소`;
+    grid.style.opacity = "1";
+  }, 180);
+}
+
+/* 정렬 세그먼트 — 선택된 흰색 pill이 슬라이드로 이동 */
+const sortSeg = document.getElementById("sortSeg");
+const segThumb = document.createElement("span");
+segThumb.className = "seg-thumb";
+segThumb.setAttribute("aria-hidden", "true");
+sortSeg.prepend(segThumb);
+function placeThumb(seg, instant) {
+  if (instant) segThumb.style.transition = "none";
+  segThumb.style.width = seg.offsetWidth + "px";
+  segThumb.style.transform = "translateX(" + seg.offsetLeft + "px)";
+  if (instant) { void segThumb.offsetWidth; segThumb.style.transition = ""; }
+}
+function repositionThumb() { const a = sortSeg.querySelector(".seg.is-active"); if (a) placeThumb(a, true); }
+requestAnimationFrame(repositionThumb);
+window.addEventListener("load", repositionThumb);
+window.addEventListener("resize", repositionThumb);
+sortSeg.addEventListener("click", (e) => {
+  const btn = e.target.closest(".seg"); if (!btn) return;
+  sortSeg.querySelectorAll(".seg").forEach((s) => s.classList.remove("is-active"));
+  btn.classList.add("is-active");
+  placeThumb(btn, false);
+  sortKey = btn.dataset.sort;
+  applyView();
+});
+
+/* 필터 드롭다운 (다중선택) */
+chipsWrap.addEventListener("click", (e) => {
+  const chipBtn = e.target.closest(".filter > .chip-btn");
+  const opt = e.target.closest(".filter-opt");
+  if (chipBtn) {
+    e.stopPropagation();
+    const filter = chipBtn.parentElement;
+    const key = filter.dataset.key;
+    if (e.target.closest(".caret") && applied[key].length) { applied[key] = []; updateChip(key); closePops(); applyView(); return; }
+    const pop = filter.querySelector(".filter-pop");
+    const willOpen = !pop.classList.contains("is-open");
+    closePops();
+    if (willOpen) { pop.classList.add("is-open"); chipBtn.setAttribute("aria-expanded", "true"); }
+    return;
+  }
+  if (opt) {
+    e.stopPropagation();
+    const filter = opt.closest(".filter");
+    const key = filter.dataset.key;
+    const val = opt.dataset.value;
+    const arr = applied[key];
+    const i = arr.indexOf(val);
+    if (i >= 0) arr.splice(i, 1); else arr.push(val);
+    updateChip(key);
+    applyView();
+    return;
+  }
+});
+document.addEventListener("click", (e) => { if (!e.target.closest(".filter")) closePops(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closePops(); });
+
+/* 프로필 팝오버 */
+const pill = document.getElementById("profilePill");
+const pop = document.getElementById("profilePop");
+pill.addEventListener("click", (e) => {
+  e.stopPropagation();
+  const open = pop.classList.toggle("is-open");
+  pill.setAttribute("aria-expanded", open ? "true" : "false");
+});
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".profile")) { pop.classList.remove("is-open"); pill.setAttribute("aria-expanded", "false"); }
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") { pop.classList.remove("is-open"); pill.setAttribute("aria-expanded", "false"); } });
+</script>
+</body>
+</html>
