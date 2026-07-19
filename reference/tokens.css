@@ -255,9 +255,9 @@
   --text-display-48: 48px;
   --text-display-40: 40px;
   --text-display-36: 36px;
-  /* Title — SemiBold */
-  --text-title-32: 32px;
-  --text-title-28: 28px;
+  /* Title — SemiBold  (프로토타입에서 한 단계 축소: 원래 32/28 → 현재 28/24) */
+  --text-title-32: 28px;
+  --text-title-28: 24px;
   /* Heading — SemiBold / Medium */
   --text-heading-24: 24px;
   --text-heading-20: 20px;
