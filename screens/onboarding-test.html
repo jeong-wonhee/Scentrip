@@ -43,7 +43,9 @@ body {
   --type-glass-edge: rgba(255, 255, 255, .6);
 }
 
-/* ---------- 공통 헤더 ---------- */
+/* ---------- 공통 헤더 ----------
+   로고는 홈으로 가는 링크. 이 테스트는 홍보용 단독 링크라 네비게이션은 두지 않고,
+   유일한 이동 경로로 로고 → 홈만 남긴다. */
 .brand {
   position: absolute;
   top: var(--space-24);
@@ -56,9 +58,15 @@ body {
   font-weight: 600;
   z-index: 100;
   color: var(--color-primary);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: opacity .2s ease;
 }
+.brand:hover { opacity: .7; }
+.brand:focus-visible { outline: 2px solid currentColor; outline-offset: 6px; }
 /* .brand는 스테이지 바깥의 형제 요소라, 스테이지 안쪽 셀렉터로는 색을 못 준다.
-   어두운 배경을 쓰는 로딩·결과에서만 흰색으로 뒤집는다. */
+   어두운 배경을 쓰는 표지·로딩·결과에서만 흰색으로 뒤집는다. */
+body:has(#stage-intro.is-active) .brand,
 body:has(#stage-loading.is-active) .brand,
 body:has(#stage-result.is-active) .brand { color: var(--color-content-on-fill); }
 .brand-mark { display: flex; align-items: flex-end; gap: 2px; height: 16px; }
@@ -76,6 +84,95 @@ body:has(#stage-result.is-active) .brand { color: var(--color-content-on-fill); 
    각 스테이지가 #id로 display(grid/block)를 지정하므로,
    숨김 규칙은 !important로 그 특이도를 이겨야 한다. */
 .stage:not(.is-active) { display: none !important; }
+
+/* ============================================================
+   STAGE 0 — 표지(커버)
+   홍보 링크로 처음 도착했을 때 보는 화면. 어두운 몰입형 히어로에
+   로딩과 같은 '피어나는 향 덩어리(bloom orb)'를 재사용해 향↔테스트를 잇는다.
+   시작하기 → 질문(밝은 화면)으로 전환.
+   ============================================================ */
+#stage-intro {
+  position: relative;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: var(--space-96) var(--space-24);
+  background:
+    radial-gradient(85% 65% at 50% 42%, var(--scent-green-800) 0%, var(--scent-green-900) 46%, var(--scent-green-950) 100%);
+  color: var(--color-content-on-fill);
+  text-align: center;
+  transition: opacity 1.2s ease, transform 1.2s cubic-bezier(.22, .61, .36, 1);
+}
+/* 시작 버튼을 누르면 표지가 질문 화면 위에 오버레이(fixed)로 떠서 서서히 흐려진다.
+   그 아래 질문이 이미 렌더돼 있으므로, 표지가 흐려지는 사이로 질문이 교차되어 드러난다. */
+#stage-intro.is-leaving {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  opacity: 0;
+  transform: scale(1.06);
+  pointer-events: none;
+}
+.intro-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-20);
+  max-width: 560px;
+}
+/* 요소가 위에서부터 차례로 떠오른다 */
+.intro-inner > * { animation: introUp .9s cubic-bezier(.22,.61,.36,1) both; }
+.intro-kicker  { animation-delay: .05s; }
+.intro-orb     { animation-delay: .15s; }
+.intro-title   { animation-delay: .3s; }
+.intro-desc    { animation-delay: .45s; }
+.intro-start   { animation-delay: .6s; }
+@keyframes introUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+
+.intro-kicker {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-6) var(--space-16);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--alpha-white-16);
+  border-top-color: var(--alpha-white-40);
+  background: var(--alpha-white-8);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  font-size: var(--text-body-14);
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--color-content-on-fill);
+}
+
+/* 향 덩어리 — 로딩 스테이지의 bloom/core/diffuse를 그대로 재사용하는 무대 */
+.intro-orb {
+  position: relative;
+  width: min(260px, 56vw);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  margin: var(--space-4) 0;
+}
+
+.intro-title {
+  font-family: 'Maru Buri', var(--font-family);
+  letter-spacing: calc(var(--letter-spacing) * 1.5);
+  font-size: clamp(var(--text-title-32), 6vw, var(--text-display-48));
+  font-weight: 600;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+.intro-desc {
+  font-size: var(--text-body-16);
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--alpha-white-70);
+  text-wrap: pretty;
+}
+.intro-start { margin-top: var(--space-16); }
 
 /* ============================================================
    STAGE 1 — 질문
@@ -444,13 +541,15 @@ body:has(#stage-result.is-active) .brand { color: var(--color-content-on-fill); 
 /* 헤딩 바로 아래 보조 설명 — 있을 때는 헤딩 간격을 좁혀 한 덩어리로 묶는다 */
 .rs-heading:has(+ .rs-desc) { margin-bottom: var(--space-12); }
 .rs-desc {
-  max-width: 44ch;
+  max-width: 58ch;
   margin: 0 auto var(--space-32);
   text-align: center;
-  font-size: var(--text-body-14);
-  line-height: 1.7;
+  font-size: var(--text-body-16);
+  line-height: 1.75;
   color: var(--type-deep);
-  opacity: .62;
+  opacity: .68;
+  /* 줄 끝에 한 단어만 남거나 어절 중간에서 끊기는 어색한 줄바꿈 방지 */
+  text-wrap: pretty;
 }
 
 /* ---------- 결과 히어로 ---------- */
@@ -660,7 +759,10 @@ body:has(#stage-result.is-active) .brand { color: var(--color-content-on-fill); 
    · 색 면(히어로·향 카피·CTA)과 맞닿는 경계: 경계선이 보이므로 96
    · 흰 면끼리 이어지는 경계: 경계가 안 보이므로 64+64 = 128 */
 .rs-block { padding-block: var(--space-64); }
+/* 색 면(히어로·향 카피)과 맞닿는 rs-block 경계는 96으로 벌린다 */
+.hero + .rs-block { padding-top: var(--space-96); }
 .quote-band + .rs-block { padding-top: var(--space-96); }
+.rs-block:has(+ .quote-band) { padding-bottom: var(--space-96); }
 .rs-block:has(+ .cta) { padding-bottom: var(--space-96); }
 
 .axes { display: grid; gap: var(--space-32); max-width: 760px; margin: 0 auto; }
@@ -1096,13 +1198,36 @@ body:has(#stage-result.is-active) .brand { color: var(--color-content-on-fill); 
 </head>
 <body>
 
-<div class="brand" aria-hidden="true">
-  <span class="brand-mark"><i></i><i></i><i></i></span>
+<a class="brand" href="home.html" aria-label="센트립 홈으로 이동">
+  <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
   <span>Scentrip</span>
-</div>
+</a>
+
+<!-- ============================ STAGE 0 — 표지 ============================ -->
+<section class="stage is-active" id="stage-intro">
+  <div class="intro-inner">
+    <span class="intro-kicker">여행 취향 테스트</span>
+
+    <!-- 로딩 스테이지의 bloom orb 재사용 (순수 CSS 애니메이션) -->
+    <div class="intro-orb" aria-hidden="true">
+      <span class="diffuse d1"></span>
+      <span class="diffuse d2"></span>
+      <span class="diffuse d3"></span>
+      <div class="bloom">
+        <span class="petal"></span><span class="petal"></span><span class="petal"></span>
+        <span class="petal"></span><span class="petal"></span><span class="petal"></span>
+      </div>
+      <div class="core"></div>
+    </div>
+
+    <h1 class="intro-title">당신의 여행은<br>어떤 향인가요?</h1>
+    <p class="intro-desc">12개의 질문으로 당신의 여행 취향을 분석해,<br>16가지 향(香) 유형 중 당신의 유형을 찾아드려요.</p>
+    <button class="btn btn-primary intro-start" id="introStart" type="button">테스트 시작하기</button>
+  </div>
+</section>
 
 <!-- ============================ STAGE 1 — 질문 ============================ -->
-<main class="stage is-active" id="stage-quiz">
+<main class="stage" id="stage-quiz">
   <div class="quiz-head" aria-hidden="true"></div>
 
   <div class="q-body" id="qBody">
@@ -1165,13 +1290,9 @@ body:has(#stage-result.is-active) .brand { color: var(--color-content-on-fill); 
     </div>
   </header>
 
-  <section class="quote-band">
-    <p id="rQuote"></p>
-  </section>
-
   <section class="rs-block rs-section reveal">
     <h2 class="rs-heading">여행자 프로필</h2>
-    <p class="rs-desc">12개의 선택이 4개의 취향 축으로 모였어요. 각 축은 상반된 두 성향 사이에서 당신이 어느 쪽에 더 가까운지, 그리고 얼마나 뚜렷한지를 보여줍니다.</p>
+    <p class="rs-desc" id="rProfileDesc"></p>
     <div class="axes" id="rAxes"></div>
   </section>
 
@@ -1188,6 +1309,10 @@ body:has(#stage-result.is-active) .brand { color: var(--color-content-on-fill); 
   <section class="rs-block rs-section reveal">
     <h2 class="rs-heading">연상되는 향</h2>
     <div class="pyramid" id="rPyramid"></div>
+  </section>
+
+  <section class="quote-band reveal">
+    <p id="rQuote"></p>
   </section>
 
   <section class="rs-block rs-section reveal">
@@ -1295,6 +1420,7 @@ const AXES = [
 const TYPES = {
   WHAN: { emoji: "🌳", mood: "빈티지 우디", label: "나무 향", alias: "시간을 수집하는 감성가",
     tagline: "시간이 켜켜이 쌓인 공간에서 가장 큰 안정감을 느끼는 여행자",
+    profileDesc: "당신은 새것의 화려함보다 시간이 쌓인 것의 깊이에 끌리는 사람이에요. 여행에서도 이름난 명소보다 세월이 밴 공간을 천천히 걸으며, 그곳에 남은 이야기를 마음에 담아 옵니다.",
     season: "가을", accent: "#a66c3a", deep: "#2a1e13", soft: "#f5ede5",
     notes: ["오래된 오크통", "젖은 흙", "한옥 나무결"],
     quote: "오래된 오크와 누룩 향이 깊어질수록, 당신의 여행도 천천히 익어갑니다.",
@@ -1316,6 +1442,7 @@ const TYPES = {
 
   WHAR: { emoji: "🍯", mood: "골든 허니 레진", label: "꿀 향", alias: "품격을 완성하는 큐레이터",
     tagline: "우아함과 깊이를 동시에 추구하는 감성 수집가",
+    profileDesc: "당신은 무엇을 보느냐만큼 어디에 머무느냐를 중요하게 여기는 사람이에요. 여행에서도 공간의 품격과 분위기를 섬세하게 고르며, 머무는 시간 자체를 하나의 경험으로 완성합니다.",
     season: "늦가을", accent: "#a88124", deep: "#2a2313", soft: "#f5f0e5",
     notes: ["꿀", "벤조인", "따뜻한 바닐라 우드"],
     quote: "따뜻한 앰버와 샌달우드 향처럼, 당신의 여행은 시간이 흐를수록 더욱 우아해집니다.",
@@ -1337,6 +1464,7 @@ const TYPES = {
 
   WHDN: { emoji: "💼", mood: "러스틱 레더", label: "가죽 향", alias: "본질을 찾아 떠나는 개척자",
     tagline: "거칠고 투박한 자연 속에서 에너지를 얻는 사람",
+    profileDesc: "당신은 다듬어진 편안함보다 거칠고 투박한 자연에서 살아있음을 느끼는 사람이에요. 여행에서도 정해진 코스 대신 현장의 공기를 따라 움직이며, 발길 닿는 곳에서 진짜 여행을 만납니다.",
     season: "초가을", accent: "#895143", deep: "#2a1813", soft: "#f5e8e5",
     notes: ["장작", "건초", "가죽 공방"],
     quote: "마른 나무와 흙먼지 향이 스며든 길 끝에서, 당신은 가장 자연스러운 자신을 만납니다.",
@@ -1358,6 +1486,7 @@ const TYPES = {
 
   WHDR: { emoji: "🫖", mood: "블랙 티 우디", label: "홍차 향", alias: "고요를 음미하는 사색가",
     tagline: "정돈된 깊이와 지적 여유를 사랑하는 여행자",
+    profileDesc: "당신은 북적임 속 자극보다 고요 속 깊이에서 편안함을 느끼는 사람이에요. 여행에서도 빼곡한 일정보다 조용한 공간에 오래 머물며, 읽고 사색하는 시간으로 여정을 채웁니다.",
     season: "겨울", accent: "#5e2c26", deep: "#2a1513", soft: "#f5e7e5",
     notes: ["홍차", "오래된 책", "삼나무 책장"],
     quote: "홍차와 종이향이 머무는 고요한 공간에서, 당신의 여행은 한 권의 이야기로 완성됩니다.",
@@ -1379,6 +1508,7 @@ const TYPES = {
 
   WLAN: { emoji: "🌲", mood: "모스 포레스트", label: "숲 향", alias: "순간을 사랑하는 낭만가",
     tagline: "따뜻하고 자유로운 감성을 따라 움직이는 사람",
+    profileDesc: "당신은 완벽한 계획보다 그 순간의 감정을 따라 움직이는 사람이에요. 여행에서도 유명한 장소보다 함께한 시간과 풍경을 소중히 여기며, 평범한 하루를 특별한 기억으로 만듭니다.",
     season: "봄", accent: "#57723b", deep: "#1f2a13", soft: "#edf5e5",
     notes: ["이끼", "비 내린 숲", "젖은 나무껍질"],
     quote: "비에 젖은 숲과 허브 향을 따라 걷다 보면, 평범한 하루도 특별한 여행이 됩니다.",
@@ -1400,6 +1530,7 @@ const TYPES = {
 
   WLAR: { emoji: "🌼", mood: "선샤인 플로럴", label: "꽃 향", alias: "분위기를 만드는 스타일리스트",
     tagline: "따뜻한 감성과 세련된 취향을 가진 여행자",
+    profileDesc: "당신은 무엇을 하느냐만큼 어떤 분위기 속에 있느냐를 즐기는 사람이에요. 여행에서도 감각적인 공간을 찾아다니며, 예쁜 순간을 포착하고 사람들과 나누는 데서 즐거움을 느낍니다.",
     season: "봄", accent: "#dbb976", deep: "#2a2213", soft: "#f5f0e5",
     notes: ["화이트 플라워", "베르가못", "햇살 머금은 정원"],
     quote: "햇살 아래 피어난 꽃과 그린티 향처럼, 당신의 여행은 언제나 기분 좋게 시작됩니다.",
@@ -1421,6 +1552,7 @@ const TYPES = {
 
   WLDN: { emoji: "🌿", mood: "와일드 허브", label: "허브 향", alias: "우연을 즐기는 발견가",
     tagline: "자유롭고 소박한 로컬 탐험가",
+    profileDesc: "당신은 짜인 일정보다 우연히 마주친 순간에서 여행의 묘미를 찾는 사람이에요. 계획 없이 길을 나서 현지의 골목과 시장을 헤매며, 예상치 못한 발견을 가장 큰 즐거움으로 여깁니다.",
     season: "초여름", accent: "#93a343", deep: "#262a13", soft: "#f3f5e5",
     notes: ["로즈마리", "레몬그라스", "허브 정원"],
     quote: "건초와 허브 향을 품은 바람은, 당신을 늘 새로운 길로 이끌어 줍니다.",
@@ -1442,6 +1574,7 @@ const TYPES = {
 
   WLDR: { emoji: "🧺", mood: "웜 코튼", label: "코튼 향", alias: "취향을 설계하는 디자이너",
     tagline: "편안하고 세련된 여행을 즐기는 사람",
+    profileDesc: "당신은 과하지 않으면서 세련된, 균형 잡힌 여행을 즐기는 사람이에요. 무리한 도전보다 편안한 선택을 하면서도 자기만의 취향을 놓치지 않고, 담백한 여정 속에 여유를 채웁니다.",
     season: "봄", accent: "#c6b495", deep: "#2a2213", soft: "#f5efe5",
     notes: ["햇살에 말린 수건", "코튼", "화이트 티"],
     quote: "화이트티와 린넨 향처럼, 당신의 여행은 담백할수록 오래 기억됩니다.",
@@ -1463,6 +1596,7 @@ const TYPES = {
 
   CHAN: { emoji: "🌊", mood: "딥 아쿠아", label: "바다 향", alias: "풍경에 머무는 몽상가",
     tagline: "시원한 공기 속 깊은 감정을 품은 여행자",
+    profileDesc: "당신은 활기찬 자극보다 고요한 풍경 속 깊은 감정에 머무는 사람이에요. 여행에서도 새벽 물가나 안개 낀 숲에서 혼자만의 사색 시간을 가지며, 조용히 마음을 채워 옵니다.",
     season: "가을", accent: "#306a7e", deep: "#13242a", soft: "#e5f1f5",
     notes: ["깊은 호수", "심해", "폭우 뒤 바다"],
     quote: "안개 사이로 번지는 이끼 향처럼, 당신의 여행은 조용히 마음속에 스며듭니다.",
@@ -1484,6 +1618,7 @@ const TYPES = {
 
   CHAR: { emoji: "🪻", mood: "실키 아이리스", label: "아이리스 향", alias: "우아함을 담는 미학가",
     tagline: "차분한 품격을 사랑하는 감성가",
+    profileDesc: "당신은 요란한 볼거리보다 차분하고 우아한 아름다움에 마음이 가는 사람이에요. 여행에서도 미술관과 공연장처럼 정제된 공간에 머물며, 은은하게 오래 남는 여운을 즐깁니다.",
     season: "가을", accent: "#6b4ca9", deep: "#1b132a", soft: "#eae5f5",
     notes: ["아이리스", "바이올렛", "촉촉한 캐시미어"],
     quote: "아이리스와 머스크 향이 은은하게 퍼지듯, 당신의 여행도 오래도록 여운을 남깁니다.",
@@ -1505,6 +1640,7 @@ const TYPES = {
 
   CHDN: { emoji: "🌲", mood: "쿨 시더", label: "삼나무 향", alias: "자유를 닮은 방랑자",
     tagline: "자연 그대로의 풍경을 사랑하는 자유인",
+    profileDesc: "당신은 사람 많은 명소보다 탁 트인 자연 그대로의 풍경에서 자유를 느끼는 사람이에요. 여행에서도 고원과 능선을 홀로 걸으며, 광활한 풍경 앞에서 가장 자유로운 숨을 쉽니다.",
     season: "초가을", accent: "#589375", deep: "#132a1e", soft: "#e5f5ed",
     notes: ["삼나무 숲", "차가운 바람", "고원의 공기"],
     quote: "삼나무와 드라이 허브 향이 부는 들판에서, 당신은 가장 자유로운 숨을 쉽니다.",
@@ -1526,6 +1662,7 @@ const TYPES = {
 
   CHDR: { emoji: "📕", mood: "잉크 우디", label: "오래된 책 향", alias: "의미를 기록하는 관찰자",
     tagline: "절제된 감성과 깊이를 가진 관찰자",
+    profileDesc: "당신은 스쳐 지나가는 여행보다 의미를 새기고 기록하는 여행을 하는 사람이에요. 근대 역사 공간과 오래된 건축을 천천히 관찰하며, 깊이 몰입한 순간을 자기만의 방식으로 남깁니다.",
     season: "겨울", accent: "#2d3b58", deep: "#131b2a", soft: "#e5eaf5",
     notes: ["잉크", "오래된 종이", "차가운 석벽"],
     quote: "잉크와 시더 향이 머무는 오래된 시간 속에서, 당신의 여행은 깊이를 더합니다.",
@@ -1547,6 +1684,7 @@ const TYPES = {
 
   CLAN: { emoji: "🍋", mood: "그린 시트러스", label: "라임 향", alias: "생기를 쫓는 모험가",
     tagline: "생기 넘치는 자연을 따라 떠나는 탐험가",
+    profileDesc: "당신은 가만히 있기보다 몸으로 부딪히며 여행을 즐기는 사람이에요. 계곡과 숲을 무대 삼아 활동적으로 움직이며, 새로운 체험 속에서 가장 생기 있게 반짝입니다.",
     season: "여름", accent: "#6cb946", deep: "#1b2a13", soft: "#eaf5e5",
     notes: ["라임", "초록 잎", "레몬버베나"],
     quote: "물안개와 그린 리프 향이 번지는 숲속에서, 당신의 여행은 가장 생기 있게 피어납니다.",
@@ -1568,6 +1706,7 @@ const TYPES = {
 
   CLAR: { emoji: "🍊", mood: "오렌지 블라썸", label: "오렌지꽃 향", alias: "감각을 담아내는 연출가",
     tagline: "밝고 세련된 감성을 가진 여행자",
+    profileDesc: "당신은 밝고 경쾌한 감각으로 여행의 순간을 연출하는 사람이에요. 바다를 따라 걷고 오션뷰 카페에 머물며, 눈부신 풍경을 자기만의 감각으로 담아 트렌디하게 즐깁니다.",
     season: "초여름", accent: "#e78940", deep: "#2a1d13", soft: "#f5ece5",
     notes: ["오렌지꽃", "만다린", "차가운 과즙"],
     quote: "시트러스와 바다바람 향처럼, 당신의 여행은 언제나 가볍고 눈부십니다.",
@@ -1589,6 +1728,7 @@ const TYPES = {
 
   CLDN: { emoji: "🌊", mood: "마린 우디", label: "바다 향", alias: "길을 만드는 노마드",
     tagline: "가장 자유로운 형태의 로컬 여행자",
+    profileDesc: "당신은 정해진 길보다 스스로 길을 만들어가는 여행자예요. 지도에 없는 해안과 섬을 자유롭게 누비고 현지인의 발자취를 따라가며, 즉흥적인 발견 속에서 자기만의 여행을 완성합니다.",
     season: "여름", accent: "#3d85b8", deep: "#13212a", soft: "#e5eff5",
     notes: ["바닷바람", "드리프트우드", "해안 절벽"],
     quote: "해풍과 드라이우드 향을 따라 걷다 보면, 길은 어느새 당신만의 여행이 됩니다.",
@@ -1611,6 +1751,7 @@ const TYPES = {
 
   CLDR: { emoji: "🫧", mood: "코튼 머스크", label: "비누 향", alias: "여백을 사랑하는 미니멀리스트",
     tagline: "깔끔함과 여유를 동시에 추구하는 여행자",
+    profileDesc: "당신은 채우기보다 비우는 데서 편안함을 느끼는 사람이에요. 잘 정돈된 공간과 효율적인 동선을 선호하고, 군더더기 없이 맑고 담백한 여정 속에서 진짜 여유를 누립니다.",
     season: "초봄", accent: "#9fc9db", deep: "#13232a", soft: "#e5f0f5",
     notes: ["빳빳한 흰 셔츠", "화이트 머스크", "비누"],
     quote: "화이트티와 바다 소금 향처럼, 당신의 여행은 맑고 담백한 여운을 남깁니다.",
@@ -1659,11 +1800,13 @@ const PYRAMID = {
    ============================================================ */
 const answers = [];   // 각 문항의 'a' | 'b'
 let current = 0;
+let locked = false;   // 문항 전환 중 잠금 — 연타로 문항이 스킵되는 것을 막는다
 
 const $ = (id) => document.getElementById(id);
 
 /* ---------- 질문 렌더 ---------- */
 function renderQuestion() {
+  locked = false;   // 새 문항이 떴으니 다시 선택 가능
   const q = QUESTIONS[current];
   $("qCount").textContent = String(current + 1).padStart(2, "0");
   $("qTitle").innerHTML = q.title;
@@ -1688,6 +1831,8 @@ function renderQuestion() {
 }
 
 function pick(choice, el) {
+  if (locked) return;   // 전환 중이면 무시 — 연타로 문항이 넘어가는 것 방지
+  locked = true;
   el.classList.add("is-picked");
   answers[current] = choice;
 
@@ -1707,7 +1852,7 @@ function pick(choice, el) {
 }
 
 $("qBack").addEventListener("click", () => {
-  if (current === 0) return;
+  if (locked || current === 0) return;   // 전환 중이면 무시
   current -= 1;
   answers.length = current;
   renderQuestion();
@@ -1806,6 +1951,7 @@ function renderResult(code, counts) {
   $("rSeason").textContent = `어울리는 계절 · ${t.season}`;
   $("rNotesChip").textContent = `${t.label} ${t.emoji}`;
   $("rQuote").textContent = t.quote;
+  $("rProfileDesc").textContent = t.profileDesc;
 
   // 4축 바 — 3문항 중 몇 개를 골랐는지를 그대로 보여줌
   $("rAxes").innerHTML = AXES.map((ax, i) => {
@@ -2021,6 +2167,19 @@ if (presetState && CTA_STATES[presetState]) {
   $("stateSelect").value = presetState;
   renderCta(ctaState);
 }
+// 표지의 '테스트 시작하기' → 표지와 질문이 교차되며(crossfade) 전환
+$("introStart").addEventListener("click", () => {
+  const intro = $("stage-intro");
+  if (intro.classList.contains("is-leaving")) return;   // 연타 방지
+  // 질문을 먼저 렌더해 표지 '뒤'에 깔아둔다. 같은 프레임에 표지를 오버레이로 띄워 흐리게 →
+  // 둘이 flow에서 겹치지 않아 레이아웃 점프 없이 크로스페이드된다.
+  renderQuestion();
+  $("stage-quiz").classList.add("is-active");
+  intro.classList.add("is-leaving");
+  window.scrollTo(0, 0);
+  setTimeout(() => { intro.classList.remove("is-active", "is-leaving"); }, 1250);
+});
+
 if (preset && TYPES[preset]) {
   const counts = AXES.map((ax, i) => (preset[i] === ax.ca ? 3 : 0));
   renderResult(preset, counts);
@@ -2028,9 +2187,8 @@ if (preset && TYPES[preset]) {
   $("typeSelect").value = preset;
   $("typeSwitch").style.display = "flex";
   $("stateSwitch").style.display = "flex";
-} else {
-  renderQuestion();
 }
+// 프리셋이 없으면 표지(stage-intro)가 그대로 노출된다 — 질문은 시작 버튼에서 렌더.
 </script>
 </body>
 </html>

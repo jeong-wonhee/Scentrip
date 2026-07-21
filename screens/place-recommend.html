@@ -102,6 +102,8 @@ button { font-family: inherit; letter-spacing: inherit; cursor: pointer; }
   font-size: var(--text-body-16); font-weight: 600; line-height: 1.5; color: var(--color-content-neutral-muted); white-space: nowrap;
 }
 .chip-btn svg { width: 16px; height: 16px; }
+.chip-btn { transition: background .16s ease, border-color .16s ease; }
+.chip-btn:hover { background: var(--color-state-hover-brand); }
 .chip-btn.is-active { border: 2px solid var(--color-content-muted); color: var(--color-content-default); }
 .chip-btn.is-active svg { width: 20px; height: 20px; }
 .count { font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; color: var(--color-content-neutral-muted); white-space: nowrap; flex: none; }
@@ -115,10 +117,29 @@ button { font-family: inherit; letter-spacing: inherit; cursor: pointer; }
 .filter-pop { position: absolute; top: calc(100% + 8px); left: 0; min-width: 180px; background: var(--color-surface-overlay); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); box-shadow: var(--elevation-lg); padding: var(--space-6); z-index: 200; opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity .16s ease, transform .16s ease, visibility .16s; }
 .filter-pop.is-open { opacity: 1; visibility: visible; transform: none; }
 .filter-opt { display: flex; align-items: center; justify-content: space-between; gap: var(--space-12); width: 100%; padding: var(--space-10) var(--space-12); border: 0; background: none; border-radius: var(--radius-md); font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-default); text-align: left; white-space: nowrap; cursor: pointer; }
-.filter-opt:hover { background: var(--color-neutral-subtle); }
+.filter-opt:hover { background: var(--color-state-hover-brand); }
 .filter-opt.is-selected { color: var(--color-content-subtle); font-weight: 600; }
 .filter-opt .check { width: 16px; height: 16px; color: var(--color-content-subtle); opacity: 0; flex: none; }
 .filter-opt.is-selected .check { opacity: 1; }
+
+/* 취향 타입 옵션 — 액센트 컬러 아바타(추후 캐릭터 일러스트 자리) + 타이틀/서브텍스트 */
+.filter[data-key="taste"] .filter-pop {
+  width: 480px;
+  max-height: 420px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+  align-content: start;
+}
+.filter[data-key="taste"] .filter-opt.opt-taste { width: 100%; }
+.filter-opt.opt-taste { padding: var(--space-10) var(--space-12); white-space: normal; }
+.opt-left { display: flex; align-items: center; gap: var(--space-10); min-width: 0; }
+.opt-avatar { width: 32px; height: 32px; border-radius: var(--radius-full); flex: none; }
+.opt-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.opt-title { font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-default); white-space: nowrap; }
+.opt-sub { font-size: var(--text-caption-11); color: var(--color-content-neutral-muted); white-space: nowrap; }
+.filter-opt.opt-taste.is-selected .opt-title { color: var(--color-content-subtle); font-weight: 600; }
 
 /* 카드 그리드 */
 .grid { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: var(--space-24); row-gap: var(--space-48); transition: opacity .18s ease; }
@@ -332,17 +353,53 @@ grid.innerHTML = PLACES.map(placeCard).join("");
 const FILTERS = [
   { key: "region", label: "지역", opts: ["서울", "강원", "경상", "전라", "충청", "제주"] },
   { key: "feature", label: "특징", opts: ["자연경관", "감성 카페", "전시·예술", "액티비티", "포토스팟"] },
-  { key: "taste", label: "취향", opts: ["감성가 타입", "큐레이터 타입", "개척자 타입", "사색가 타입", "낭만가 타입", "미학가 타입", "방랑자 타입", "노마드 타입"], preset: ["감성가 타입"] },
+  { key: "taste", label: "취향", opts: [
+    "감성가 타입", "큐레이터 타입", "개척자 타입", "사색가 타입",
+    "낭만가 타입", "스타일리스트 타입", "발견가 타입", "디자이너 타입",
+    "몽상가 타입", "미학가 타입", "방랑자 타입", "관찰자 타입",
+    "모험가 타입", "연출가 타입", "노마드 타입", "미니멀리스트 타입",
+  ], preset: ["감성가 타입"] },
 ];
 const applied = {};
 FILTERS.forEach((f) => { applied[f.key] = f.preset ? [...f.preset] : []; });
+
+// 취향 타입별 액센트 컬러 · 구분용 서브 텍스트 (onboarding-test.html TYPES의 spaces 기준으로 요약한 장소 특징)
+// 원형 아바타 자리는 추후 유형별 캐릭터 일러스트가 들어올 자리 — 아직 미완성이라 지금은 accent 컬러만 채운다.
+const TASTE_INFO = {
+  "감성가 타입": { accent: "#a66c3a", sub: "한옥·고택·전통시장 선호" },
+  "큐레이터 타입": { accent: "#a88124", sub: "클래식 호텔·헤리티지 숙소 선호" },
+  "개척자 타입": { accent: "#895143", sub: "산속 오두막·캠핑 선호" },
+  "사색가 타입": { accent: "#5e2c26", sub: "박물관·독립서점 탐방 선호" },
+  "낭만가 타입": { accent: "#57723b", sub: "숲길·자연 산책 선호" },
+  "스타일리스트 타입": { accent: "#dbb976", sub: "온실·플라워 카페 선호" },
+  "발견가 타입": { accent: "#93a343", sub: "오일장·시골 포구 선호" },
+  "디자이너 타입": { accent: "#c6b495", sub: "북카페·편집숍 선호" },
+  "몽상가 타입": { accent: "#306a7e", sub: "호숫가·전망데크 선호" },
+  "미학가 타입": { accent: "#6b4ca9", sub: "미술관·공연 관람 선호" },
+  "방랑자 타입": { accent: "#589375", sub: "고원·자연 풍경 선호" },
+  "관찰자 타입": { accent: "#2d3b58", sub: "간이역·근대역사관 선호" },
+  "모험가 타입": { accent: "#6cb946", sub: "계곡·폭포 전망 선호" },
+  "연출가 타입": { accent: "#e78940", sub: "해안 산책로·오션뷰 선호" },
+  "미니멀리스트 타입": { accent: "#9fc9db", sub: "북스테이·디자인 호텔 선호" },
+  "노마드 타입": { accent: "#3d85b8", sub: "섬·해안 자유여행 선호" },
+};
 
 const chipsWrap = document.getElementById("filterChips");
 chipsWrap.innerHTML = FILTERS.map((f) => `
   <div class="filter" data-key="${f.key}">
     <button class="chip-btn" type="button" aria-expanded="false"><span class="chip-label"></span><span class="caret"></span></button>
     <div class="filter-pop" role="listbox">
-      ${f.opts.map((o) => `<button class="filter-opt" type="button" data-value="${o}">${o}${check}</button>`).join("")}
+      ${f.opts.map((o) => {
+        const info = TASTE_INFO[o];
+        if (!info) return `<button class="filter-opt" type="button" data-value="${o}">${o}${check}</button>`;
+        return `<button class="filter-opt opt-taste" type="button" data-value="${o}">
+          <span class="opt-left">
+            <span class="opt-avatar" style="background:${info.accent}" aria-hidden="true"></span>
+            <span class="opt-text"><span class="opt-title">${o}</span><span class="opt-sub">${info.sub}</span></span>
+          </span>
+          ${check}
+        </button>`;
+      }).join("")}
     </div>
   </div>`).join("");
 
