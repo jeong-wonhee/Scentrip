@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scentrip 16유형 팔레트 정리안</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font-family: -apple-system, "Pretendard", "Apple SD Gothic Neo", sans-serif;
+    letter-spacing: -0.02em;
+    padding: 40px 24px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+    color: #1c1c1c;
+    background: #fff;
+  }
+  h1 { font-size: 20px; font-weight: 700; margin: 0 0 4px; }
+  p.desc { color: #666; font-size: 14px; margin: 0 0 32px; }
+  .section { margin-bottom: 44px; }
+  .section h2 { font-size: 14px; font-weight: 700; margin: 0 0 4px; }
+  .section .note { font-size: 12px; color: #888; margin: 0 0 14px; }
+  .row { display: grid; grid-template-columns: repeat(16, 1fr); gap: 4px; }
+  .swatch { aspect-ratio: 1; border-radius: 8px; position: relative; }
+  .labels { display: grid; grid-template-columns: repeat(16, 1fr); gap: 4px; margin-top: 6px; }
+  .labels span { font-size: 9px; text-align: center; color: #999; writing-mode: vertical-rl; text-orientation: mixed; height: 40px; overflow: hidden; }
+
+  table.cmp { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.cmp th, table.cmp td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #e5e5e5; }
+  table.cmp th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #888; font-weight: 600; }
+  table.cmp td.code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 600; }
+  table.cmp td.label { color: #666; }
+  table.cmp td.title { color: #444; font-size: 12px; white-space: nowrap; }
+  .chip-cell { display: flex; align-items: center; gap: 8px; }
+  .chip { width: 22px; height: 22px; border-radius: 6px; flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+  .hex { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #555; }
+  table.cmp tbody tr:hover { background: rgba(0,0,0,.02); }
+  th.col4, td.col4 { background: #fafaf5; }
+  th.col5, td.col5 { background: #f4f8f7; }
+</style>
+</head>
+<body>
+
+<h1>16유형 accent 컬러 — 정리 전/후 비교</h1>
+<p class="desc">같은 순서(WHAN → CLDR)로 16개 색을 나란히 놓고 비교합니다. ④는 ③을 그대로 복사한 행이니, 표의 HEX 값을 직접 바꿔가며 Figma에서 확인해보세요.</p>
+
+<div class="section">
+  <h2>① 지금 (파일에 있는 값 그대로)</h2>
+  <p class="note">채도 11~71%, 명도 30~67%로 편차가 커서 옆에 두면 어떤 건 탁하고 어떤 건 파스텔처럼 떠 보여요.</p>
+  <div class="row" id="row-orig"></div>
+</div>
+
+<div class="section">
+  <h2>② 톤만 정리 (색상은 그대로, 채도·명도만 좁은 범위로)</h2>
+  <p class="note">채도 40~54%, 명도 44~52%로 압축. 전체적으로 훨씬 차분하고 하나의 세트처럼 보이지만, 원래 색상이 비슷했던 갈색 계열(나무·꿀·가죽·홍차·꽃·코튼·오렌지꽃 7종)은 여전히 서로 꽤 비슷해요.</p>
+  <div class="row" id="row-norm"></div>
+</div>
+
+<div class="section">
+  <h2>③ 톤 정리 + 갈색 계열 색상 분리</h2>
+  <p class="note">위 7종만 색상(Hue)을 10°~56° 사이로 살짝 더 벌려서 나무는 붉은 갈색, 꿀은 골드, 코튼은 옅은 황토색처럼 구분되게 했어요. 나머지 초록/청록/보라 계열은 원래 색상 그대로.</p>
+  <div class="row" id="row-v3"></div>
+</div>
+
+<div class="section">
+  <h2>④ (③ 복사본 — 여기서 직접 수정)</h2>
+  <p class="note">아래 표의 "④ 직접 수정" 열 HEX 값을 바꾸면 이 스와치 행에 바로 반영됩니다.</p>
+  <div class="row" id="row-v4"></div>
+  <div class="labels" id="row-labels"></div>
+</div>
+
+<div class="section">
+  <h2>색상 비교표</h2>
+  <p class="note">유형 코드 · 노트 라벨 기준으로 값을 비교합니다. ④ 열의 HEX 텍스트를 편집하고 페이지를 새로고침하면 위 스와치에 반영돼요.</p>
+  <table class="cmp">
+    <thead>
+      <tr>
+        <th>코드</th>
+        <th>노트</th>
+        <th>타이틀</th>
+        <th>① 지금</th>
+        <th>② 톤만 정리</th>
+        <th>③ 톤+색상 분리</th>
+        <th class="col4">④ 직접 수정</th>
+      </tr>
+    </thead>
+    <tbody id="table-body"></tbody>
+  </table>
+</div>
+
+<script>
+// [코드, 노트, ①지금, ②톤만정리, ③톤+색상분리, ④(서사 기준으로 하나씩 조정), 타이틀(alias)]
+const rows = [
+  ["WHAN", "나무",      "#7d5334", "#a96b3d", "#a9683d", "#a66c3a", "시간을 수집하는 감성가"],
+  ["WHAR", "꿀",        "#c08840", "#b8833f", "#b8a03f", "#a88124", "품격을 완성하는 큐레이터"],
+  ["WHDN", "가죽",      "#9a5a3c", "#b0623e", "#b0513e", "#895143", "본질을 찾아 떠나는 개척자"],
+  ["WHDR", "홍차",      "#5f4a3a", "#a16a40", "#a15a40", "#5e2c26", "고요를 음미하는 사색가"],
+  ["WLAN", "숲",        "#6e8c55", "#73ac44", "#73ac44", "#57723b", "순간을 사랑하는 낭만가"],
+  ["WLAR", "꽃",        "#e0a373", "#c57d44", "#c59a44", "#dbb976", "분위기를 만드는 스타일리스트"],
+  ["WLDN", "허브",      "#a8b04e", "#abb542", "#abb542", "#93a343", "우연을 즐기는 발견가"],
+  ["WLDR", "코튼",      "#c2ab8b", "#bb8d4d", "#bbb44d", "#c6b495", "취향을 설계하는 디자이너"],
+  ["CHAN", "이슬",      "#5c8a92", "#469eae", "#469eae", "#306a7e", "풍경에 머무는 몽상가"],
+  ["CHAR", "아이리스",  "#7d72a6", "#5f48b4", "#5f48b4", "#6b4ca9", "우아함을 담는 미학가"],
+  ["CHDN", "삼나무",    "#6f8a7f", "#4aac84", "#4aac84", "#589375", "자유를 닮은 방랑자"],
+  ["CHDR", "오래된책",  "#3d4a63", "#4062a2", "#4062a2", "#2d3b58", "의미를 기록하는 관찰자"],
+  ["CLAN", "라임",      "#6aa84f", "#64b342", "#64b342", "#6cb946", "생기를 쫓는 모험가"],
+  ["CLAR", "오렌지꽃",  "#e08a4c", "#c5753c", "#c5853c", "#e78940", "감각을 담아내는 연출가"],
+  ["CLDN", "마린",      "#4c7f9c", "#4288b0", "#4288b0", "#3d85b8", "길을 만드는 노마드"],
+  ["CLDR", "비누",      "#90a8b5", "#4f93b7", "#4f93b7", "#9fc9db", "여백을 사랑하는 미니멀리스트"],
+];
+
+function render(id, idx) {
+  const el = document.getElementById(id);
+  el.innerHTML = rows.map(r => `<div class="swatch" style="background:${r[idx]}" title="${r[1]} ${r[idx]}"></div>`).join("");
+}
+render("row-orig", 2);
+render("row-norm", 3);
+render("row-v3", 4);
+render("row-v4", 5);
+document.getElementById("row-labels").innerHTML = rows.map(r => `<span>${r[1]}</span>`).join("");
+
+function chip(hex, editableIdx) {
+  return `<div class="chip-cell"><span class="chip" style="background:${hex}"></span><span class="hex">${hex}</span></div>`;
+}
+document.getElementById("table-body").innerHTML = rows.map(r => `
+  <tr>
+    <td class="code">${r[0]}</td>
+    <td class="label">${r[1]}</td>
+    <td class="title">${r[6]}</td>
+    <td>${chip(r[2])}</td>
+    <td>${chip(r[3])}</td>
+    <td>${chip(r[4])}</td>
+    <td class="col4">${chip(r[5])}</td>
+  </tr>`).join("");
+</script>
+
+</body>
+</html>

@@ -112,7 +112,6 @@ button { font-family: inherit; letter-spacing: inherit; cursor: pointer; }
 .taste-title { font-size: clamp(26px, 3.2vw, 36px); font-weight: 600; line-height: 1.25; color: var(--type-deep); }
 .btn-outline { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-8); height: 44px; padding: 0 var(--space-20); border-radius: var(--radius-full); background: var(--color-surface-overlay); border: 1px solid var(--type-line); font-size: var(--text-body-14); font-weight: 500; line-height: 1.5; color: var(--type-deep); text-decoration: none; transition: background .18s ease, border-color .18s ease; }
 .btn-outline:hover { background: color-mix(in srgb, var(--type-accent) 10%, var(--color-surface-overlay)); border-color: color-mix(in srgb, var(--type-accent) 40%, transparent); }
-.taste-scent { display: flex; gap: var(--space-6); font-size: var(--text-body-14); font-weight: 500; line-height: 1.5; color: color-mix(in srgb, var(--type-deep) 68%, transparent); }
 
 .news { flex: 1 0 0; display: flex; flex-direction: column; gap: 28px; justify-content: center; padding: var(--space-20) 0; min-width: 0; }
 .news-head { display: flex; gap: var(--space-20); align-items: center; width: 100%; }
@@ -222,6 +221,34 @@ button { font-family: inherit; letter-spacing: inherit; cursor: pointer; }
   .nav-center { display: none; }
   .row4, .row3 { grid-template-columns: 1fr; }
 }
+
+/* ---------- 유형 프리뷰 스위처 (검수용 · 개발 전달 시 제거) ---------- */
+.type-switch {
+  position: fixed;
+  right: var(--space-16);
+  bottom: var(--space-16);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-8) var(--space-12);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-overlay);
+  border: 1px solid var(--color-border-default);
+  box-shadow: var(--elevation-lg);
+  font-size: var(--text-caption-12);
+  color: var(--color-content-subtle);
+}
+.type-switch select {
+  font-family: inherit;
+  letter-spacing: inherit;
+  font-size: var(--text-caption-12);
+  border: 0;
+  background: none;
+  color: var(--color-content-default);
+  font-weight: 600;
+  cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -289,7 +316,6 @@ button { font-family: inherit; letter-spacing: inherit; cursor: pointer; }
           <div class="taste-labels">
             <p class="taste-eyebrow">OO님의 여행 취향</p>
             <p class="taste-title" id="tasteTitle">시간을 수집하는<br>감성가</p>
-            <p class="taste-scent" id="tasteScent">🌳 나무 향 · 빈티지 우디</p>
           </div>
           <a class="btn-outline" id="tasteLink" href="onboarding-test.html?type=WHAN">자세히 보기</a>
         </div>
@@ -369,43 +395,56 @@ button { font-family: inherit; letter-spacing: inherit; cursor: pointer; }
 
 </div>
 
+<div class="type-switch" id="typeSwitch">
+  <label for="typeSelect">유형 프리뷰</label>
+  <select id="typeSelect"></select>
+</div>
+
 <script>
 /* ===== 취향 유형 색상/라벨 (onboarding-test.html 의 TYPES 와 동일한 accent/deep/soft) =====
    로그인 사용자의 유형만 필요하지만, 유형 교체가 쉽도록 16종 전부 보유. */
 const TASTE_TYPES = {
-  WHAN:{emoji:"🌳",label:"나무 향",mood:"빈티지 우디",alias:"시간을 수집하는 감성가",accent:"#7d5334",deep:"#241a12",soft:"#f4ece3"},
-  WHAR:{emoji:"🟤",label:"앰버 향",mood:"웜 앰버",alias:"품격을 완성하는 큐레이터",accent:"#c08840",deep:"#2b2013",soft:"#fbf1e2"},
-  WHDN:{emoji:"💼",label:"가죽 향",mood:"러스틱 레더",alias:"본질을 찾아 떠나는 개척자",accent:"#9a5a3c",deep:"#271a14",soft:"#f7ece6"},
-  WHDR:{emoji:"🫖",label:"홍차 향",mood:"블랙 티 우디",alias:"고요를 음미하는 사색가",accent:"#5f4a3a",deep:"#1f1913",soft:"#f1ece6"},
-  WLAN:{emoji:"🌲",label:"숲 향",mood:"모스 포레스트",alias:"순간을 사랑하는 낭만가",accent:"#6e8c55",deep:"#212a1b",soft:"#eef3e8"},
-  WLAR:{emoji:"🌼",label:"꽃 향",mood:"선샤인 플로럴",alias:"분위기를 만드는 스타일리스트",accent:"#e0a373",deep:"#33241a",soft:"#fdf0e6"},
-  WLDN:{emoji:"🌿",label:"허브 향",mood:"와일드 허브",alias:"우연을 즐기는 발견가",accent:"#a8b04e",deep:"#26281a",soft:"#f5f6e3"},
-  WLDR:{emoji:"🧺",label:"린넨 향",mood:"화이트 티 린넨",alias:"취향을 설계하는 디자이너",accent:"#c2ab8b",deep:"#2a251e",soft:"#f8f3ea"},
-  CHAN:{emoji:"💧",label:"이슬 향",mood:"미스티 아쿠아",alias:"풍경에 머무는 몽상가",accent:"#5c8a92",deep:"#162426",soft:"#e9f2f3"},
-  CHAR:{emoji:"🪻",label:"바이올렛 향",mood:"파우더리 아이리스",alias:"우아함을 담는 미학가",accent:"#7d72a6",deep:"#211d2e",soft:"#efedf7"},
-  CHDN:{emoji:"🌲",label:"삼나무 향",mood:"쿨 시더",alias:"자유를 닮은 방랑자",accent:"#6f8a7f",deep:"#1c2521",soft:"#ecf2ef"},
-  CHDR:{emoji:"📕",label:"오래된 책 향",mood:"미네랄 잉크 우디",alias:"의미를 기록하는 관찰자",accent:"#3d4a63",deep:"#171d28",soft:"#eaeef5"},
-  CLAN:{emoji:"🍋",label:"라임 향",mood:"그린 시트러스",alias:"생기를 좇는 모험가",accent:"#6aa84f",deep:"#1a2617",soft:"#eef6e9"},
-  CLAR:{emoji:"🍊",label:"오렌지꽃 향",mood:"오렌지 블라썸",alias:"감각을 담아내는 연출가",accent:"#e08a4c",deep:"#2e2016",soft:"#fdefe2"},
-  CLDN:{emoji:"🌊",label:"바다 향",mood:"마린 우디",alias:"길을 만드는 노마드",accent:"#4c7f9c",deep:"#16242c",soft:"#e8f2f6"},
-  CLDR:{emoji:"🧼",label:"비누 향",mood:"코튼 머스크",alias:"여백을 사랑하는 미니멀리스트",accent:"#90a8b5",deep:"#1f2a30",soft:"#eef4f7"}
+  WHAN:{emoji:"🌳",label:"나무 향",mood:"빈티지 우디",alias:"시간을 수집하는 감성가",accent:"#a66c3a",deep:"#2a1e13",soft:"#f5ede5"},
+  WHAR:{emoji:"🍯",label:"꿀 향",mood:"골든 허니 레진",alias:"품격을 완성하는 큐레이터",accent:"#a88124",deep:"#2a2313",soft:"#f5f0e5"},
+  WHDN:{emoji:"💼",label:"가죽 향",mood:"러스틱 레더",alias:"본질을 찾아 떠나는 개척자",accent:"#895143",deep:"#2a1813",soft:"#f5e8e5"},
+  WHDR:{emoji:"🫖",label:"홍차 향",mood:"블랙 티 우디",alias:"고요를 음미하는 사색가",accent:"#5e2c26",deep:"#2a1513",soft:"#f5e7e5"},
+  WLAN:{emoji:"🌲",label:"숲 향",mood:"모스 포레스트",alias:"순간을 사랑하는 낭만가",accent:"#57723b",deep:"#1f2a13",soft:"#edf5e5"},
+  WLAR:{emoji:"🌼",label:"꽃 향",mood:"선샤인 플로럴",alias:"분위기를 만드는 스타일리스트",accent:"#dbb976",deep:"#2a2213",soft:"#f5f0e5"},
+  WLDN:{emoji:"🌿",label:"허브 향",mood:"와일드 허브",alias:"우연을 즐기는 발견가",accent:"#93a343",deep:"#262a13",soft:"#f3f5e5"},
+  WLDR:{emoji:"🧺",label:"코튼 향",mood:"웜 코튼",alias:"취향을 설계하는 디자이너",accent:"#c6b495",deep:"#2a2213",soft:"#f5efe5"},
+  CHAN:{emoji:"🌊",label:"바다 향",mood:"딥 아쿠아",alias:"풍경에 머무는 몽상가",accent:"#306a7e",deep:"#13242a",soft:"#e5f1f5"},
+  CHAR:{emoji:"🪻",label:"아이리스 향",mood:"실키 아이리스",alias:"우아함을 담는 미학가",accent:"#6b4ca9",deep:"#1b132a",soft:"#eae5f5"},
+  CHDN:{emoji:"🌲",label:"삼나무 향",mood:"쿨 시더",alias:"자유를 닮은 방랑자",accent:"#589375",deep:"#132a1e",soft:"#e5f5ed"},
+  CHDR:{emoji:"📕",label:"오래된 책 향",mood:"잉크 우디",alias:"의미를 기록하는 관찰자",accent:"#2d3b58",deep:"#131b2a",soft:"#e5eaf5"},
+  CLAN:{emoji:"🍋",label:"라임 향",mood:"그린 시트러스",alias:"생기를 쫓는 모험가",accent:"#6cb946",deep:"#1b2a13",soft:"#eaf5e5"},
+  CLAR:{emoji:"🍊",label:"오렌지꽃 향",mood:"오렌지 블라썸",alias:"감각을 담아내는 연출가",accent:"#e78940",deep:"#2a1d13",soft:"#f5ece5"},
+  CLDN:{emoji:"🌊",label:"바다 향",mood:"마린 우디",alias:"길을 만드는 노마드",accent:"#3d85b8",deep:"#13212a",soft:"#e5eff5"},
+  CLDR:{emoji:"🫧",label:"비누 향",mood:"코튼 머스크",alias:"여백을 사랑하는 미니멀리스트",accent:"#9fc9db",deep:"#13232a",soft:"#e5f0f5"}
 };
 /* 로그인 사용자의 취향 유형 — 실제 서비스에선 서버 값으로 대체 */
-const USER_TASTE_TYPE = "WHAN";
-(function applyTaste(){
+let USER_TASTE_TYPE = "WHAN";
+function applyTaste(code){
+  USER_TASTE_TYPE = code;
   const t = TASTE_TYPES[USER_TASTE_TYPE]; if (!t) return;
   const card = document.getElementById("tasteCard");
   card.style.setProperty("--type-accent", t.accent);
   card.style.setProperty("--type-deep", t.deep);
   card.style.setProperty("--type-soft", t.soft);
   document.getElementById("tasteEmoji").textContent = t.emoji;
-  document.getElementById("tasteScent").textContent = `${t.emoji} ${t.label} · ${t.mood}`;
   document.getElementById("tasteLink").href = `onboarding-test.html?type=${USER_TASTE_TYPE}`;
   // alias 는 마지막 단어를 다음 줄로 내려 두 줄 무게감 유지
   const p = t.alias.split(" ");
   document.getElementById("tasteTitle").innerHTML =
     p.length > 1 ? p.slice(0, -1).join(" ") + "<br>" + p.slice(-1) : t.alias;
-})();
+}
+applyTaste(USER_TASTE_TYPE);
+
+/* ---------- 검수용 유형 스위처 ---------- */
+const tasteTypeSelect = document.getElementById("typeSelect");
+tasteTypeSelect.innerHTML = Object.keys(TASTE_TYPES)
+  .map((c) => `<option value="${c}">${c} · ${TASTE_TYPES[c].alias}</option>`).join("");
+tasteTypeSelect.value = USER_TASTE_TYPE;
+tasteTypeSelect.addEventListener("change", (e) => applyTaste(e.target.value));
 
 const starFour = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg>';
 const heart = '<svg class="heart" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M178,32c-20.65,0-38.73,8.88-50,23.89C116.73,40.88,98.65,32,78,32A62.07,62.07,0,0,0,16,94c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,220.66,240,164,240,94A62.07,62.07,0,0,0,178,32Zm-50,174c-18.26-11.06-96-64.11-96-112A46.06,46.06,0,0,1,78,48c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0C142.22,58.36,158.55,48,178,48a46.06,46.06,0,0,1,46,46C224,141.87,146.24,194.93,128,206Z"/></svg>';
