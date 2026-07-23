@@ -633,71 +633,46 @@ body:has(#stage-result.is-active) .brand { color: var(--color-content-on-fill); 
   margin: var(--space-32) 0 var(--space-24);
   display: grid;
   place-items: center;
-  /* 소환된 다음(0.5s 뒤 등장 완료) 부유하기 시작한다 */
-  animation:
-    summon 1.2s cubic-bezier(.22,.61,.36,1) .5s both,
-    float 6s ease-in-out 1.7s infinite;
+  /* 컨테이너는 등장(summon)만 담당. 부유(float)는 점선원·실선링·이미지가 각자 따로 한다 */
+  animation: summon 1.2s cubic-bezier(.22,.61,.36,1) .5s both;
 }
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-12px); }
-}
-/* 소환된 창 — 정령이 담기는 원형 포털 */
-.character::before {
-  content: "";
-  position: absolute;
-  inset: -6%;
-  border-radius: var(--radius-full);
-  background:
-    radial-gradient(circle, var(--alpha-white-16) 0%, transparent 58%),
-    radial-gradient(circle at 50% 60%, var(--type-accent) 0%, transparent 62%);
-  filter: blur(20px);
-  z-index: -1;
-}
-/* 포털의 테두리 — 빛의 가장자리 */
-.character::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--alpha-white-16);
-  mask: radial-gradient(circle, transparent 62%, #000 74%);
-  pointer-events: none;
-}
+/* 캐릭터 이미지 부유 */
+@keyframes floatImg { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
 /* 캐릭터 — 시안이 나오기 전이라 일반 렌더. 유형 컬러 글로우만 은은하게 얹는다.
    흰색/단색 반투명 실루엣으로 시안이 나오면 아래 두 줄을 되살려 '향의 정령'처럼 렌더할 수 있다:
      mix-blend-mode: screen;
      filter: drop-shadow(0 0 24px var(--type-accent)) drop-shadow(0 0 60px var(--alpha-white-40)); */
-.character img {
+.character-img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 10px 30px var(--alpha-black-40));
+  /* 깊이감용 어두운 그림자 + 유형 컬러 글로우 → 은은한 발광 */
+  filter:
+    drop-shadow(0 10px 30px var(--alpha-black-40))
+    drop-shadow(0 0 24px var(--type-accent));
+  /* WHAN 캐릭터 시안 테스트 — 배경 위에 밝은 부분만 얹히도록 lighten 블렌드 */
+  mix-blend-mode: lighten;
+  z-index: 1;
+  animation: floatImg 6s ease-in-out 1.7s infinite;
 }
 /* 정령에서 흩어지는 향 입자 */
 .spirit-dust { position: absolute; inset: -10%; overflow: hidden; pointer-events: none; }
+/* 향 입자 = 반딧불이. 유형 컬러로 발광하며 위로 떠오르고, 별개의 주기로 깜빡인다.
+   float-up: 상승 + 등장/퇴장 페이드(opacity) / twinkle: 글로우 세기 반짝임(box-shadow) */
 .spirit-dust i {
   position: absolute;
   bottom: 30%;
   border-radius: var(--radius-full);
-  background: var(--alpha-white-70);
-  animation: float-up linear infinite;
+  background: var(--type-accent);
+  box-shadow: 0 0 6px 1px var(--type-accent);
+  animation: float-up linear infinite, twinkle ease-in-out infinite;
 }
-
-/* 에셋 들어오기 전 임시 실루엣 */
-.character-placeholder {
-  width: 72%;
-  height: 72%;
-  border-radius: var(--radius-full);
-  border: 1px dashed var(--alpha-white-40);
-  display: grid;
-  place-items: center;
-  gap: var(--space-4);
-  color: var(--alpha-white-70);
-  font-size: var(--text-caption-12);
-  background: var(--alpha-white-8);
+@keyframes twinkle {
+  0%, 100% { box-shadow: 0 0 3px 0 var(--type-accent); filter: brightness(0.7); }
+  50%      { box-shadow: 0 0 10px 2px var(--type-accent); filter: brightness(1.6); }
 }
-.character-placeholder span:first-child { font-size: 44px; line-height: 1; }
 
 .hero-alias {
   font-size: var(--text-display-48);
@@ -1272,12 +1247,11 @@ body:has(#stage-result.is-active) .brand { color: var(--color-content-on-fill); 
     <div class="hero-inner">
       <p class="hero-kicker"><span id="rType"></span> · <span id="rScent"></span></p>
 
-      <!-- 캐릭터 슬롯: assets/characters/{TYPE}.png (투명 배경, 정사각 720×720 권장) -->
+      <!-- 캐릭터 슬롯: assets/character/{TYPE}.png (투명 배경, 정사각 권장) -->
       <div class="character" id="rCharacter">
-        <div class="character-placeholder">
-          <span id="rEmoji">🌿</span>
-          <span>캐릭터 자리</span>
-        </div>
+        <!-- 캐릭터 이미지 (시안 있는 유형만, 현재 WHAN) -->
+        <img class="character-img" id="rCharImg" alt="" hidden>
+        <!-- 위로 떠오르는 향 입자 — 반딧불이처럼 컬러 글로우로 반짝임 -->
         <div class="spirit-dust" id="spiritDust" aria-hidden="true"></div>
       </div>
 
@@ -1418,7 +1392,7 @@ const AXES = [
    color: 유형의 향 키워드에서 뽑은 액센트 / 히어로 딥 / 소프트 면
    ============================================================ */
 const TYPES = {
-  WHAN: { emoji: "🌳", mood: "빈티지 우디", label: "나무 향", alias: "시간을 수집하는 감성가",
+  WHAN: { emoji: "🪵", mood: "빈티지 우디", label: "나무 향", alias: "시간을 수집하는 감성가",
     tagline: "시간이 켜켜이 쌓인 공간에서 가장 큰 안정감을 느끼는 여행자",
     profileDesc: "당신은 새것의 화려함보다 시간이 쌓인 것의 깊이에 끌리는 사람이에요. 여행에서도 이름난 명소보다 세월이 밴 공간을 천천히 걸으며, 그곳에 남은 이야기를 마음에 담아 옵니다.",
     season: "가을", accent: "#a66c3a", deep: "#2a1e13", soft: "#f5ede5",
@@ -1506,7 +1480,7 @@ const TYPES = {
       "https://images.unsplash.com/photo-1524311583145-d5593bd3502a?auto=format&fit=crop&w=800&q=70"
     ] },
 
-  WLAN: { emoji: "🌲", mood: "모스 포레스트", label: "숲 향", alias: "순간을 사랑하는 낭만가",
+  WLAN: { emoji: "🌳", mood: "모스 포레스트", label: "숲 향", alias: "순간을 사랑하는 낭만가",
     tagline: "따뜻하고 자유로운 감성을 따라 움직이는 사람",
     profileDesc: "당신은 완벽한 계획보다 그 순간의 감정을 따라 움직이는 사람이에요. 여행에서도 유명한 장소보다 함께한 시간과 풍경을 소중히 여기며, 평범한 하루를 특별한 기억으로 만듭니다.",
     season: "봄", accent: "#57723b", deep: "#1f2a13", soft: "#edf5e5",
@@ -1932,9 +1906,27 @@ function runLoading() {
 }
 
 /* ---------- 결과 렌더 ---------- */
+/* 캐릭터 시안이 준비된 유형만 등록(경로: screens/ 기준 상대). 현재 WHAN만 테스트 */
+const CHARACTER_ASSETS = {
+  WHAN: "../assets/character/WHAN.png",
+  WHAR: "../assets/character/WHAR.png",
+  WLAN: "../assets/character/WLAN.png"
+};
+
 function renderResult(code, counts) {
   const t = TYPES[code];
   const root = document.documentElement;
+
+  // 캐릭터 슬롯: 시안이 있는 유형(현재 WHAN)만 점선 프레임 안에 이미지 렌더
+  const charImg = $("rCharImg");
+  const asset   = CHARACTER_ASSETS[code];
+  if (asset) {
+    charImg.src = asset;
+    charImg.hidden = false;
+  } else {
+    charImg.hidden = true;
+    charImg.removeAttribute("src");
+  }
   root.style.setProperty("--type-accent", t.accent);
   root.style.setProperty("--type-deep", t.deep);
   root.style.setProperty("--type-soft", t.soft);
@@ -1945,7 +1937,6 @@ function renderResult(code, counts) {
 
   $("rType").textContent = code;
   $("rScent").textContent = t.mood;
-  $("rEmoji").textContent = t.emoji;
   $("rAlias").textContent = t.alias;
   $("rTagline").textContent = t.tagline;
   $("rSeason").textContent = `어울리는 계절 · ${t.season}`;
@@ -2024,17 +2015,19 @@ function renderResult(code, counts) {
     </article>`;
   }).join("");
 
-  // 정령에서 흩어지는 향 입자
+  // 정령에서 흩어지는 향 입자 = 반딧불이. 상승 주기와 깜빡임 주기를 각각 따로 부여
   const dust = $("spiritDust");
   if (!dust.childElementCount) {
-    dust.innerHTML = Array.from({ length: 16 }, () => {
+    dust.innerHTML = Array.from({ length: 20 }, () => {
       const size = 1.5 + Math.random() * 2.5;
+      const rise = 4 + Math.random() * 4;       // 상승(float-up) 주기
+      const tw   = 0.8 + Math.random() * 1.6;   // 깜빡임(twinkle) 주기 — 훨씬 짧게
       return `<i style="
         left:${15 + Math.random() * 70}%;
         width:${size}px; height:${size}px;
         --drift:${(Math.random() - 0.5) * 70}px;
-        animation-duration:${4 + Math.random() * 4}s;
-        animation-delay:${-Math.random() * 6}s;"></i>`;
+        animation-duration:${rise}s, ${tw}s;
+        animation-delay:${-Math.random() * 6}s, ${-Math.random() * 3}s;"></i>`;
     }).join("");
   }
 
