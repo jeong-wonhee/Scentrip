@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scentrip — 마이페이지</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="../reference/tokens.css">
+<style>
+/* ============================================================
+   Scentrip — 마이페이지 (Desktop Web)
+   · Figma node 598:831 기준으로 재작성
+   · 메뉴 3개: 계정 설정 / 내 리뷰 / 고객센터  (+ 리뷰 수정·회원탈퇴 서브페이지)
+   · 색/라운드/타이포/스페이싱은 tokens.css var()만 사용 (home·탐색과 동일)
+   · 헤더/브랜드/푸터는 home.html과 동일한 공용 크롬
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing);
+  color: var(--color-content-default);
+  background: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+img { display: block; max-width: 100%; }
+[hidden] { display: none !important; }
+button { font-family: inherit; letter-spacing: inherit; cursor: pointer; background: none; border: 0; color: inherit; }
+input, textarea, select { font-family: inherit; letter-spacing: inherit; }
+a { color: inherit; }
+ul, ol { list-style: none; }
+
+/* 로컬 보강 토큰 */
+:root {
+  --star-on: var(--scent-green-600);
+  --star-off: var(--neutral-300);
+  --color-error-hover: var(--red-800);
+  --page-max: 1240px;
+  --side-w: 236px;
+  --content-w: 680px;
+}
+
+:focus-visible { outline: 3px solid var(--color-border-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+.page { display: flex; flex-direction: column; align-items: stretch; width: 100%; min-height: 100vh; }
+
+/* ============================================================
+   공용 크롬 — 브랜드 / Nav / Footer (home.html과 동일)
+   ============================================================ */
+.brand { display: flex; align-items: center; gap: var(--space-6); height: 56px; text-decoration: none; flex: none; }
+.brand-bars { display: flex; align-items: center; gap: var(--space-2); height: 24px; }
+.brand-bars i { display: block; width: 4px; border-radius: var(--radius-full); background: var(--gradient-brand); }
+.brand-bars i:nth-child(1) { height: 8px; }
+.brand-bars i:nth-child(2) { height: 18px; opacity: .7; }
+.brand-bars i:nth-child(3) { height: 12px; opacity: .4; }
+.brand-name {
+  font-size: var(--text-heading-20); font-weight: 600; line-height: 1.25;
+  background: var(--gradient-brand); -webkit-background-clip: text; background-clip: text; color: transparent; white-space: nowrap;
+}
+
+.nav { display: flex; align-items: center; height: 56px; padding: 0 60px; width: 100%; max-width: var(--page-max); margin: 0 auto; background: var(--color-surface-overlay); position: relative; z-index: 10; justify-content: space-between; }
+.nav-center { position: absolute; left: 50%; top: 0; transform: translateX(-50%); height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.nav-list { display: flex; align-items: center; justify-content: center; gap: var(--space-32); }
+.nav-link { display: flex; align-items: center; justify-content: center; height: 56px; font-size: var(--text-body-16); line-height: 1.5; font-weight: 500; color: var(--color-content-nav); text-decoration: none; }
+.nav-link:hover { color: var(--color-content-nav-hover); }
+.nav-link.is-selected { font-weight: 600; color: var(--color-content-nav-selected); }
+.nav-right { display: flex; align-items: center; gap: var(--space-12); }
+
+/* 프로필 칩 */
+.profile { position: relative; }
+.type-pill { display: flex; align-items: center; gap: var(--space-8); padding: 4px 4px 4px 12px; background: var(--color-surface-01); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-full); transition: background .18s ease, border-color .18s ease; }
+.type-pill:hover, .type-pill[aria-expanded="true"] { background: var(--color-surface-02); border-color: var(--color-border-default); }
+.pill-name { font-size: 13px; font-weight: 600; line-height: 1.5; color: var(--color-content-muted); white-space: nowrap; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+
+/* 아바타 공용 */
+.av { border-radius: var(--radius-full); background: var(--color-surface-04); color: var(--color-content-on-fill); display: flex; align-items: center; justify-content: center; flex: none; overflow: hidden; }
+.av .av-svg { display: flex; width: 58%; height: 58%; }
+.av .av-svg svg { width: 100%; height: 100%; }
+.av-28 { width: 28px; height: 28px; }
+.av-48 { width: 48px; height: 48px; }
+.av-100 { width: 100px; height: 100px; }
+
+/* 팝오버 공용 */
+.popover {
+  position: absolute; top: calc(100% + 10px); right: 0; background: var(--color-surface-overlay);
+  border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); box-shadow: var(--elevation-lg);
+  z-index: 300; opacity: 0; visibility: hidden; transform: translateY(-6px);
+  transition: opacity .18s ease, transform .18s ease, visibility .18s;
+}
+.popover.is-open { opacity: 1; visibility: visible; transform: none; }
+.profile-pop { width: 288px; padding: var(--space-8); }
+.pop-profile { display: flex; gap: var(--space-12); align-items: center; padding: var(--space-12); border-radius: var(--radius-md); width: 100%; text-align: left; }
+.pop-id { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.pop-name { font-size: var(--text-body-16); font-weight: 600; line-height: 1.3; color: var(--color-content-default); }
+.pop-taste { font-size: var(--text-body-14); font-weight: 500; line-height: 1.3; color: var(--color-content-subtle); }
+.pop-divider { height: 1px; background: var(--color-border-subtle); margin: var(--space-6) var(--space-8); }
+.pop-menu { display: flex; flex-direction: column; }
+.pop-item { display: flex; align-items: center; gap: var(--space-10); padding: var(--space-12); border-radius: var(--radius-md); font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-default); text-decoration: none; width: 100%; text-align: left; }
+.pop-item:hover { background: var(--color-neutral-subtle); }
+.pop-item svg { width: 18px; height: 18px; color: var(--color-content-neutral-muted); flex: none; }
+/* 로그인/게스트 토글 (공용) */
+html .guest-only { display: none; }
+.is-guest .auth-only { display: none; }
+.btn-login { display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 var(--space-20); border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-content-on-fill); font-size: var(--text-body-14); font-weight: 600; text-decoration: none; border: 0; transition: background .16s ease; }
+.btn-login:hover { background: var(--color-primary-hover); }
+.is-guest .btn-login { display: inline-flex; }
+
+/* 게스트 게이트 (마이페이지는 비로그인 시 접근 불가) */
+.guest-gate { display: none; }
+.is-guest #app { display: none; }
+.is-guest .guest-gate { display: flex; flex: 1 0 auto; align-items: center; justify-content: center; padding: 80px var(--space-32); }
+.gate-card { max-width: 480px; width: 100%; text-align: center; display: flex; flex-direction: column; align-items: center; gap: var(--space-16); padding: 56px 40px; background: var(--color-surface-overlay); border: 1px solid var(--color-border-default); border-radius: var(--radius-2xl); box-shadow: var(--elevation-md); }
+.gate-icon { width: 72px; height: 72px; border-radius: var(--radius-full); background: var(--color-surface-01); color: var(--color-primary); display: flex; align-items: center; justify-content: center; }
+.gate-icon svg { width: 34px; height: 34px; }
+.gate-card h1 { font-size: var(--text-title-28); font-weight: 600; color: var(--color-content-neutral); line-height: 1.35; }
+.gate-card p { font-size: var(--text-body-14); color: var(--color-content-neutral-muted); line-height: 1.8; }
+.gate-card .btn { margin-top: var(--space-12); }
+
+/* ============================================================
+   My Page 레이아웃
+   ============================================================ */
+.mp {
+  flex: 1 0 auto; width: 100%; max-width: var(--page-max); margin: 0 auto;
+  padding: 40px 60px 96px;
+  display: grid; grid-template-columns: var(--side-w) minmax(0, var(--content-w));
+  column-gap: var(--space-24); align-items: start;
+}
+
+/* 사이드바 */
+.side { position: sticky; top: var(--space-24); display: flex; flex-direction: column; gap: var(--space-2); }
+.side-link {
+  display: flex; align-items: center; gap: var(--space-10); padding: var(--space-10) var(--space-12);
+  border-radius: var(--radius-md); font-size: var(--text-body-14); font-weight: 600;
+  color: var(--color-content-neutral-muted); width: 100%; text-align: left;
+  transition: background .14s ease, color .14s ease;
+}
+.side-link svg { width: 20px; height: 20px; flex: none; color: var(--color-content-neutral-subtle); }
+.side-link:hover { background: var(--color-neutral-subtle); color: var(--color-content-neutral); }
+.side-link[aria-current="page"] { color: var(--color-content-neutral); font-weight: 600; }
+.side-link[aria-current="page"] svg { color: var(--color-content-neutral); }
+
+/* 콘텐츠 / 뷰 */
+.content { min-width: 0; }
+.view { display: none; flex-direction: column; gap: var(--space-32); }
+.view.is-active { display: flex; }
+.view-title { font-size: var(--text-title-28); font-weight: 600; line-height: 1.3; color: var(--color-content-neutral); }
+.view-title:focus-visible { outline: 3px solid var(--color-border-focus); outline-offset: 4px; }
+.view-head { display: flex; flex-direction: column; gap: var(--space-8); }
+.view-head p { font-size: var(--text-body-14); color: var(--color-content-neutral-muted); line-height: 1.6; }
+
+/* 그룹 (섹션 라벨 + 내용) */
+.group { display: flex; flex-direction: column; gap: var(--space-12); }
+.group-label { font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-neutral-muted); }
+
+/* 카드 */
+.card { background: var(--color-surface-overlay); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); }
+
+/* ============================================================
+   계정 설정
+   ============================================================ */
+.pf-summary { display: flex; flex-direction: column; gap: var(--space-16); }
+.pf-id { display: flex; flex-direction: column; gap: var(--space-6); }
+.pf-name { font-size: var(--text-heading-24); font-weight: 600; line-height: 1.3; color: var(--color-content-neutral); }
+.pf-mail { font-size: var(--text-body-14); color: var(--color-content-muted); word-break: break-all; }
+.pf-taste { display: inline-flex; align-items: center; gap: var(--space-6); align-self: flex-start; margin-top: var(--space-4); padding: var(--space-4) var(--space-12); background: var(--color-surface-overlay); border: 1px solid var(--color-primary-border, var(--color-border-default)); border-radius: var(--radius-full); font-size: 13px; font-weight: 600; color: var(--color-primary); }
+
+.acc-list { display: flex; flex-direction: column; margin-top: var(--space-8); }
+.acc-row { display: flex; align-items: flex-start; gap: var(--space-20); padding: var(--space-20) 0; border-top: 1px solid var(--color-border-subtle); }
+.acc-list > .acc-row:first-child { border-top: 0; }
+.acc-field { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: var(--space-8); }
+.acc-field dt { font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-neutral-muted); }
+.acc-field .val { font-size: var(--text-body-16); font-weight: 500; color: var(--color-content-neutral); display: flex; align-items: center; gap: var(--space-8); flex-wrap: wrap; word-break: break-all; }
+.acc-edit { flex: none; font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-neutral-muted); padding: var(--space-6) var(--space-8); border-radius: var(--radius-sm); transition: color .14s ease, background .14s ease; }
+.acc-edit:hover { color: var(--color-primary); background: var(--color-neutral-subtle); }
+.acc-foot { display: flex; justify-content: flex-end; padding-top: var(--space-20); border-top: 1px solid var(--color-border-subtle); }
+.link-danger { font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-error); padding: var(--space-6) var(--space-8); border-radius: var(--radius-sm); }
+.link-danger:hover { background: var(--color-error-subtle); }
+
+/* 칩 */
+.chip { display: inline-flex; align-items: center; gap: var(--space-6); padding: 3px var(--space-10); border-radius: var(--radius-full); font-size: var(--text-caption-12); font-weight: 600; letter-spacing: 0; white-space: nowrap; }
+.chip.g { background: var(--color-surface-01); color: var(--color-content-subtle); border: 1px solid var(--color-border-default); }
+
+/* 버튼 */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-8); height: 44px; padding: 0 var(--space-24); border-radius: var(--radius-full); font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; text-decoration: none; border: 1px solid transparent; transition: background .16s ease, border-color .16s ease, color .16s ease; white-space: nowrap; }
+.btn svg { width: 16px; height: 16px; flex: none; }
+.btn-primary { background: var(--color-primary); color: var(--color-content-on-fill); }
+.btn-primary:hover { background: var(--color-primary-hover); }
+.btn-primary:active { background: var(--color-primary-active); }
+.btn-outline { background: var(--color-surface-overlay); border-color: var(--color-border-strong); color: var(--color-content-muted); }
+.btn-outline:hover { background: var(--color-surface-01); border-color: var(--color-primary); color: var(--color-primary); }
+.btn-ghost { background: none; color: var(--color-content-neutral-muted); }
+.btn-ghost:hover { background: var(--color-neutral-subtle); color: var(--color-content-neutral); }
+.btn-danger { background: var(--color-error); color: #fff; }
+.btn-danger:hover { background: var(--color-error-hover); }
+.btn-dark { background: var(--scent-green-950); color: #fff; }
+.btn-dark:hover { background: var(--scent-green-900); }
+.btn-sm { height: 38px; padding: 0 var(--space-16); font-size: 13px; }
+.btn:disabled, .btn[aria-disabled="true"] { background: var(--neutral-200); border-color: transparent; color: var(--color-content-neutral-disabled); cursor: not-allowed; pointer-events: none; }
+
+/* ============================================================
+   내 리뷰
+   ============================================================ */
+.rv-toolbar { display: flex; align-items: center; gap: var(--space-12); }
+.dropdown { position: relative; }
+.dd-btn { display: inline-flex; align-items: center; gap: var(--space-8); height: 44px; padding: 0 var(--space-16); border: 1px solid var(--color-neutral-border); border-radius: var(--radius-full); background: var(--color-surface-overlay); font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-neutral); transition: border-color .14s ease, background .14s ease; }
+.dd-btn:hover, .dd-btn[aria-expanded="true"] { border-color: var(--color-border-strong); background: var(--color-surface-01); }
+.dd-btn svg { width: 16px; height: 16px; color: var(--color-content-neutral-muted); transition: transform .18s ease; }
+.dd-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+.dd-menu { left: 0; right: auto; width: 160px; padding: var(--space-6); }
+.dd-item { display: flex; align-items: center; justify-content: space-between; gap: var(--space-8); width: 100%; padding: var(--space-10) var(--space-12); border-radius: var(--radius-md); font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-neutral); text-align: left; }
+.dd-item:hover { background: var(--color-neutral-subtle); }
+.dd-item[aria-selected="true"] { color: var(--color-primary); font-weight: 600; }
+.dd-item .ck { width: 16px; height: 16px; opacity: 0; color: var(--color-primary); }
+.dd-item[aria-selected="true"] .ck { opacity: 1; }
+
+.rv-list { display: flex; flex-direction: column; gap: var(--space-16); }
+.rv { position: relative; padding: var(--space-24); background: var(--color-surface-overlay); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); display: flex; flex-direction: column; gap: var(--space-12); }
+.rv-top { display: flex; align-items: flex-start; gap: var(--space-12); }
+.rv-heads { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: var(--space-4); }
+.rv-place { font-size: var(--text-body-18); font-weight: 600; color: var(--color-content-neutral); line-height: 1.35; }
+.rv-loc { font-size: 13px; color: var(--color-content-neutral-muted); }
+.stars { display: inline-flex; align-items: center; gap: 2px; }
+.stars svg { width: 16px; height: 16px; }
+.stars .on { color: var(--star-on); }
+.stars .off { color: var(--star-off); }
+.rv-text { font-size: var(--text-body-14); color: var(--color-content-neutral-muted); line-height: 1.6; }
+.rv-photos { margin-top: var(--space-12); display: flex; gap: var(--space-6); flex-wrap: wrap; }
+.rv-photos img { width: 80px; height: 80px; object-fit: cover; border-radius: var(--radius-md); background: var(--color-surface-02); }
+.rv-date { font-size: var(--text-caption-12); color: var(--color-content-neutral-subtle); margin-top: var(--space-12); }
+
+/* 케밥 메뉴 */
+.kebab-wrap { position: relative; flex: none; }
+.icon-btn { width: 36px; height: 36px; border-radius: var(--radius-full); display: inline-flex; align-items: center; justify-content: center; color: var(--color-content-neutral-muted); transition: background .14s ease, color .14s ease; }
+.icon-btn:hover, .icon-btn[aria-expanded="true"] { background: var(--color-surface-01); color: var(--color-content-neutral); }
+.icon-btn svg { width: 20px; height: 20px; }
+.kebab-menu { width: 148px; padding: var(--space-6); }
+.kebab-item { display: flex; align-items: center; gap: var(--space-10); width: 100%; padding: var(--space-10) var(--space-12); border-radius: var(--radius-md); font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-neutral); text-align: left; }
+.kebab-item svg { width: 16px; height: 16px; flex: none; color: var(--color-content-neutral-muted); }
+.kebab-item:hover { background: var(--color-neutral-subtle); }
+.kebab-item.danger { color: var(--color-content-error); }
+.kebab-item.danger svg { color: var(--color-error); }
+.kebab-item.danger:hover { background: var(--color-error-subtle); }
+
+.empty-box { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-8); padding: 72px var(--space-24); background: var(--color-surface-overlay); border: 1px dashed var(--color-border-strong); border-radius: var(--radius-xl); }
+.empty-box b { font-size: var(--text-heading-20); font-weight: 600; color: var(--color-content-neutral); }
+.empty-box span { font-size: var(--text-body-14); color: var(--color-content-neutral-muted); }
+
+/* ============================================================
+   고객센터 — FAQ / 문의
+   ============================================================ */
+.faq { border-top: 1px solid var(--color-border-subtle); }
+.card > .faq:first-child { border-top: 0; }
+.faq summary { list-style: none; cursor: pointer; padding: var(--space-20) var(--space-24); display: flex; align-items: center; gap: var(--space-12); font-size: var(--text-body-16); font-weight: 500; color: var(--color-content-neutral); }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary:focus-visible { outline: 3px solid var(--color-border-focus); outline-offset: -3px; }
+.faq summary .q { flex: 1 1 auto; }
+.faq summary .pl { color: var(--color-content-neutral-muted); transition: transform .2s ease; flex: none; display: flex; }
+.faq summary .pl svg { width: 20px; height: 20px; }
+.faq summary .pl .ic-x { display: none; }
+.faq[open] summary { padding-bottom: var(--space-12); }
+.faq[open] summary .pl .ic-plus { display: none; }
+.faq[open] summary .pl .ic-x { display: block; }
+.faq .a { padding: 0 var(--space-24) var(--space-20); font-size: var(--text-body-14); color: var(--color-content-neutral-muted); line-height: 1.7; }
+
+.inquiry { display: flex; align-items: center; gap: var(--space-24); padding: 28px; }
+.inquiry p { flex: 1 1 auto; font-size: var(--text-body-14); color: var(--color-content-neutral-muted); line-height: 1.6; }
+.inquiry .btn { flex: none; }
+
+/* ============================================================
+   회원탈퇴
+   ============================================================ */
+.del-list { display: flex; flex-direction: column; gap: var(--space-12); padding: var(--space-24); }
+.del-list li { display: flex; align-items: flex-start; gap: var(--space-10); font-size: var(--text-body-14); color: var(--color-content-neutral-muted); line-height: 1.5; }
+.del-list li::before { content: ""; width: 5px; height: 5px; border-radius: var(--radius-full); background: var(--color-content-neutral-subtle); flex: none; margin-top: 8px; }
+.radio-list { display: flex; flex-direction: column; gap: var(--space-8); }
+.radio { display: flex; align-items: center; gap: var(--space-12); padding: var(--space-14) var(--space-16); border: 1px solid var(--color-neutral-border); border-radius: var(--radius-md); cursor: pointer; font-size: var(--text-body-16); color: var(--color-content-neutral); transition: background .14s ease, border-color .14s ease; }
+.radio:hover { border-color: var(--color-border-strong); background: var(--color-surface-01); }
+.radio:has(input:checked) { border-color: var(--color-primary); background: var(--color-surface-01); font-weight: 600; }
+.radio input { width: 18px; height: 18px; accent-color: var(--color-primary); flex: none; }
+.wd-actions { display: flex; justify-content: flex-end; }
+
+/* ============================================================
+   리뷰 수정 (폼)
+   ============================================================ */
+.re-card { padding: 28px; display: flex; flex-direction: column; gap: var(--space-20); }
+.re-head { display: flex; flex-direction: column; gap: var(--space-4); }
+.re-place { font-size: var(--text-heading-20); font-weight: 600; color: var(--color-content-neutral); line-height: 1.35; }
+.re-loc { font-size: 13px; color: var(--color-content-neutral-muted); }
+.star-input { display: flex; gap: var(--space-6); border: 0; padding: 0; margin: 0; }
+.star-input legend { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); }
+.star-opt { position: relative; display: inline-flex; }
+.star-opt input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.star-opt span:not(.sr-only) { display: flex; color: var(--star-off); transition: color .12s ease; pointer-events: none; }
+.star-opt span svg { width: 40px; height: 40px; }
+.star-opt.on span:not(.sr-only) { color: var(--star-on); }
+.star-opt input:focus-visible + .sr-only + span { outline: 3px solid var(--color-border-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
+.star-opt:hover span:not(.sr-only) { color: var(--star-on); }
+.re-field { display: flex; flex-direction: column; gap: var(--space-8); }
+.textarea { width: 100%; padding: var(--space-16) var(--space-20); border: 1px solid var(--color-neutral-border); border-radius: var(--radius-md); font-size: var(--text-body-16); color: var(--color-content-neutral); background: var(--color-surface-overlay); resize: vertical; min-height: 140px; line-height: 1.6; transition: border-color .14s ease, box-shadow .14s ease; }
+.textarea:focus { outline: none; border-color: var(--color-border-focus); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 22%, transparent); }
+.textarea[aria-invalid="true"] { border-color: var(--color-error); background: var(--color-error-subtle); }
+.counter { font-size: var(--text-caption-12); color: var(--color-content-neutral-muted); text-align: right; }
+.re-actions { display: flex; align-items: center; justify-content: space-between; }
+.re-label { font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-neutral); }
+.re-optional { font-weight: 500; color: var(--color-content-neutral-subtle); margin-left: var(--space-4); }
+.re-date { max-width: 220px; }
+.photo-grid { display: flex; flex-wrap: wrap; gap: var(--space-12); }
+.photo-thumb { position: relative; width: 96px; height: 96px; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--color-border-default); background: var(--color-surface-01); flex: none; }
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.photo-del { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border-radius: var(--radius-full); background: rgba(0,0,0,.55); color: #fff; display: flex; align-items: center; justify-content: center; }
+.photo-del svg { width: 14px; height: 14px; }
+.photo-del:hover { background: rgba(0,0,0,.75); }
+.photo-add { width: 96px; height: 96px; border-radius: var(--radius-md); border: 1px dashed var(--color-border-strong); background: var(--color-surface-01); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-4); color: var(--color-content-neutral-muted); flex: none; transition: background .14s ease, border-color .14s ease, color .14s ease; }
+.photo-add:hover { background: var(--color-surface-02); border-color: var(--color-primary); color: var(--color-primary); }
+.photo-add svg { width: 22px; height: 22px; }
+.photo-add span { font-size: var(--text-caption-12); font-weight: 600; letter-spacing: 0; }
+
+/* 입력 (모달) */
+.field { display: flex; flex-direction: column; gap: var(--space-8); }
+.field > label { font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-neutral); }
+.field .hint { font-size: 13px; color: var(--color-content-neutral-muted); line-height: 1.5; }
+.input { width: 100%; height: 50px; padding: 0 var(--space-16); border: 1px solid var(--color-neutral-border); border-radius: var(--radius-md); font-size: var(--text-body-16); color: var(--color-content-neutral); background: var(--color-surface-overlay); transition: border-color .14s ease, box-shadow .14s ease; }
+.input:focus { outline: none; border-color: var(--color-border-focus); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 22%, transparent); }
+.input[aria-invalid="true"] { border-color: var(--color-error); background: var(--color-error-subtle); }
+.err-msg { display: none; align-items: center; gap: var(--space-6); font-size: 13px; font-weight: 600; color: var(--color-content-error); }
+.err-msg.show { display: flex; }
+
+/* ============================================================
+   Toast / Modal
+   ============================================================ */
+.toast { position: fixed; left: 50%; bottom: 36px; transform: translate(-50%, 20px); background: var(--scent-green-900); color: #fff; padding: var(--space-14) var(--space-24); border-radius: var(--radius-full); font-size: var(--text-body-14); font-weight: 600; box-shadow: var(--elevation-xl); display: flex; align-items: center; gap: var(--space-10); z-index: 600; opacity: 0; visibility: hidden; transition: opacity .24s ease, transform .24s ease, visibility .24s; max-width: 520px; }
+.toast.show { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+.toast svg { width: 18px; height: 18px; flex: none; color: var(--emerald-300); }
+.toast.err { background: var(--red-950); }
+.toast.err svg { color: var(--red-300); }
+
+.modal-bg { position: fixed; inset: 0; background: var(--color-state-scrim); display: none; align-items: center; justify-content: center; z-index: 500; padding: var(--space-32); overflow-y: auto; }
+.modal-bg.show { display: flex; }
+.modal { background: var(--color-surface-overlay); border-radius: var(--radius-2xl); padding: var(--space-32); max-width: 460px; width: 100%; box-shadow: var(--elevation-xl); max-height: calc(100vh - 64px); overflow-y: auto; margin: auto; }
+.modal h2 { font-size: var(--text-heading-24); font-weight: 600; color: var(--color-content-default); margin-bottom: var(--space-8); line-height: 1.35; }
+.modal h2.danger { color: var(--color-content-error); }
+.modal > p { font-size: var(--text-body-14); color: var(--color-content-neutral-muted); line-height: 1.7; margin-bottom: var(--space-24); }
+.modal .field { margin-bottom: var(--space-8); }
+.modal-actions { display: flex; gap: var(--space-12); justify-content: flex-end; margin-top: var(--space-24); }
+
+/* ============================================================
+   Footer (home.html과 동일)
+   ============================================================ */
+.footer { padding-top: 36px; width: 100%; margin-top: auto; }
+.footer-inner { background: var(--color-neutral-bg); padding: 48px 60px; display: flex; flex-direction: column; gap: var(--space-40); overflow: hidden; max-width: var(--page-max); margin: 0 auto; width: 100%; }
+.footer-top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-24); width: 100%; }
+.footer-brand-col { display: flex; flex-direction: column; gap: var(--space-20); width: 300px; flex: none; }
+.footer-brand { display: flex; align-items: center; gap: var(--space-6); }
+.footer-desc { font-size: 15px; font-weight: 500; line-height: 1.5; color: var(--color-content-neutral-muted); }
+.footer-nav { flex: 1 0 0; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: var(--space-12); font-size: 15px; font-weight: 500; line-height: 1.5; color: var(--color-content-neutral-muted); text-align: right; }
+.footer-nav a { color: inherit; text-decoration: none; white-space: nowrap; }
+.footer-nav a:hover { color: var(--color-content-neutral); }
+.footer-bottom { display: flex; align-items: center; justify-content: space-between; gap: var(--space-24); width: 100%; padding-top: var(--space-40); border-top: 1px solid var(--color-neutral-border); font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; white-space: nowrap; }
+.footer-copy { color: var(--color-content-neutral-subtle); }
+.footer-legal { display: flex; gap: var(--space-20); }
+.footer-legal a { text-decoration: none; white-space: nowrap; }
+.footer-legal .lgl-muted { color: var(--color-content-neutral-muted); }
+.footer-legal .lgl-strong { color: var(--color-content-neutral-muted); }
+
+/* ============================================================
+   반응형
+   ============================================================ */
+@media (max-width: 1120px) {
+  .mp { grid-template-columns: 1fr; column-gap: 0; row-gap: var(--space-24); padding: var(--space-32) var(--space-24) 64px; }
+  .mp.is-solo { grid-template-columns: 1fr; }
+  /* 좁은 화면: 언더라인 탭 메뉴 */
+  .side { position: static; flex-direction: row; flex-wrap: nowrap; gap: var(--space-4); padding: 0; border: 0; border-bottom: 1px solid var(--color-border-default); border-radius: 0; overflow-x: auto; }
+  .mp.is-solo .side { display: none; }
+  .side-link { width: auto; flex: none; justify-content: center; padding: var(--space-12) var(--space-10); border-radius: 0; margin-bottom: -1px; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .side-link:hover { background: none; color: var(--color-content-neutral); }
+  .side-link[aria-current="page"] { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+  .side-link[aria-current="page"] svg { color: var(--color-primary); }
+  .nav { padding: 0 var(--space-20); }
+  .nav-list { gap: var(--space-24); }
+  .footer-inner { padding: 48px 32px; }
+  .footer-top { flex-direction: column; align-items: flex-start; gap: var(--space-20); }
+  .footer-nav { align-items: flex-start; text-align: left; }
+}
+@media (max-width: 560px) {
+  .nav-center { display: none; }
+  .mp { padding: var(--space-24) var(--space-16) 48px; }
+  .footer-inner { padding: 40px 20px; }
+  .inquiry { flex-direction: column; align-items: flex-start; }
+}
+/* 사이드바가 보이는 뷰에서는 solo 레이아웃일 때 좌측 컬럼을 비워 정렬 유지 */
+.mp.is-solo .side { visibility: hidden; }
+</style>
+<script>(function(){try{if((localStorage.getItem("scentrip_auth")||"in")==="out")document.documentElement.classList.add("is-guest");}catch(e){}})();</script>
+</head>
+<body>
+
+<div class="page">
+  <!-- ======================= Nav ======================= -->
+  <nav class="nav" aria-label="주 메뉴">
+    <a class="brand" href="home.html" aria-label="Scentrip 홈">
+      <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="brand-name">Scentrip</span>
+    </a>
+    <div class="nav-center">
+      <div class="nav-list">
+        <a class="nav-link" href="#">소식</a>
+        <a class="nav-link" href="place-recommend.html">탐색</a>
+        <a class="nav-link" href="#">내 여행</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <a class="btn-login guest-only" href="#" data-login role="button">로그인</a>
+      <div class="profile auth-only">
+        <button class="type-pill" id="profilePill" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="profilePop">
+          <span class="pill-name" data-bind="nickname">이서연</span>
+          <span class="av av-28" aria-hidden="true"><span class="av-svg"></span></span>
+        </button>
+        <div class="popover profile-pop" id="profilePop" role="menu">
+          <div class="pop-profile" aria-hidden="true">
+            <span class="av av-48" aria-hidden="true"><span class="av-svg"></span></span>
+            <span class="pop-id">
+              <span class="pop-name" data-bind="nickname">이서연</span>
+              <span class="pop-taste" data-bind="taste">WHAN · 시간을 수집하는 감성가</span>
+            </span>
+          </div>
+          <div class="pop-divider"></div>
+          <div class="pop-menu">
+            <button class="pop-item" type="button" data-view-link="account" role="menuitem">
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg>
+              계정 설정
+            </button>
+            <button class="pop-item" type="button" data-view-link="reviews" role="menuitem">
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M88,96a8,8,0,0,1,8-8h64a8,8,0,0,1,0,16H96A8,8,0,0,1,88,96Zm8,40h64a8,8,0,0,0,0-16H96a8,8,0,0,0,0,16ZM232,64V152a8,8,0,0,1-2.34,5.66l-64,64A8,8,0,0,1,160,224H56a16,16,0,0,1-16-16V64A16,16,0,0,1,56,48H216A16,16,0,0,1,232,64ZM56,208h96V160a8,8,0,0,1,8-8h48V64H56Zm120-40v28.7L204.69,168Z"/></svg>
+              내 리뷰
+            </button>
+            <button class="pop-item" type="button" data-view-link="support" role="menuitem">
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M201.89,54.66A104.06,104.06,0,0,0,24,128v56a24,24,0,0,0,24,24H64a24,24,0,0,0,24-24V152a24,24,0,0,0-24-24H40.35A88,88,0,0,1,190.51,69.34,87.42,87.42,0,0,1,215.65,128H192a24,24,0,0,0-24,24v32a24,24,0,0,0,24,24h16a24,24,0,0,0,1.94-.08A24,24,0,0,1,186,214.31l-.06,0A24.06,24.06,0,0,1,168,232H128a8,8,0,0,0,0,16h40a40.07,40.07,0,0,0,36.35-23.32A40,40,0,0,0,232,186V128A103.41,103.41,0,0,0,201.89,54.66Z"/></svg>
+              고객센터
+            </button>
+            <div class="pop-divider"></div>
+            <button class="pop-item" type="button" data-logout role="menuitem">
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M124,216a12,12,0,0,1-12,12H48a12,12,0,0,1-12-12V40A12,12,0,0,1,48,28h64a12,12,0,0,1,0,24H60V204h52A12,12,0,0,1,124,216Zm108.49-96.49-40-40a12,12,0,0,0-17,17L195,116H112a12,12,0,0,0,0,24h83l-19.52,19.51a12,12,0,0,0,17,17l40-40A12,12,0,0,0,232.49,119.51Z"/></svg>
+              로그아웃
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ======================= My Page ======================= -->
+  <main class="mp" id="app">
+    <!-- 사이드바 -->
+    <nav class="side" id="side" aria-label="마이페이지 메뉴">
+      <button class="side-link" type="button" data-view-link="account">
+        <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg>
+        계정 설정
+      </button>
+      <button class="side-link" type="button" data-view-link="reviews">
+        <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M88,96a8,8,0,0,1,8-8h64a8,8,0,0,1,0,16H96A8,8,0,0,1,88,96Zm8,40h64a8,8,0,0,0,0-16H96a8,8,0,0,0,0,16ZM232,64V152a8,8,0,0,1-2.34,5.66l-64,64A8,8,0,0,1,160,224H56a16,16,0,0,1-16-16V64A16,16,0,0,1,56,48H216A16,16,0,0,1,232,64ZM56,208h96V160a8,8,0,0,1,8-8h48V64H56Zm120-40v28.7L204.69,168Z"/></svg>
+        내 리뷰
+      </button>
+      <button class="side-link" type="button" data-view-link="support">
+        <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M201.89,54.66A104.06,104.06,0,0,0,24,128v56a24,24,0,0,0,24,24H64a24,24,0,0,0,24-24V152a24,24,0,0,0-24-24H40.35A88,88,0,0,1,190.51,69.34,87.42,87.42,0,0,1,215.65,128H192a24,24,0,0,0-24,24v32a24,24,0,0,0,24,24h16a24,24,0,0,0,1.94-.08A24,24,0,0,1,186,214.31l-.06,0A24.06,24.06,0,0,1,168,232H128a8,8,0,0,0,0,16h40a40.07,40.07,0,0,0,36.35-23.32A40,40,0,0,0,232,186V128A103.41,103.41,0,0,0,201.89,54.66Z"/></svg>
+        고객센터
+      </button>
+    </nav>
+
+    <!-- ======================= 콘텐츠 ======================= -->
+    <div class="content">
+
+      <!-- ① 계정 설정 -->
+      <section class="view" data-view="account" aria-labelledby="t-account">
+        <h2 class="view-title sr-only" id="t-account" tabindex="-1">계정 설정</h2>
+
+        <div class="pf-summary">
+          <span class="av av-100" aria-hidden="true"><span class="av-svg"></span></span>
+          <div class="pf-id">
+            <p class="pf-name" data-bind="nickname">이서연</p>
+            <p class="pf-mail" data-bind="email">seoyeon@gmail.com</p>
+            <span class="pf-taste" data-bind="taste">WHAN · 시간을 수집하는 감성가</span>
+          </div>
+        </div>
+
+        <dl class="acc-list">
+          <div class="acc-row">
+            <div class="acc-field">
+              <dt>이름</dt>
+              <dd class="val" data-bind="nickname">이서연</dd>
+            </div>
+            <button class="acc-edit" type="button" data-edit-name>수정</button>
+          </div>
+          <div class="acc-row">
+            <div class="acc-field">
+              <dt>이메일</dt>
+              <dd class="val">
+                <span data-bind="email">seoyeon@gmail.com</span>
+                <span class="chip g">Google 로그인</span>
+              </dd>
+            </div>
+            <button class="acc-edit" type="button" data-edit-email>수정</button>
+          </div>
+        </dl>
+        <div class="acc-foot">
+          <button class="link-danger" type="button" data-view-link="withdraw">회원탈퇴</button>
+        </div>
+      </section>
+
+      <!-- ② 내 리뷰 -->
+      <section class="view" data-view="reviews" aria-labelledby="t-reviews">
+        <h2 class="view-title sr-only" id="t-reviews" tabindex="-1">내 리뷰</h2>
+
+        <div class="rv-toolbar">
+          <div class="dropdown" id="regionDd">
+            <button class="dd-btn" id="regionBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="regionMenu">
+              <span id="regionLabel">지역</span>
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M215.39,92.94A8,8,0,0,0,208,88H48a8,8,0,0,0-5.66,13.66l80,80a8,8,0,0,0,11.32,0l80-80A8,8,0,0,0,215.39,92.94Z"/></svg>
+            </button>
+            <div class="popover dd-menu" id="regionMenu" role="menu"></div>
+          </div>
+        </div>
+
+        <div class="rv-list" id="rvList"></div>
+        <div class="empty-box" id="rvEmptyAll" hidden>
+          <b>아직 작성한 리뷰가 없어요</b>
+          <span>다녀온 여행지에 리뷰를 남기면 이곳에 모여요.</span>
+        </div>
+        <div class="empty-box" id="rvEmptyFilter" hidden>
+          <b>해당 지역의 리뷰가 없어요</b>
+          <span>다른 지역을 선택해 보세요.</span>
+        </div>
+      </section>
+
+      <!-- ③ 고객센터 -->
+      <section class="view" data-view="support" aria-labelledby="t-support">
+        <h2 class="view-title sr-only" id="t-support" tabindex="-1">고객센터</h2>
+
+        <div class="group">
+          <p class="group-label">자주 묻는 질문</p>
+          <div class="card">
+            <details class="faq">
+              <summary>
+                <span class="q">향 취향 결과는 어떻게 나오나요?</span>
+                <span class="pl" aria-hidden="true">
+                  <svg class="ic-plus" viewBox="0 0 256 256" fill="currentColor"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg>
+                  <svg class="ic-x" viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>
+                </span>
+              </summary>
+              <div class="a">향 취향 검사 응답을 바탕으로 16가지 유형 중 하나로 분석됩니다. 결과는 계정 설정의 프로필 카드에서 확인할 수 있습니다.</div>
+            </details>
+            <details class="faq">
+              <summary>
+                <span class="q">이메일 주소를 바꾸고 싶어요.</span>
+                <span class="pl" aria-hidden="true">
+                  <svg class="ic-plus" viewBox="0 0 256 256" fill="currentColor"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg>
+                  <svg class="ic-x" viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>
+                </span>
+              </summary>
+              <div class="a">계정 설정 &gt; 이메일의 [수정] 버튼에서 변경할 수 있어요. Google 계정으로 로그인한 경우 연동된 주소가 표시됩니다.</div>
+            </details>
+            <details class="faq">
+              <summary>
+                <span class="q">회원탈퇴하면 Google 계정도 삭제되나요?</span>
+                <span class="pl" aria-hidden="true">
+                  <svg class="ic-plus" viewBox="0 0 256 256" fill="currentColor"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg>
+                  <svg class="ic-x" viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>
+                </span>
+              </summary>
+              <div class="a">아니요. Scentrip 계정과 서비스 이용 데이터만 삭제되며, Google 계정 자체에는 영향을 주지 않습니다.</div>
+            </details>
+          </div>
+        </div>
+
+        <div class="group">
+          <p class="group-label">문의하기</p>
+          <div class="card inquiry">
+            <p>자주 묻는 질문에서 해결되지 않는 내용은 문의를 남겨 주세요. 답변은 가입하신 이메일로 안내드립니다.</p>
+            <button class="btn btn-primary" type="button" id="inquiryBtn">문의하기</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ④ 리뷰 수정 (서브페이지) -->
+      <section class="view" data-view="review-edit" aria-labelledby="t-reviewedit">
+        <h2 class="view-title" id="t-reviewedit" tabindex="-1">리뷰 수정</h2>
+        <form class="card re-card" id="reviewForm" novalidate>
+          <div class="re-head">
+            <p class="re-place" id="rePlace">성수동 스페셜 카페</p>
+            <p class="re-loc" id="reLoc">서울 성동구 · 카페</p>
+          </div>
+
+          <fieldset class="star-input" id="reStars">
+            <legend>별점</legend>
+          </fieldset>
+          <p class="err-msg" id="reStarErr">
+            <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-8,56a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm8,104a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z"/></svg>
+            별점을 선택해 주세요.
+          </p>
+
+          <div class="re-field">
+            <label class="re-label" for="reDate">방문 날짜</label>
+            <input class="input re-date" type="date" id="reDate" max="2026-12-31">
+          </div>
+
+          <div class="re-field">
+            <label class="re-label" for="reText">리뷰 내용</label>
+            <textarea class="textarea" id="reText" maxlength="300" placeholder="이 장소의 향과 분위기를 기록해 주세요."></textarea>
+            <p class="err-msg" id="reTextErr">
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-8,56a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm8,104a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z"/></svg>
+              리뷰 내용을 입력해 주세요.
+            </p>
+            <p class="counter"><span id="reTextCount">0</span>/300</p>
+          </div>
+
+          <div class="re-field">
+            <span class="re-label">사진 <span class="re-optional">최대 5장</span></span>
+            <div class="photo-grid" id="rePhotos"></div>
+            <input type="file" id="rePhotoInput" accept="image/jpeg,image/png" multiple hidden>
+          </div>
+
+          <div class="re-actions">
+            <button class="btn btn-ghost" type="button" id="reCancel">취소</button>
+            <button class="btn btn-primary" type="submit">저장하기</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ⑤ 회원탈퇴 (서브페이지) -->
+      <section class="view" data-view="withdraw" aria-labelledby="t-withdraw">
+        <div class="view-head">
+          <h2 class="view-title" id="t-withdraw" tabindex="-1">회원탈퇴</h2>
+          <p>탈퇴하면 Scentrip 계정과 아래 서비스 이용 데이터가 삭제되며 복구할 수 없습니다.</p>
+        </div>
+
+        <div class="group">
+          <p class="group-label">삭제되는 정보</p>
+          <ul class="card del-list">
+            <li>회원 프로필과 닉네임</li>
+            <li>이메일 및 Google 연동 정보</li>
+            <li>향 취향 검사 응답과 결과</li>
+            <li>저장한 여행지와 추천 기록</li>
+          </ul>
+        </div>
+
+        <div class="group">
+          <p class="group-label">탈퇴 사유 (선택)</p>
+          <div class="radio-list" role="radiogroup" aria-label="탈퇴 사유">
+            <label class="radio"><input type="radio" name="why" value="unused">더 이상 사용하지 않아서</label>
+            <label class="radio"><input type="radio" name="why" value="reco">추천 결과가 마음에 들지 않아서</label>
+            <label class="radio"><input type="radio" name="why" value="privacy">개인정보가 걱정돼서</label>
+            <label class="radio"><input type="radio" name="why" value="etc">기타</label>
+          </div>
+        </div>
+
+        <div class="wd-actions">
+          <button class="btn btn-dark" type="button" id="wdBtn">탈퇴하기</button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ======================= 게스트 게이트 (비로그인) ======================= -->
+  <section class="guest-gate" aria-labelledby="gateTitle">
+    <div class="gate-card">
+      <span class="gate-icon" aria-hidden="true">
+        <svg viewBox="0 0 256 256" fill="currentColor"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96Zm40,110.62V184a8,8,0,0,1-16,0V166.62a24,24,0,1,1,16,0Z"/></svg>
+      </span>
+      <h1 id="gateTitle">로그인이 필요해요</h1>
+      <p>마이페이지는 로그인 후 이용할 수 있어요.<br>향 취향 결과와 내가 남긴 리뷰를 확인해 보세요.</p>
+      <button class="btn btn-primary" type="button" data-login>로그인</button>
+    </div>
+  </section>
+
+  <!-- ======================= Footer ======================= -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-brand-col">
+          <span class="footer-brand">
+            <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="brand-name">Scentrip</span>
+          </span>
+          <p class="footer-desc">나만의 취향을 찾아 떠나는 특별한 여행,<br>센트립이 당신의 여정을 함께합니다.</p>
+        </div>
+        <nav class="footer-nav">
+          <a href="about.html">센트립 소개</a>
+          <a href="#">공지사항</a>
+          <a href="#">FAQ</a>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <span class="footer-copy">email · contact</span>
+        <div class="footer-legal">
+          <a href="#" class="lgl-muted">이용약관</a>
+          <a href="#" class="lgl-strong">개인정보처리방침</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ======================= 모달 ======================= -->
+<!-- 리뷰 삭제 -->
+<div class="modal-bg" id="delModal" data-modal role="dialog" aria-modal="true" aria-labelledby="delTitle">
+  <div class="modal">
+    <h2 id="delTitle">리뷰를 삭제할까요?</h2>
+    <p>삭제한 리뷰는 복구할 수 없습니다. 정말 삭제하시겠어요?</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" type="button" data-close-modal>취소</button>
+      <button class="btn btn-danger" type="button" id="delConfirm">삭제</button>
+    </div>
+  </div>
+</div>
+
+<!-- 이름 수정 -->
+<div class="modal-bg" id="nameModal" data-modal role="dialog" aria-modal="true" aria-labelledby="nameTitle">
+  <div class="modal">
+    <h2 id="nameTitle">이름 수정</h2>
+    <div class="field">
+      <label for="nameInput">이름</label>
+      <input class="input" id="nameInput" type="text" maxlength="20" data-autofocus>
+      <p class="hint">2자 이상 12자 이하, 한글·영문·숫자를 사용할 수 있어요.</p>
+      <p class="err-msg" id="nameErr">
+        <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-8,56a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm8,104a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z"/></svg>
+        <span id="nameErrText">이름을 확인해 주세요.</span>
+      </p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" type="button" data-close-modal>취소</button>
+      <button class="btn btn-primary" type="button" id="nameSave">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 이메일 수정 -->
+<div class="modal-bg" id="emailModal" data-modal role="dialog" aria-modal="true" aria-labelledby="emailTitle">
+  <div class="modal">
+    <h2 id="emailTitle">이메일 수정</h2>
+    <div class="field">
+      <label for="emailInput">이메일</label>
+      <input class="input" id="emailInput" type="email" autocomplete="email" data-autofocus>
+      <p class="hint">답변·알림이 이 주소로 발송됩니다.</p>
+      <p class="err-msg" id="emailErr">
+        <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-8,56a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm8,104a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z"/></svg>
+        <span id="emailErrText">올바른 이메일 주소를 입력해 주세요.</span>
+      </p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" type="button" data-close-modal>취소</button>
+      <button class="btn btn-primary" type="button" id="emailSave">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= Toast ======================= -->
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+/* ============================================================
+   0. 데이터 (프로토타입: 브라우저 메모리)
+   ============================================================ */
+const PERSON_SVG = '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg>';
+const STAR_PATH = 'M234.29,114.85l-45,38.83L203,211.75a16.4,16.4,0,0,1-24.5,17.82L128,198.49,77.47,229.57A16.4,16.4,0,0,1,53,211.75l13.76-58.07-45-38.83A16.46,16.46,0,0,1,31.08,86l59-4.76,22.76-55.08a16.36,16.36,0,0,1,30.27,0l22.75,55.08,59,4.76a16.46,16.46,0,0,1,9.37,28.86Z';
+const PENCIL_PATH = 'M227.32,73.37,182.63,28.69a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.32,96A16,16,0,0,0,227.32,73.37ZM51.31,208l-.06-44.06,88-88,44.11,44.05-88,88Zm137.37-137.37L160,42.06l-25.94,25.94,25.94,25.94Z';
+const TRASH_PATH = 'M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM112,168a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0ZM160,48H96V40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8Z';
+const KEBAB_PATH = 'M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128ZM128,72a12,12,0,1,0-12-12A12,12,0,0,0,128,72Zm0,112a12,12,0,1,0,12,12A12,12,0,0,0,128,184Z';
+const CHECK_PATH = 'M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z';
+const X_PATH = 'M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z';
+const IMAGE_PATH = 'M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,16V158.75l-26.07-26.06a16,16,0,0,0-22.63,0l-20,20-44-44a16,16,0,0,0-22.62,0L40,149.37V56ZM40,172l52-52,80,80H40Zm176,28H194.63l-36-36,20-20L216,181.38V200ZM144,100a12,12,0,1,1,12,12A12,12,0,0,1,144,100Z';
+const MAX_PHOTOS = 5;
+
+const state = {
+  user: {
+    nickname: '이서연',
+    email: 'seoyeon@gmail.com',
+    tasteCode: 'WHAN',
+    tasteAlias: '시간을 수집하는 감성가'
+  },
+  reviews: [
+    { id:'r1', place:'성수동 스페셜 카페', region:'서울', loc:'서울 성동구 · 카페', visitDate:'26.08.20', rating:4,
+      text:'조용하고 따뜻한 분위기가 좋았어요. 우디한 향이 은은하게 퍼져서 오래 머물고 싶은 공간이었습니다.',
+      photos:['../assets/route/big.jpg','../assets/route/g3.jpg','../assets/route/g1.jpg'], date:'2026.08.01' },
+    { id:'r2', place:'제주 사려니 숲길', region:'제주', loc:'제주 제주시 · 숲', visitDate:'26.02.20', rating:5,
+      text:'숲 향과 흙 냄새가 가득해서 걷는 내내 편안했어요. 사람이 적은 이른 아침을 추천합니다.',
+      photos:['../assets/route/g3.jpg'], date:'2026.08.01' },
+    { id:'r3', place:'거제 바람의 언덕', region:'경남', loc:'경남 거제시 · 지역명소', visitDate:'25.08.20', rating:4,
+      text:'바다 향이 은은하게 불어오는 곳. 해질 무렵 빛이 정말 예뻤습니다.', photos:[], date:'2026.08.01' }
+  ],
+  ui: { view:'account', region:'all', editingId:null, pendingDeleteId:null, editPhotos:[] }
+};
+const VIEWS = ['account','reviews','support','review-edit','withdraw'];
+const SOLO_VIEWS = ['review-edit','withdraw'];
+
+/* ============================================================
+   1. 유틸
+   ============================================================ */
+const $  = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+const charLen = (s) => Array.from(s).length;
+
+function svgIcon(pathD, cls){
+  const s = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  s.setAttribute('viewBox','0 0 256 256'); s.setAttribute('fill','currentColor'); s.setAttribute('aria-hidden','true');
+  const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('d', pathD); s.appendChild(p);
+  if (cls) s.setAttribute('class', cls);
+  return s;
+}
+function starsNode(rating){
+  const wrap = document.createElement('span');
+  wrap.className = 'stars';
+  wrap.setAttribute('role','img');
+  wrap.setAttribute('aria-label', `5점 만점에 ${rating}점`);
+  for (let i=1;i<=5;i++) wrap.appendChild(svgIcon(STAR_PATH, i<=rating ? 'on' : 'off'));
+  return wrap;
+}
+
+let toastTimer;
+function toast(msg, kind){
+  const t = $('#toast');
+  $('#toastMsg').textContent = msg;
+  t.classList.toggle('err', kind === 'error');
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+/* 아바타(기본 사람 실루엣) 주입 */
+$$('.av .av-svg').forEach(el => { el.innerHTML = PERSON_SVG; });
+
+/* ============================================================
+   2. 모달 (포커스 트랩 · ESC · 포커스 복귀)
+   ============================================================ */
+let openModalEl = null, lastFocused = null;
+const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]):not([tabindex="-1"]),select,textarea,[tabindex]:not([tabindex="-1"])';
+
+function openModal(id){
+  const bg = document.getElementById(id);
+  if (!bg) return;
+  lastFocused = document.activeElement;
+  closePopovers();
+  bg.classList.add('show');
+  openModalEl = bg;
+  $('.page').setAttribute('aria-hidden','true');
+  const target = bg.querySelector('[data-autofocus]') || bg.querySelector(FOCUSABLE);
+  if (target) target.focus();
+}
+function closeModal(){
+  if (!openModalEl) return;
+  openModalEl.classList.remove('show');
+  openModalEl = null;
+  $('.page').removeAttribute('aria-hidden');
+  if (lastFocused && document.contains(lastFocused)) lastFocused.focus();
+  lastFocused = null;
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape'){
+    if (openModalEl){ e.preventDefault(); closeModal(); return; }
+    closePopovers(); return;
+  }
+  if (e.key === 'Tab' && openModalEl){
+    const items = $$(FOCUSABLE, openModalEl).filter(el => el.offsetParent !== null);
+    if (!items.length) return;
+    const first = items[0], last = items[items.length-1];
+    if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  }
+});
+$$('[data-modal]').forEach(bg => bg.addEventListener('mousedown', (e) => { if (e.target === bg) closeModal(); }));
+document.addEventListener('click', (e) => { if (e.target.closest('[data-close-modal]')) closeModal(); });
+
+/* ============================================================
+   3. 팝오버 (프로필 / 지역 필터 / 리뷰 케밥)
+   ============================================================ */
+const profilePill = $('#profilePill'), profilePop = $('#profilePop');
+const regionBtn = $('#regionBtn'), regionMenu = $('#regionMenu');
+
+function closePopovers(){
+  profilePop.classList.remove('is-open'); profilePill.setAttribute('aria-expanded','false');
+  regionMenu.classList.remove('is-open'); regionBtn.setAttribute('aria-expanded','false');
+  $$('.kebab-menu.is-open').forEach(m => {
+    m.classList.remove('is-open');
+    const b = m.previousElementSibling; if (b) b.setAttribute('aria-expanded','false');
+  });
+}
+function togglePop(btn, pop){
+  const open = !pop.classList.contains('is-open');
+  closePopovers();
+  pop.classList.toggle('is-open', open);
+  btn.setAttribute('aria-expanded', String(open));
+}
+profilePill.addEventListener('click', (e) => { e.stopPropagation(); togglePop(profilePill, profilePop); });
+regionBtn.addEventListener('click', (e) => { e.stopPropagation(); togglePop(regionBtn, regionMenu); });
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.profile') && !e.target.closest('.dropdown') && !e.target.closest('.kebab-wrap')) closePopovers();
+});
+
+/* ============================================================
+   4. 정체성 렌더 (이름/이메일/취향)
+   ============================================================ */
+function renderIdentity(){
+  const u = state.user;
+  $$('[data-bind="nickname"]').forEach(el => el.textContent = u.nickname);
+  $$('[data-bind="email"]').forEach(el => el.textContent = u.email);
+  $$('[data-bind="taste"]').forEach(el => el.textContent = `${u.tasteCode} · ${u.tasteAlias}`);
+  profilePill.setAttribute('aria-label', `${u.nickname} 계정 메뉴`);
+}
+
+/* 이름 수정 */
+$('[data-edit-name]').addEventListener('click', () => {
+  $('#nameInput').value = state.user.nickname;
+  $('#nameErr').classList.remove('show'); $('#nameInput').setAttribute('aria-invalid','false');
+  openModal('nameModal');
+});
+const NICK_RE = /^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+( [가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+)*$/;
+$('#nameSave').addEventListener('click', () => {
+  const v = $('#nameInput').value.trim().replace(/\s+/g,' ');
+  const len = charLen(v);
+  let msg = '';
+  if (len < 2 || len > 12) msg = '이름은 2자 이상 12자 이하로 입력해 주세요.';
+  else if (!NICK_RE.test(v)) msg = '한글·영문·숫자와 한 칸 공백만 사용할 수 있어요.';
+  if (msg){
+    $('#nameErrText').textContent = msg;
+    $('#nameErr').classList.add('show'); $('#nameInput').setAttribute('aria-invalid','true'); $('#nameInput').focus();
+    return;
+  }
+  state.user.nickname = v;
+  renderIdentity();
+  closeModal();
+  toast('이름이 변경되었습니다');
+});
+$('#nameInput').addEventListener('input', () => { $('#nameErr').classList.remove('show'); $('#nameInput').setAttribute('aria-invalid','false'); });
+
+/* 이메일 수정 */
+$('[data-edit-email]').addEventListener('click', () => {
+  $('#emailInput').value = state.user.email;
+  $('#emailErr').classList.remove('show'); $('#emailInput').setAttribute('aria-invalid','false');
+  openModal('emailModal');
+});
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+$('#emailSave').addEventListener('click', () => {
+  const v = $('#emailInput').value.trim();
+  if (!EMAIL_RE.test(v)){
+    $('#emailErr').classList.add('show'); $('#emailInput').setAttribute('aria-invalid','true'); $('#emailInput').focus();
+    return;
+  }
+  state.user.email = v;
+  renderIdentity();
+  closeModal();
+  toast('이메일이 변경되었습니다');
+});
+$('#emailInput').addEventListener('input', () => { $('#emailErr').classList.remove('show'); $('#emailInput').setAttribute('aria-invalid','false'); });
+
+/* ============================================================
+   5. 지역 필터
+   ============================================================ */
+function regionOptions(){
+  const set = ['all', ...new Set(state.reviews.map(r => r.region))];
+  return set;
+}
+function renderRegionMenu(){
+  regionMenu.replaceChildren();
+  regionOptions().forEach(reg => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'dd-item'; b.setAttribute('role','menuitemradio');
+    b.dataset.region = reg;
+    const selected = state.ui.region === reg;
+    b.setAttribute('aria-selected', String(selected));
+    b.setAttribute('aria-checked', String(selected));
+    const label = document.createElement('span'); label.textContent = reg === 'all' ? '전체' : reg;
+    const ck = svgIcon(CHECK_PATH, 'ck');
+    b.append(label, ck);
+    regionMenu.appendChild(b);
+  });
+}
+regionMenu.addEventListener('click', (e) => {
+  const item = e.target.closest('[data-region]');
+  if (!item) return;
+  state.ui.region = item.dataset.region;
+  $('#regionLabel').textContent = state.ui.region === 'all' ? '지역' : state.ui.region;
+  closePopovers();
+  renderRegionMenu();
+  renderReviews();
+});
+
+/* ============================================================
+   6. 리뷰 렌더
+   ============================================================ */
+function renderReviews(){
+  const list = $('#rvList');
+  const total = state.reviews.length;
+  const filtered = state.ui.region === 'all'
+    ? state.reviews
+    : state.reviews.filter(r => r.region === state.ui.region);
+
+  list.replaceChildren();
+  filtered.forEach(r => list.appendChild(reviewCard(r)));
+
+  const noneAtAll = total === 0;
+  const noneInFilter = !noneAtAll && filtered.length === 0;
+  list.hidden = filtered.length === 0;
+  $('#rvEmptyAll').hidden = !noneAtAll;
+  $('#rvEmptyFilter').hidden = !noneInFilter;
+  $('#regionDd').hidden = noneAtAll;
+}
+
+function reviewCard(r){
+  const art = document.createElement('article');
+  art.className = 'rv';
+
+  const top = document.createElement('div'); top.className = 'rv-top';
+  const heads = document.createElement('div'); heads.className = 'rv-heads';
+  const h3 = document.createElement('h3'); h3.className = 'rv-place'; h3.textContent = r.place;
+  const loc = document.createElement('p'); loc.className = 'rv-loc'; loc.textContent = `${r.loc} · ${r.visitDate} 방문`;
+  heads.append(h3, loc);
+
+  // 케밥 메뉴
+  const kw = document.createElement('div'); kw.className = 'kebab-wrap';
+  const kbtn = document.createElement('button');
+  kbtn.type = 'button'; kbtn.className = 'icon-btn';
+  kbtn.setAttribute('aria-haspopup','true'); kbtn.setAttribute('aria-expanded','false');
+  kbtn.setAttribute('aria-label', `${r.place} 리뷰 관리`);
+  kbtn.appendChild(svgIcon(KEBAB_PATH));
+  const menu = document.createElement('div'); menu.className = 'popover kebab-menu'; menu.setAttribute('role','menu');
+
+  const editItem = document.createElement('button');
+  editItem.type = 'button'; editItem.className = 'kebab-item'; editItem.setAttribute('role','menuitem');
+  editItem.dataset.editId = r.id;
+  editItem.append(svgIcon(PENCIL_PATH), document.createTextNode('리뷰 수정'));
+
+  const delItem = document.createElement('button');
+  delItem.type = 'button'; delItem.className = 'kebab-item danger'; delItem.setAttribute('role','menuitem');
+  delItem.dataset.delId = r.id;
+  delItem.append(svgIcon(TRASH_PATH), document.createTextNode('리뷰 삭제'));
+
+  menu.append(editItem, delItem);
+  kbtn.addEventListener('click', (e) => { e.stopPropagation(); togglePop(kbtn, menu); });
+  kw.append(kbtn, menu);
+  top.append(heads, kw);
+
+  const metaRow = document.createElement('div'); metaRow.className = 'rv-meta-row';
+  metaRow.appendChild(starsNode(r.rating));
+
+  const text = document.createElement('p'); text.className = 'rv-text'; text.textContent = r.text;
+  const date = document.createElement('p'); date.className = 'rv-date'; date.textContent = r.date;
+
+  art.append(top, metaRow, text);
+  if (r.photos && r.photos.length){
+    const ph = document.createElement('div'); ph.className = 'rv-photos';
+    r.photos.forEach((src, i) => { const im = document.createElement('img'); im.src = src; im.alt = `리뷰 사진 ${i+1}`; ph.appendChild(im); });
+    art.appendChild(ph);
+  }
+  art.appendChild(date);
+  return art;
+}
+
+$('#rvList').addEventListener('click', (e) => {
+  const del = e.target.closest('[data-del-id]');
+  if (del){ state.ui.pendingDeleteId = del.dataset.delId; closePopovers(); openModal('delModal'); return; }
+  const edit = e.target.closest('[data-edit-id]');
+  if (edit){ closePopovers(); startReviewEdit(edit.dataset.editId); }
+});
+$('#delConfirm').addEventListener('click', () => {
+  state.reviews = state.reviews.filter(r => r.id !== state.ui.pendingDeleteId);
+  state.ui.pendingDeleteId = null;
+  closeModal();
+  renderRegionMenu();
+  renderReviews();
+  toast('리뷰가 삭제되었습니다');
+});
+
+/* ============================================================
+   7. 리뷰 수정
+   ============================================================ */
+function buildStarInput(){
+  const fs = $('#reStars');
+  fs.querySelectorAll('.star-opt').forEach(n => n.remove());
+  for (let i=1;i<=5;i++){
+    const label = document.createElement('label'); label.className = 'star-opt';
+    const input = document.createElement('input');
+    input.type = 'radio'; input.name = 'reRating'; input.value = String(i); input.id = 'star'+i;
+    const sr = document.createElement('span'); sr.className = 'sr-only'; sr.textContent = `${i}점`;
+    const icon = document.createElement('span'); icon.appendChild(svgIcon(STAR_PATH));
+    label.append(input, sr, icon);
+    fs.appendChild(label);
+  }
+  fs.addEventListener('change', paintStarInput);
+}
+function paintStarInput(){
+  const v = Number(($('input[name="reRating"]:checked') || {}).value || 0);
+  $$('#reStars .star-opt').forEach((opt, idx) => opt.classList.toggle('on', idx < v));
+  if (v > 0) $('#reStarErr').classList.remove('show');
+}
+/* 방문 날짜 · 사진 첨부 */
+const dotToDash = (d) => d ? d.replace(/\./g, '-') : '';
+const dashToDot = (d) => d ? d.replace(/-/g, '.') : '';
+const rePhotoInput = $('#rePhotoInput'), rePhotosEl = $('#rePhotos');
+function renderPhotos(){
+  const list = state.ui.editPhotos;
+  rePhotosEl.replaceChildren();
+  list.forEach((p, idx) => {
+    const t = document.createElement('div'); t.className = 'photo-thumb';
+    const img = document.createElement('img'); img.src = p.url; img.alt = `첨부 사진 ${idx+1}`;
+    const del = document.createElement('button');
+    del.type = 'button'; del.className = 'photo-del'; del.dataset.photoDel = String(idx);
+    del.setAttribute('aria-label', `사진 ${idx+1} 삭제`);
+    del.appendChild(svgIcon(X_PATH));
+    t.append(img, del);
+    rePhotosEl.appendChild(t);
+  });
+  if (list.length < MAX_PHOTOS){
+    const add = document.createElement('button');
+    add.type = 'button'; add.className = 'photo-add'; add.id = 'photoAdd';
+    add.setAttribute('aria-label', '사진 추가');
+    add.appendChild(svgIcon(IMAGE_PATH));
+    const sp = document.createElement('span'); sp.textContent = `추가 ${list.length}/${MAX_PHOTOS}`;
+    add.appendChild(sp);
+    rePhotosEl.appendChild(add);
+  }
+}
+rePhotosEl.addEventListener('click', (e) => {
+  const del = e.target.closest('[data-photo-del]');
+  if (del){ state.ui.editPhotos.splice(Number(del.dataset.photoDel), 1); renderPhotos(); return; }
+  if (e.target.closest('#photoAdd')) rePhotoInput.click();
+});
+rePhotoInput.addEventListener('change', (e) => {
+  const files = Array.from(e.target.files || []);
+  let added = 0, badType = false;
+  for (const f of files){
+    if (state.ui.editPhotos.length >= MAX_PHOTOS) break;
+    if (!['image/jpeg','image/png'].includes(f.type)){ badType = true; continue; }
+    state.ui.editPhotos.push({ url: URL.createObjectURL(f) });
+    added++;
+  }
+  renderPhotos();
+  if (added < files.length){
+    if (state.ui.editPhotos.length >= MAX_PHOTOS) toast(`사진은 최대 ${MAX_PHOTOS}장까지 올릴 수 있어요`, 'error');
+    else if (badType) toast('JPG 또는 PNG 이미지만 올릴 수 있어요', 'error');
+  }
+  e.target.value = '';
+});
+
+function startReviewEdit(id){
+  const r = state.reviews.find(x => x.id === id);
+  if (!r) return;
+  state.ui.editingId = id;
+  $('#rePlace').textContent = r.place;
+  $('#reLoc').textContent = r.loc;
+  const radio = $(`#reStars input[value="${r.rating}"]`);
+  if (radio) radio.checked = true;
+  paintStarInput();
+  $('#reText').value = r.text;
+  $('#reTextCount').textContent = String(charLen(r.text));
+  $('#reText').setAttribute('aria-invalid','false'); $('#reTextErr').classList.remove('show');
+  $('#reStarErr').classList.remove('show');
+  $('#reDate').value = dotToDash(r.date);
+  state.ui.editPhotos = r.photos ? r.photos.map(p => ({ ...p })) : [];
+  renderPhotos();
+  navigate('review-edit');
+}
+$('#reText').addEventListener('input', (e) => {
+  $('#reTextCount').textContent = String(charLen(e.target.value));
+  if (e.target.value.trim()){ e.target.setAttribute('aria-invalid','false'); $('#reTextErr').classList.remove('show'); }
+});
+$('#reCancel').addEventListener('click', () => navigate('reviews'));
+$('#reviewForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const r = state.reviews.find(x => x.id === state.ui.editingId);
+  if (!r){ navigate('reviews'); return; }
+  const rating = Number(($('input[name="reRating"]:checked') || {}).value || 0);
+  const text = $('#reText').value.trim();
+  let firstBad = null;
+
+  const badStar = rating < 1;
+  $('#reStarErr').classList.toggle('show', badStar);
+  if (badStar) firstBad = $('#reStars input');
+
+  const badText = text.length === 0;
+  $('#reText').setAttribute('aria-invalid', badText ? 'true' : 'false');
+  $('#reTextErr').classList.toggle('show', badText);
+  if (badText && !firstBad) firstBad = $('#reText');
+
+  if (firstBad){ firstBad.focus(); return; }
+
+  r.rating = rating; r.text = text;
+  if ($('#reDate').value) r.date = dashToDot($('#reDate').value);
+  r.photos = state.ui.editPhotos.map(p => ({ ...p }));
+  state.ui.editingId = null;
+  renderReviews();
+  navigate('reviews');
+  toast('리뷰가 수정되었습니다');
+});
+
+/* ============================================================
+   8. 로그아웃 / 문의 / 회원탈퇴
+   ============================================================ */
+/* 로그아웃은 공용 스크립트(data-logout)가 처리 — auth 플래그 해제 후 홈으로 */
+$('#inquiryBtn').addEventListener('click', () => toast('문의가 접수되었습니다. 가입하신 이메일로 안내드릴게요.'));
+$('#wdBtn').addEventListener('click', () => {
+  try { localStorage.setItem('scentrip_auth','out'); } catch(x) {}
+  location.href = 'home.html';
+});
+
+/* ============================================================
+   9. 화면 전환 (해시 라우팅)
+   ============================================================ */
+function navigate(view, opts){
+  if (!VIEWS.includes(view)) view = 'account';
+  state.ui.view = view;
+
+  $$('.view').forEach(v => v.classList.toggle('is-active', v.dataset.view === view));
+  $('#app').classList.toggle('is-solo', SOLO_VIEWS.includes(view));
+
+  $$('.side-link').forEach(l => {
+    const active = l.dataset.viewLink === view
+      || (view === 'review-edit' && l.dataset.viewLink === 'reviews')
+      || (view === 'withdraw' && l.dataset.viewLink === 'account');
+    if (active) l.setAttribute('aria-current','page'); else l.removeAttribute('aria-current');
+  });
+
+  if (location.hash !== '#' + view) history.pushState({ view }, '', '#' + view);
+
+  const active = $(`.view[data-view="${view}"]`);
+  const heading = active && active.querySelector('.view-title');
+  if (heading && !(opts && opts.silent)) heading.focus({ preventScroll:true });
+  const reduce = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window.scrollTo({ top:0, behavior: reduce ? 'auto' : 'smooth' });
+}
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('[data-view-link]');
+  if (!link) return;
+  e.preventDefault();
+  closePopovers();
+  navigate(link.dataset.viewLink);
+});
+window.addEventListener('popstate', () => {
+  const v = location.hash.replace('#','') || 'account';
+  navigate(VIEWS.includes(v) ? v : 'account', { silent:true });
+});
+
+/* ============================================================
+   10. 초기화
+   ============================================================ */
+buildStarInput();
+renderIdentity();
+renderRegionMenu();
+renderReviews();
+(function init(){
+  const v = location.hash.replace('#','');
+  navigate(VIEWS.includes(v) ? v : 'account', { silent:true });
+})();
+</script>
+<script>
+document.addEventListener('click',function(e){
+  var lo=e.target.closest('[data-logout]'), li=e.target.closest('[data-login]');
+  if(lo){e.preventDefault();try{localStorage.setItem('scentrip_auth','out');}catch(x){}location.href='home.html';}
+  if(li){e.preventDefault();try{localStorage.setItem('scentrip_auth','in');}catch(x){}location.reload();}
+});
+</script>
+</body>
+</html>

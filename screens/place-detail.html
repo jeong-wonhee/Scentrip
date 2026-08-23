@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scentrip — 여행 장소 상세</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="../reference/tokens.css">
+<script>(function(){try{if((localStorage.getItem("scentrip_auth")||"in")==="out")document.documentElement.classList.add("is-guest");}catch(e){}})();</script>
+<style>
+/* ============================================================
+   Scentrip — 여행 장소 상세 · Figma node 95:359 이식
+   색/라운드/타이포/스페이싱은 tokens.css var() 사용.
+   헤더/푸터는 공용 크롬(home·about과 동일).
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-family); letter-spacing: var(--letter-spacing); color: var(--color-content-default); background: var(--color-background); -webkit-font-smoothing: antialiased; word-break: keep-all; overflow-wrap: break-word; }
+img { display: block; max-width: 100%; }
+button { font-family: inherit; letter-spacing: inherit; cursor: pointer; background: none; border: 0; color: inherit; }
+a { color: inherit; }
+ul, ol { list-style: none; }
+:focus-visible { outline: 3px solid var(--color-border-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition-duration: .01ms !important; } }
+.page { display: flex; flex-direction: column; align-items: stretch; width: 100%; min-height: 100vh; }
+
+/* ---------- 브랜드 로고 ---------- */
+.brand { display: flex; align-items: center; gap: var(--space-6); height: 56px; width: 128px; text-decoration: none; }
+.brand-bars { display: flex; align-items: center; gap: var(--space-2); height: 24px; }
+.brand-bars i { display: block; width: 4px; border-radius: var(--radius-full); background: linear-gradient(180deg, #31493a, #418a8b); }
+.brand-bars i:nth-child(1) { height: 8px; } .brand-bars i:nth-child(2) { height: 18px; opacity: .7; } .brand-bars i:nth-child(3) { height: 12px; opacity: .4; }
+.brand-name { font-size: var(--text-heading-20); font-weight: 600; line-height: 1.25; background: linear-gradient(180deg, #31493a, #418a8b); -webkit-background-clip: text; background-clip: text; color: transparent; white-space: nowrap; }
+
+/* ---------- Nav ---------- */
+.nav { display: flex; align-items: center; height: 56px; padding: 0 28px; width: 100%; background: var(--color-surface-overlay); position: relative; z-index: 10; justify-content: space-between; }
+.nav-center { position: absolute; left: 50%; top: 0; transform: translateX(-50%); height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.nav-list { display: flex; align-items: center; justify-content: center; gap: var(--space-32); }
+.nav-link { display: flex; align-items: center; justify-content: center; height: 56px; font-size: var(--text-body-16); line-height: 1.5; font-weight: 500; color: var(--color-content-nav); text-decoration: none; }
+.nav-link.is-selected { font-weight: 600; color: var(--color-content-nav-selected); }
+.nav-right { display: flex; align-items: center; }
+
+/* 프로필 칩 + 팝오버 (공용 헤더 컴포넌트) */
+.profile { position: relative; }
+.type-pill { display: flex; align-items: center; gap: var(--space-8); padding: 4px 4px 4px 12px; background: var(--color-surface-01); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-full); transition: background .18s ease, border-color .18s ease; }
+.type-pill:hover, .type-pill[aria-expanded="true"] { background: var(--color-surface-02); border-color: var(--color-border-default); }
+.pill-name { font-size: 13px; font-weight: 600; line-height: 1.5; color: var(--color-content-muted); white-space: nowrap; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+.av { border-radius: var(--radius-full); background: var(--color-surface-04); color: var(--color-content-on-fill); display: flex; align-items: center; justify-content: center; flex: none; overflow: hidden; }
+.av .av-svg { display: flex; width: 58%; height: 58%; }
+.av .av-svg svg { width: 100%; height: 100%; }
+.av-28 { width: 28px; height: 28px; } .av-36 { width: 36px; height: 36px; } .av-48 { width: 48px; height: 48px; }
+.popover { position: absolute; top: calc(100% + 10px); right: 0; background: var(--color-surface-overlay); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); box-shadow: var(--elevation-lg); z-index: 300; opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity .18s ease, transform .18s ease, visibility .18s; }
+.popover.is-open { opacity: 1; visibility: visible; transform: none; }
+.profile-pop { width: 288px; padding: var(--space-8); }
+.pop-profile { display: flex; gap: var(--space-12); align-items: center; padding: var(--space-12); border-radius: var(--radius-md); width: 100%; text-align: left; text-decoration: none; }
+.pop-id { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.pop-name { font-size: var(--text-body-16); font-weight: 600; line-height: 1.3; color: var(--color-content-default); }
+.pop-taste { font-size: var(--text-body-14); font-weight: 500; line-height: 1.3; color: var(--color-content-subtle); }
+.pop-divider { height: 1px; background: var(--color-border-subtle); margin: var(--space-6) var(--space-8); }
+.pop-menu { display: flex; flex-direction: column; }
+.pop-item { display: flex; align-items: center; gap: var(--space-10); padding: var(--space-12); border-radius: var(--radius-md); font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-default); text-decoration: none; width: 100%; text-align: left; background: none; border: 0; }
+.pop-item:hover { background: var(--color-neutral-subtle); }
+.pop-item svg { width: 18px; height: 18px; color: var(--color-content-neutral-muted); flex: none; }
+html .guest-only { display: none; }
+.is-guest .auth-only { display: none; }
+.btn-login { display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 var(--space-20); border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-content-on-fill); font-size: var(--text-body-14); font-weight: 600; text-decoration: none; border: 0; transition: background .16s ease; }
+.btn-login:hover { background: var(--color-primary-hover); }
+
+/* ============================================================
+   Place Detail
+   ============================================================ */
+.pd { flex: 1 0 auto; width: 100%; }
+.pd-hero { width: 100%; height: 480px; background: var(--color-surface-02); overflow: hidden; }
+.pd-hero img { width: 100%; height: 100%; object-fit: cover; }
+.pd-body { max-width: 1080px; margin: 0 auto; padding: 56px 60px 96px; }
+.pd-sec { margin-top: 56px; }
+.pd-h2 { font-size: var(--text-heading-24); font-weight: 600; color: var(--color-content-neutral); line-height: 1.3; }
+
+/* 헤더(제목/설명/배지) */
+.pd-title-row { display: flex; align-items: flex-start; gap: var(--space-16); }
+.pd-title { flex: 1 1 auto; min-width: 0; font-size: var(--text-title-32); font-weight: 700; line-height: 1.25; color: var(--scent-green-950); }
+.pd-actions { display: flex; gap: var(--space-8); flex: none; }
+.icon-btn-o { width: 44px; height: 44px; border-radius: var(--radius-full); border: 1px solid var(--color-border-strong); background: var(--color-surface-overlay); display: inline-flex; align-items: center; justify-content: center; color: var(--color-content-muted); transition: background .14s ease, border-color .14s ease, color .14s ease; }
+.icon-btn-o:hover { background: var(--color-surface-01); border-color: var(--color-primary); color: var(--color-primary); }
+.icon-btn-o svg { width: 20px; height: 20px; }
+.icon-btn-o[aria-pressed="true"] { color: var(--color-error); border-color: var(--color-error-border); }
+.pd-desc { margin-top: var(--space-12); font-size: var(--text-body-16); color: var(--color-content-neutral-muted); }
+.pd-badges { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-8); margin-top: var(--space-20); }
+.ai-badge { display: inline-flex; align-items: center; gap: var(--space-6); height: 40px; padding: 0 var(--space-16); border-radius: var(--radius-full); background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface-overlay)); border: 1px solid color-mix(in srgb, var(--color-primary) 24%, transparent); font-size: var(--text-body-14); font-weight: 600; color: var(--color-primary); }
+.ai-badge svg { width: 16px; height: 16px; }
+.scent-chip { display: inline-flex; align-items: center; height: 40px; padding: 0 var(--space-16); border-radius: var(--radius-full); border: 1px solid var(--color-border-default); background: var(--color-surface-overlay); font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-subtle); }
+
+/* 장소 소개 + 정보 */
+.pd-p { margin-top: var(--space-16); font-size: var(--text-body-16); color: var(--color-content-neutral-muted); line-height: 1.8; }
+.pd-info { margin-top: var(--space-20); background: var(--color-surface-01); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); padding: var(--space-24); display: flex; flex-direction: column; gap: var(--space-12); }
+.pd-info-row { display: flex; align-items: center; gap: var(--space-12); font-size: var(--text-body-16); color: var(--color-content-neutral); }
+.pd-info-row svg { width: 20px; height: 20px; color: var(--color-content-neutral-muted); flex: none; }
+
+/* 갤러리 */
+.pd-gallery { margin-top: var(--space-20); display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-16); }
+.pd-gallery img { width: 100%; height: 240px; object-fit: cover; border-radius: var(--radius-lg); background: var(--color-surface-02); }
+
+/* 지도 */
+.pd-map { margin-top: var(--space-20); height: 320px; border-radius: var(--radius-xl); background: color-mix(in srgb, var(--scent-green-100) 55%, var(--color-background)); border: 1px solid var(--color-border-subtle); display: flex; align-items: center; justify-content: center; }
+.pd-map-btn { display: flex; flex-direction: column; align-items: center; gap: var(--space-8); color: var(--color-primary); font-size: var(--text-body-14); font-weight: 600; }
+.pd-map-btn .pin { width: 44px; height: 44px; border-radius: var(--radius-full); background: var(--color-surface-overlay); box-shadow: var(--elevation-md); display: flex; align-items: center; justify-content: center; }
+.pd-map-btn .pin svg { width: 22px; height: 22px; }
+
+/* 리뷰 */
+.pd-rv-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-16); }
+.pd-rv-head .cnt { font-size: var(--text-heading-24); font-weight: 600; color: var(--color-content-neutral); }
+.pd-rv-head .cnt em { font-style: normal; color: var(--color-primary); margin-left: var(--space-6); }
+.pd-rv-write { font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-muted); text-decoration: none; }
+.pd-rv-write:hover { color: var(--color-primary); }
+.pd-rv-list { margin-top: var(--space-20); display: flex; flex-direction: column; gap: var(--space-16); }
+.pd-rv { position: relative; padding: var(--space-24); background: var(--color-surface-overlay); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); }
+.pd-rv-top { display: flex; align-items: flex-start; gap: var(--space-12); }
+.pd-rv-id { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.pd-rv-name { font-size: var(--text-body-16); font-weight: 600; color: var(--color-content-neutral); }
+.pd-rv-meta { font-size: 13px; color: var(--color-content-neutral-muted); }
+.pd-rv-stars { display: inline-flex; gap: 2px; margin-top: var(--space-16); }
+.pd-rv-stars svg { width: 16px; height: 16px; }
+.pd-rv-stars .on { color: var(--color-primary); } .pd-rv-stars .off { color: var(--neutral-300); }
+.pd-rv-text { margin-top: var(--space-12); font-size: var(--text-body-14); color: var(--color-content-neutral-muted); line-height: 1.7; }
+.pd-rv-photos { margin-top: var(--space-16); display: flex; gap: var(--space-6); }
+.pd-rv-photos img { width: 80px; height: 80px; object-fit: cover; border-radius: var(--radius-md); background: var(--color-surface-02); }
+.pd-rv-date { margin-top: var(--space-16); font-size: var(--text-caption-12); color: var(--color-content-neutral-subtle); }
+.kebab-wrap { position: relative; flex: none; }
+.icon-btn { width: 36px; height: 36px; border-radius: var(--radius-full); display: inline-flex; align-items: center; justify-content: center; color: var(--color-content-neutral-muted); transition: background .14s ease, color .14s ease; }
+.icon-btn:hover, .icon-btn[aria-expanded="true"] { background: var(--color-surface-01); color: var(--color-content-neutral); }
+.icon-btn svg { width: 20px; height: 20px; }
+.kebab-menu { width: 148px; padding: var(--space-6); }
+.kebab-item { display: flex; align-items: center; gap: var(--space-10); width: 100%; padding: var(--space-10) var(--space-12); border-radius: var(--radius-md); font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-neutral); text-align: left; }
+.kebab-item svg { width: 16px; height: 16px; flex: none; color: var(--color-content-neutral-muted); }
+.kebab-item:hover { background: var(--color-neutral-subtle); }
+.kebab-item.danger { color: var(--color-content-error); } .kebab-item.danger svg { color: var(--color-error); }
+.kebab-item.danger:hover { background: var(--color-error-subtle); }
+.pd-rv-more { margin-top: var(--space-24); display: flex; justify-content: center; }
+.btn-outline { display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 var(--space-24); border-radius: var(--radius-full); background: var(--color-surface-overlay); border: 1px solid var(--color-border-strong); color: var(--color-content-muted); font-size: var(--text-body-14); font-weight: 600; text-decoration: none; transition: background .16s ease, border-color .16s ease, color .16s ease; }
+.btn-outline:hover { background: var(--color-surface-01); border-color: var(--color-primary); color: var(--color-primary); }
+
+.pd-divider { height: 1px; background: var(--color-border-subtle); margin: 56px 0 0; border: 0; }
+
+/* 주변 장소 추천 */
+.pd-near { margin-top: var(--space-20); display: flex; flex-direction: column; }
+.pd-near-row { display: flex; align-items: center; gap: var(--space-16); padding: var(--space-10) 0; text-decoration: none; border-radius: var(--radius-md); }
+.pd-near-row:hover .pd-near-name { color: var(--color-primary); }
+.pd-near-row img { width: 80px; height: 80px; border-radius: var(--radius-md); object-fit: cover; flex: none; background: var(--color-surface-02); }
+.pd-near-tx { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
+.pd-near-name { font-size: var(--text-body-16); font-weight: 600; color: var(--color-content-neutral); transition: color .14s ease; }
+.pd-near-meta { font-size: var(--text-body-14); color: var(--color-content-neutral-muted); }
+
+/* ---------- Footer ---------- */
+.footer { padding-top: 36px; width: 100%; margin-top: auto; }
+.footer-inner { background: var(--color-neutral-bg); padding: 48px 60px; display: flex; flex-direction: column; gap: var(--space-40); overflow: hidden; width: 100%; }
+.footer-top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-24); width: 100%; }
+.footer-brand-col { display: flex; flex-direction: column; gap: var(--space-20); width: 300px; flex: none; }
+.footer-brand { display: flex; align-items: center; gap: var(--space-6); }
+.footer-desc { font-size: 15px; font-weight: 500; line-height: 1.5; color: var(--color-content-neutral-muted); }
+.footer-nav { flex: 1 0 0; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: var(--space-12); font-size: 15px; font-weight: 500; line-height: 1.5; color: var(--color-content-neutral-muted); text-align: right; }
+.footer-nav a { color: inherit; text-decoration: none; white-space: nowrap; }
+.footer-nav a:hover { color: var(--color-content-neutral); }
+.footer-bottom { display: flex; align-items: center; justify-content: space-between; gap: var(--space-24); width: 100%; padding-top: var(--space-40); border-top: 1px solid var(--color-neutral-border); font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; white-space: nowrap; }
+.footer-copy { color: var(--color-content-neutral-subtle); }
+.footer-legal { display: flex; gap: var(--space-20); }
+.footer-legal a { text-decoration: none; white-space: nowrap; }
+.footer-legal .lgl-muted { color: var(--color-content-neutral-muted); }
+.footer-legal .lgl-strong { color: var(--color-content-neutral-muted); }
+
+/* ---------- 반응형 ---------- */
+@media (max-width: 1120px) {
+  .pd-hero { height: 360px; }
+  .pd-body { padding: 40px 32px 72px; }
+  .nav { padding: 0 20px; } .nav-list { gap: var(--space-24); }
+  .footer-inner { padding: 48px 32px; }
+  .footer-top { flex-direction: column; align-items: flex-start; gap: var(--space-20); }
+  .footer-nav { align-items: flex-start; text-align: left; }
+}
+@media (max-width: 640px) {
+  .nav-center { display: none; }
+  .pd-hero { height: 240px; }
+  .pd-body { padding: 28px 20px 56px; }
+  .pd-title { font-size: var(--text-title-28); }
+  .pd-gallery { grid-template-columns: 1fr; }
+  .pd-gallery img { height: 200px; }
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <!-- ======================= Nav ======================= -->
+  <nav class="nav" aria-label="주 메뉴">
+    <a class="brand" href="home.html" aria-label="Scentrip 홈">
+      <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="brand-name">Scentrip</span>
+    </a>
+    <div class="nav-center">
+      <div class="nav-list">
+        <a class="nav-link" href="#">소식</a>
+        <a class="nav-link is-selected" href="place-recommend.html">탐색</a>
+        <a class="nav-link" href="#">내 여행</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <a class="btn-login guest-only" href="#" data-login role="button">로그인</a>
+      <div class="profile auth-only">
+        <button class="type-pill" id="profilePill" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="profilePop">
+          <span class="pill-name">이서연</span>
+          <span class="av av-28" aria-hidden="true"><span class="av-svg"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg></span></span>
+        </button>
+        <div class="popover profile-pop" id="profilePop" role="menu">
+          <div class="pop-profile" aria-hidden="true">
+            <span class="av av-48" aria-hidden="true"><span class="av-svg"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg></span></span>
+            <span class="pop-id">
+              <span class="pop-name">이서연</span>
+              <span class="pop-taste">WHAN · 시간을 수집하는 감성가</span>
+            </span>
+          </div>
+          <div class="pop-divider"></div>
+          <div class="pop-menu">
+            <a class="pop-item" href="mypage.html#account" data-view-link="account" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg> 계정 설정</a>
+            <a class="pop-item" href="mypage.html#reviews" data-view-link="reviews" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M88,96a8,8,0,0,1,8-8h64a8,8,0,0,1,0,16H96A8,8,0,0,1,88,96Zm8,40h64a8,8,0,0,0,0-16H96a8,8,0,0,0,0,16ZM232,64V152a8,8,0,0,1-2.34,5.66l-64,64A8,8,0,0,1,160,224H56a16,16,0,0,1-16-16V64A16,16,0,0,1,56,48H216A16,16,0,0,1,232,64ZM56,208h96V160a8,8,0,0,1,8-8h48V64H56Zm120-40v28.7L204.69,168Z"/></svg> 내 리뷰</a>
+            <a class="pop-item" href="mypage.html#support" data-view-link="support" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M201.89,54.66A104.06,104.06,0,0,0,24,128v56a24,24,0,0,0,24,24H64a24,24,0,0,0,24-24V152a24,24,0,0,0-24-24H40.35A88,88,0,0,1,190.51,69.34,87.42,87.42,0,0,1,215.65,128H192a24,24,0,0,0-24,24v32a24,24,0,0,0,24,24h16a24,24,0,0,0,1.94-.08A24,24,0,0,1,186,214.31l-.06,0A24.06,24.06,0,0,1,168,232H128a8,8,0,0,0,0,16h40a40.07,40.07,0,0,0,36.35-23.32A40,40,0,0,0,232,186V128A103.41,103.41,0,0,0,201.89,54.66Z"/></svg> 고객센터</a>
+            <div class="pop-divider"></div>
+            <button class="pop-item" type="button" data-logout role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M124,216a12,12,0,0,1-12,12H48a12,12,0,0,1-12-12V40A12,12,0,0,1,48,28h64a12,12,0,0,1,0,24H60V204h52A12,12,0,0,1,124,216Zm108.49-96.49-40-40a12,12,0,0,0-17,17L195,116H112a12,12,0,0,0,0,24h83l-19.52,19.51a12,12,0,0,0,17,17l40-40A12,12,0,0,0,232.49,119.51Z"/></svg> 로그아웃</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="pd">
+    <!-- 히어로 이미지 -->
+    <div class="pd-hero"><img src="../assets/place/frame9.jpg" alt="천관산 억새 언덕 전경"></div>
+
+    <div class="pd-body">
+      <!-- 헤더 -->
+      <header class="pd-head">
+        <div class="pd-title-row">
+          <h1 class="pd-title">천관산 억새 언덕</h1>
+          <div class="pd-actions">
+            <button class="icon-btn-o" type="button" id="saveBtn" aria-pressed="false" aria-label="저장">
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M184,32H72A16,16,0,0,0,56,48V224a8,8,0,0,0,12.24,6.78L128,193.43l59.77,37.35A8,8,0,0,0,200,224V48A16,16,0,0,0,184,32Zm0,177.57-51.77-32.35a8,8,0,0,0-8.48,0L72,209.57V48H184Z"/></svg>
+            </button>
+            <button class="icon-btn-o" type="button" id="shareBtn" aria-label="공유">
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M176,160a39.89,39.89,0,0,0-28.62,12.09l-46.1-29.63a39.8,39.8,0,0,0,0-28.92l46.1-29.63a40,40,0,1,0-8.66-13.45l-46.1,29.63a40,40,0,1,0,0,55.82l46.1,29.63A40,40,0,1,0,176,160Z"/></svg>
+            </button>
+          </div>
+        </div>
+        <p class="pd-desc">자연 명소 · 전남 장흥군</p>
+        <div class="pd-badges">
+          <span class="ai-badge"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg>AI 매칭 88%</span>
+          <span class="scent-chip">마른 억새</span>
+          <span class="scent-chip">가을 흙내음</span>
+        </div>
+      </header>
+
+      <!-- 장소 소개 -->
+      <section class="pd-sec">
+        <h2 class="pd-h2">장소 소개</h2>
+        <p class="pd-p">이곳은 도심의 소음에서 벗어나 온전한 휴식을 즐길 수 있는 힐링 명소입니다. 넓게 펼쳐진 억새밭과 계절마다 옷을 갈아입는 자연의 풍경이 아름답기로 유명합니다. 특히 해 질 녘 노을이 비치는 억새의 금빛 물결은 잊지 못할 장관을 선사합니다. 산책로를 따라 걷다 보면 마음이 차분해지는 것을 느끼실 수 있습니다. 연인, 가족과 함께 소중한 추억을 남기기에 완벽한 장소입니다.</p>
+        <div class="pd-info">
+          <div class="pd-info-row"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm56,112H128a8,8,0,0,1-8-8V72a8,8,0,0,1,16,0v48h48a8,8,0,0,1,0,16Z"/></svg>09:00 - 18:00 · 월 휴무</div>
+          <div class="pd-info-row"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM84,96A12,12,0,1,1,96,84,12,12,0,0,1,84,96Z"/></svg>성인 2,000원</div>
+          <div class="pd-info-row"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,16a88.1,88.1,0,0,0-88,88c0,75.3,80,132.17,83.41,134.55a8,8,0,0,0,9.18,0C136,236.17,216,179.3,216,104A88.1,88.1,0,0,0,128,16Zm0,56a32,32,0,1,1-32,32A32,32,0,0,1,128,72Z"/></svg>전남 장흥군 관산읍 천관산로 12</div>
+          <div class="pd-info-row"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M184,24H72A32,32,0,0,0,40,56V200a24,24,0,0,0,16,22.63V232a8,8,0,0,0,16,0v-8H184v8a8,8,0,0,0,16,0v-9.37A24,24,0,0,0,216,200V56A32,32,0,0,0,184,24ZM72,40H184a16,16,0,0,1,16,16V96H56V56A16,16,0,0,1,72,40ZM56,112H120v48H56Zm144,88a8,8,0,0,1-8,8H64a8,8,0,0,1-8-8V176H200Zm0-40H136V112h64ZM84,188a12,12,0,1,1-12-12A12,12,0,0,1,84,188Zm112,0a12,12,0,1,1-12-12A12,12,0,0,1,196,188Z"/></svg>장흥터미널에서 8km</div>
+        </div>
+      </section>
+
+      <!-- 갤러리 -->
+      <section class="pd-sec">
+        <h2 class="pd-h2">갤러리</h2>
+        <div class="pd-gallery">
+          <img src="../assets/route/big.jpg" alt="억새 산책로 1">
+          <img src="../assets/route/g3.jpg" alt="억새 산책로 2">
+          <img src="../assets/route/g1.jpg" alt="억새 산책로 3">
+        </div>
+      </section>
+
+      <!-- 지도 -->
+      <section class="pd-sec">
+        <h2 class="pd-h2">지도</h2>
+        <div class="pd-map">
+          <a class="pd-map-btn" href="#" aria-label="지도 보기">
+            <span class="pin" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M128,16a88.1,88.1,0,0,0-88,88c0,75.3,80,132.17,83.41,134.55a8,8,0,0,0,9.18,0C136,236.17,216,179.3,216,104A88.1,88.1,0,0,0,128,16Zm0,56a32,32,0,1,1-32,32A32,32,0,0,1,128,72Z"/></svg></span>
+            지도 보기
+          </a>
+        </div>
+      </section>
+
+      <!-- 리뷰 -->
+      <section class="pd-sec">
+        <div class="pd-rv-head">
+          <p class="cnt">리뷰 <em id="rvCount">3</em></p>
+          <a class="pd-rv-write" href="#">리뷰 작성하기</a>
+        </div>
+        <div class="pd-rv-list" id="rvList"></div>
+        <div class="pd-rv-more"><a class="btn-outline" href="#">전체 리뷰 보기</a></div>
+      </section>
+
+      <hr class="pd-divider">
+
+      <!-- 주변 장소 추천 -->
+      <section class="pd-sec">
+        <h2 class="pd-h2">향이 이어지는 주변 장소 추천</h2>
+        <div class="pd-near">
+          <a class="pd-near-row" href="place-detail.html">
+            <img src="../assets/route/big.jpg" alt="소나무 숲길">
+            <div class="pd-near-tx"><span class="pd-near-name">소나무 숲길</span><span class="pd-near-meta">800m · 도보 12분</span></div>
+          </a>
+          <a class="pd-near-row" href="place-detail.html">
+            <img src="../assets/route/g1.jpg" alt="청량 카페">
+            <div class="pd-near-tx"><span class="pd-near-name">청량 카페</span><span class="pd-near-meta">1.2km</span></div>
+          </a>
+          <a class="pd-near-row" href="place-detail.html">
+            <img src="../assets/route/g3.jpg" alt="바람의 언덕">
+            <div class="pd-near-tx"><span class="pd-near-name">바람의 언덕</span><span class="pd-near-meta">2.5km</span></div>
+          </a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ======================= Footer ======================= -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-brand-col">
+          <span class="footer-brand">
+            <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="brand-name">Scentrip</span>
+          </span>
+          <p class="footer-desc">나만의 취향을 찾아 떠나는 특별한 여행,<br>센트립이 당신의 여정을 함께합니다.</p>
+        </div>
+        <nav class="footer-nav">
+          <a href="about.html">센트립 소개</a>
+          <a href="#">공지사항</a>
+          <a href="#">FAQ</a>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <span class="footer-copy">email · contact</span>
+        <div class="footer-legal">
+          <a href="#" class="lgl-muted">이용약관</a>
+          <a href="#" class="lgl-strong">개인정보처리방침</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+const STAR = 'M234.29,114.85l-45,38.83L203,211.75a16.4,16.4,0,0,1-24.5,17.82L128,198.49,77.47,229.57A16.4,16.4,0,0,1,53,211.75l13.76-58.07-45-38.83A16.46,16.46,0,0,1,31.08,86l59-4.76,22.76-55.08a16.36,16.36,0,0,1,30.27,0l22.75,55.08,59,4.76a16.46,16.46,0,0,1,9.37,28.86Z';
+const PERSON = 'M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z';
+const PENCIL = 'M227.32,73.37,182.63,28.69a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.32,96A16,16,0,0,0,227.32,73.37ZM51.31,208l-.06-44.06,88-88,44.11,44.05-88,88Zm137.37-137.37L160,42.06l-25.94,25.94,25.94,25.94Z';
+const TRASH = 'M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM112,168a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0ZM160,48H96V40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8Z';
+const KEBAB = 'M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128ZM128,72a12,12,0,1,0-12-12A12,12,0,0,0,128,72Zm0,112a12,12,0,1,0,12,12A12,12,0,0,0,128,184Z';
+const ico = (d) => `<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="${d}"/></svg>`;
+const stars = (n) => '<span class="pd-rv-stars" role="img" aria-label="5점 만점에 '+n+'점">'+[1,2,3,4,5].map(i=>`<span class="${i<=n?'on':'off'}">${ico(STAR)}</span>`).join('')+'</span>';
+
+const REVIEWS = [
+  { name:'이서연', type:'WHAN', typeName:'감성가 타입', visit:'26.08.20', rating:5, mine:true,
+    text:'조용하고 따뜻한 분위기가 좋았어요. 우디한 향이 은은하게 퍼져서 오래 머물고 싶은 공간이었습니다. 해 질 녘 억새밭은 꼭 보세요.',
+    photos:['../assets/route/g1.jpg','../assets/route/g3.jpg','../assets/place/frame9.jpg'], date:'2026.08.21' },
+  { name:'예주', type:'CLAR', typeName:'연출가 타입', visit:'26.08.15', rating:4, mine:false,
+    text:'바람에 억새가 흔들리는 소리가 좋았어요. 사진 찍기 정말 좋은 곳! 서늘한 공기가 상쾌했습니다.',
+    photos:['../assets/route/g3.jpg','../assets/route/big.jpg','../assets/route/g1.jpg'], date:'2026.08.16' },
+  { name:'봉주림', type:'WLAN', typeName:'낭만가 타입', visit:'26.08.02', rating:4, mine:false,
+    text:'이른 아침에 방문했는데 사람이 적어 고요하게 산책하기 좋았어요. 마른 풀 향이 은은하게 퍼집니다.',
+    photos:['../assets/route/big.jpg','../assets/route/g1.jpg','../assets/route/g3.jpg'], date:'2026.08.03' },
+];
+
+function reviewCard(r){
+  const art = document.createElement('article'); art.className = 'pd-rv';
+  const kebab = r.mine ? `
+    <div class="kebab-wrap">
+      <button class="icon-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="내 리뷰 관리">${ico(KEBAB)}</button>
+      <div class="popover kebab-menu" role="menu">
+        <a class="kebab-item" href="mypage.html#reviews" role="menuitem">${ico(PENCIL)} 리뷰 수정</a>
+        <button class="kebab-item danger" type="button" role="menuitem">${ico(TRASH)} 리뷰 삭제</button>
+      </div>
+    </div>` : '';
+  art.innerHTML = `
+    <div class="pd-rv-top">
+      <span class="av av-36" aria-hidden="true"><span class="av-svg">${ico(PERSON)}</span></span>
+      <div class="pd-rv-id">
+        <span class="pd-rv-name">${r.name}</span>
+        <span class="pd-rv-meta">${r.type} · ${r.typeName} · ${r.visit} 방문</span>
+      </div>
+      ${kebab}
+    </div>
+    ${stars(r.rating)}
+    <p class="pd-rv-text">${r.text}</p>
+    <div class="pd-rv-photos">${r.photos.map((p,i)=>`<img src="${p}" alt="리뷰 사진 ${i+1}">`).join('')}</div>
+    <p class="pd-rv-date">${r.date}</p>`;
+  return art;
+}
+const rvList = document.getElementById('rvList');
+REVIEWS.forEach(r => rvList.appendChild(reviewCard(r)));
+document.getElementById('rvCount').textContent = String(REVIEWS.length);
+
+/* 케밥 팝오버 토글 */
+rvList.addEventListener('click', (e) => {
+  const btn = e.target.closest('.kebab-wrap .icon-btn');
+  document.querySelectorAll('.kebab-menu.is-open').forEach(m => { if (!btn || m.previousElementSibling !== btn) { m.classList.remove('is-open'); m.previousElementSibling.setAttribute('aria-expanded','false'); } });
+  if (btn){ e.stopPropagation(); const m = btn.nextElementSibling; const open = !m.classList.contains('is-open'); m.classList.toggle('is-open', open); btn.setAttribute('aria-expanded', String(open)); }
+});
+
+/* 저장 토글 */
+document.getElementById('saveBtn').addEventListener('click', (e) => {
+  const b = e.currentTarget; b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+});
+
+/* 프로필 팝오버 */
+const pill = document.getElementById('profilePill'), pop = document.getElementById('profilePop');
+pill.addEventListener('click', (e) => { e.stopPropagation(); const open = pop.classList.toggle('is-open'); pill.setAttribute('aria-expanded', String(open)); });
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.profile')) { pop.classList.remove('is-open'); pill.setAttribute('aria-expanded','false'); }
+  if (!e.target.closest('.kebab-wrap')) document.querySelectorAll('.kebab-menu.is-open').forEach(m => { m.classList.remove('is-open'); m.previousElementSibling.setAttribute('aria-expanded','false'); });
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { pop.classList.remove('is-open'); pill.setAttribute('aria-expanded','false'); document.querySelectorAll('.kebab-menu.is-open').forEach(m => m.classList.remove('is-open')); } });
+</script>
+<script>
+document.addEventListener('click',function(e){
+  var lo=e.target.closest('[data-logout]'), li=e.target.closest('[data-login]');
+  if(lo){e.preventDefault();try{localStorage.setItem('scentrip_auth','out');}catch(x){}location.href='home.html';}
+  if(li){e.preventDefault();try{localStorage.setItem('scentrip_auth','in');}catch(x){}location.reload();}
+});
+</script>
+</body>
+</html>

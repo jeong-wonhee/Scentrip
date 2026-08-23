@@ -98,8 +98,10 @@ body:has(#stage-result.is-active) .brand { color: var(--color-content-on-fill); 
   place-items: center;
   overflow: hidden;
   padding: var(--space-96) var(--space-24);
+  /* 커버 시안과 동일한 다크 그린 그라디언트 (위 어둠 → 아래 은은한 그린) */
   background:
-    radial-gradient(85% 65% at 50% 42%, var(--scent-green-800) 0%, var(--scent-green-900) 46%, var(--scent-green-950) 100%);
+    linear-gradient(180deg, #08130d 0%, #0e2016 34%, #1d3a2a 64%, #35594524 88%, #567b6540 100%),
+    #0a160e;
   color: var(--color-content-on-fill);
   text-align: center;
   transition: opacity 1.2s ease, transform 1.2s cubic-bezier(.22, .61, .36, 1);
@@ -156,6 +158,10 @@ body:has(#stage-result.is-active) .brand { color: var(--color-content-on-fill); 
   place-items: center;
   margin: var(--space-4) 0;
 }
+/* 표지 오브 — 로딩과 공유하는 블러를 표지에서만 살짝 줄여 조금 더 또렷하게 */
+#stage-intro .core { filter: blur(26px); }
+#stage-intro .petal { filter: blur(9px); }
+#stage-intro .diffuse { filter: blur(9px); }
 
 .intro-title {
   font-family: 'Maru Buri', var(--font-family);
@@ -173,6 +179,34 @@ body:has(#stage-result.is-active) .brand { color: var(--color-content-on-fill); 
   text-wrap: pretty;
 }
 .intro-start { margin-top: var(--space-16); }
+
+/* ---------- 표지 배경 FX (그린 그레인 오로라 + 점 그리드 + 앰비언트 pill) ---------- */
+.intro-fx { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+/* 오로라 — 크게 번진 빛웅덩이가 아주 느리게 표류 */
+.intro-aurora { position: absolute; inset: -20% -12%; filter: blur(74px) saturate(115%); }
+.intro-aurora .ib { position: absolute; display: block; border-radius: 50%; mix-blend-mode: screen; }
+.ib-cream { width: 34vw; height: 34vw; left: 0%;  top: 40%; background: radial-gradient(circle at 50% 50%, rgba(243,239,225,.10), rgba(243,239,225,0) 62%); animation: iDrift1 27s ease-in-out infinite; }
+.ib-teal  { width: 40vw; height: 40vw; right: -2%; top: 0%; background: radial-gradient(circle at 50% 50%, rgba(58,130,124,.34), rgba(58,130,124,0) 64%);  animation: iDrift2 33s ease-in-out infinite; }
+.ib-green { width: 58vw; height: 58vw; left: 16%; top: 40%; background: radial-gradient(circle at 50% 50%, rgba(46,110,74,.5),   rgba(46,110,74,0) 66%);   animation: iDrift3 39s ease-in-out infinite; }
+@keyframes iDrift1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(6%,-5%) scale(1.12)} }
+@keyframes iDrift2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-7%,6%) scale(1.08)} }
+@keyframes iDrift3 { 0%,100%{transform:translate(0,0) scale(1.05)} 50%{transform:translate(4%,-6%) scale(.94)} }
+/* 점 그리드 별밭 — 위쪽에 은은하게 */
+.intro-dots {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(rgba(238,244,238,.5) 1px, transparent 1.6px);
+  background-size: 34px 34px;
+  -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.85) 0%, rgba(0,0,0,.32) 42%, rgba(0,0,0,0) 74%);
+          mask-image: linear-gradient(180deg, rgba(0,0,0,.85) 0%, rgba(0,0,0,.32) 42%, rgba(0,0,0,0) 74%);
+  opacity: .42;
+}
+/* 필름 그레인 */
+.intro-grain {
+  position: absolute; inset: 0; opacity: .07; mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+}
+@media (prefers-reduced-motion: reduce) { .intro-aurora .ib { animation: none !important; } }
 
 /* ============================================================
    STAGE 1 — 질문
@@ -636,8 +670,13 @@ body:has(#stage-result.is-active) .brand { color: var(--color-content-on-fill); 
   /* 컨테이너는 등장(summon)만 담당. 부유(float)는 점선원·실선링·이미지가 각자 따로 한다 */
   animation: summon 1.2s cubic-bezier(.22,.61,.36,1) .5s both;
 }
-/* 캐릭터 이미지 부유 */
-@keyframes floatImg { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+/* 캐릭터 이미지 부유 — 유형별 --char-scale(시각 크기 보정)을 함께 유지한다.
+   새 이미지마다 캔버스 대비 새가 차지하는 비율이 달라, JS가 유형별 배율을 주입해
+   '가장 긴 변'이 컨테이너의 일정 비율이 되도록 맞춘다(= WHAN과 비슷한 크기감). */
+@keyframes floatImg {
+  0%, 100% { transform: translateY(0)     scale(var(--char-scale, 1)); }
+  50%      { transform: translateY(-14px) scale(var(--char-scale, 1)); }
+}
 /* 캐릭터 — 시안이 나오기 전이라 일반 렌더. 유형 컬러 글로우만 은은하게 얹는다.
    흰색/단색 반투명 실루엣으로 시안이 나오면 아래 두 줄을 되살려 '향의 정령'처럼 렌더할 수 있다:
      mix-blend-mode: screen;
@@ -648,6 +687,8 @@ body:has(#stage-result.is-active) .brand { color: var(--color-content-on-fill); 
   width: 100%;
   height: 100%;
   object-fit: contain;
+  /* 부유 시작 전(1.7s)에도 크기 보정이 적용돼 있도록 기본 transform에 scale 유지 */
+  transform: scale(var(--char-scale, 1));
   /* 깊이감용 어두운 그림자 + 유형 컬러 글로우 → 은은한 발광 */
   filter:
     drop-shadow(0 10px 30px var(--alpha-black-40))
@@ -1180,6 +1221,16 @@ body:has(#stage-result.is-active) .brand { color: var(--color-content-on-fill); 
 
 <!-- ============================ STAGE 0 — 표지 ============================ -->
 <section class="stage is-active" id="stage-intro">
+  <!-- 배경 FX: 그린 그레인 오로라 + 점 그리드 별밭 + 앰비언트 점선 pill (장식) -->
+  <div class="intro-fx" aria-hidden="true">
+    <div class="intro-aurora">
+      <span class="ib ib-cream"></span>
+      <span class="ib ib-teal"></span>
+      <span class="ib ib-green"></span>
+    </div>
+    <div class="intro-dots"></div>
+    <div class="intro-grain"></div>
+  </div>
   <div class="intro-inner">
     <span class="intro-kicker">여행 취향 테스트</span>
 
@@ -1906,22 +1957,46 @@ function runLoading() {
 }
 
 /* ---------- 결과 렌더 ---------- */
-/* 캐릭터 시안이 준비된 유형만 등록(경로: screens/ 기준 상대). 현재 WHAN만 테스트 */
+/* 캐릭터 시안이 준비된 유형만 등록(경로: screens/ 기준 상대). 16유형 전체 준비 완료 */
 const CHARACTER_ASSETS = {
   WHAN: "../assets/character/WHAN.png",
   WHAR: "../assets/character/WHAR.png",
-  WLAN: "../assets/character/WLAN.png"
+  WHDN: "../assets/character/WHDN.png",
+  WHDR: "../assets/character/WHDR.png",
+  WLAN: "../assets/character/WLAN.png",
+  WLAR: "../assets/character/WLAR.png",
+  WLDN: "../assets/character/WLDN.png",
+  WLDR: "../assets/character/WLDR.png",
+  CHAN: "../assets/character/CHAN.png",
+  CHAR: "../assets/character/CHAR.png",
+  CHDN: "../assets/character/CHDN.png",
+  CHDR: "../assets/character/CHDR.png",
+  CLAN: "../assets/character/CLAN.png",
+  CLAR: "../assets/character/CLAR.png",
+  CLDN: "../assets/character/CLDN.png",
+  CLDR: "../assets/character/CLDR.png"
+};
+
+/* 유형별 캐릭터 시각 크기 보정 배율.
+   이미지 파일 자체에 내부 여백을 통일해 두어(WHAN 기준), 16유형 모두 별도 보정 없이
+   컨테이너 대비 동일 비율(100%)로 렌더한다. object-fit:contain + scale 1.0. */
+const CHAR_SCALE = {
+  WHAN: 1.00, WHAR: 1.00, WHDN: 1.00, WHDR: 1.00,
+  WLAN: 1.00, WLAR: 1.00, WLDN: 1.00, WLDR: 1.00,
+  CHAN: 1.00, CHAR: 1.00, CHDN: 1.00, CHDR: 1.00,
+  CLAN: 1.00, CLAR: 1.00, CLDN: 1.00, CLDR: 1.00
 };
 
 function renderResult(code, counts) {
   const t = TYPES[code];
   const root = document.documentElement;
 
-  // 캐릭터 슬롯: 시안이 있는 유형(현재 WHAN)만 점선 프레임 안에 이미지 렌더
+  // 캐릭터 슬롯: 시안이 있는 유형만 프레임 안에 이미지 렌더 + 유형별 크기 보정
   const charImg = $("rCharImg");
   const asset   = CHARACTER_ASSETS[code];
   if (asset) {
     charImg.src = asset;
+    charImg.style.setProperty("--char-scale", CHAR_SCALE[code] ?? 1);
     charImg.hidden = false;
   } else {
     charImg.hidden = true;

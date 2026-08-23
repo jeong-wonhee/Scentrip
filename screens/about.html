@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scentrip — 센트립 소개</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="../reference/tokens.css">
+<script>(function(){try{if((localStorage.getItem("scentrip_auth")||"in")==="out")document.documentElement.classList.add("is-guest");}catch(e){}})();</script>
+<style>
+/* ============================================================
+   Scentrip — 센트립 소개 (향 취향 소개) · Figma node 611:5135 이식
+   색/라운드/타이포/스페이싱은 tokens.css var() 사용.
+   헤더/푸터는 home.html과 동일한 공용 크롬.
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing);
+  color: var(--color-content-default);
+  background: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+img { display: block; max-width: 100%; }
+button { font-family: inherit; letter-spacing: inherit; cursor: pointer; background: none; border: 0; color: inherit; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--color-border-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition-duration: .01ms !important; } }
+
+.page { display: flex; flex-direction: column; align-items: stretch; width: 100%; min-height: 100vh; }
+
+/* ---------- 브랜드 로고 ---------- */
+.brand { display: flex; align-items: center; gap: var(--space-6); height: 56px; width: 128px; text-decoration: none; }
+.brand-bars { display: flex; align-items: center; gap: var(--space-2); height: 24px; }
+.brand-bars i { display: block; width: 4px; border-radius: var(--radius-full); background: linear-gradient(180deg, #31493a, #418a8b); }
+.brand-bars i:nth-child(1) { height: 8px; }
+.brand-bars i:nth-child(2) { height: 18px; opacity: .7; }
+.brand-bars i:nth-child(3) { height: 12px; opacity: .4; }
+.brand-name { font-size: var(--text-heading-20); font-weight: 600; line-height: 1.25; background: linear-gradient(180deg, #31493a, #418a8b); -webkit-background-clip: text; background-clip: text; color: transparent; white-space: nowrap; }
+
+/* ---------- Nav ---------- */
+.nav { display: flex; align-items: center; height: 56px; padding: 0 28px; width: 100%; background: var(--color-surface-overlay); position: relative; z-index: 10; justify-content: space-between; }
+.nav-center { position: absolute; left: 50%; top: 0; transform: translateX(-50%); height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.nav-list { display: flex; align-items: center; justify-content: center; gap: var(--space-32); }
+.nav-link { display: flex; align-items: center; justify-content: center; height: 56px; font-size: var(--text-body-16); line-height: 1.5; font-weight: 500; color: var(--color-content-nav); text-decoration: none; }
+.nav-link.is-selected { font-weight: 600; color: var(--color-content-nav-selected); }
+.nav-right { display: flex; align-items: center; }
+
+/* 프로필 칩 + 팝오버 (전 페이지 공용 헤더 컴포넌트) */
+.profile { position: relative; }
+.type-pill { display: flex; align-items: center; gap: var(--space-8); padding: 4px 4px 4px 12px; background: var(--color-surface-01); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-full); transition: background .18s ease, border-color .18s ease; }
+.type-pill:hover, .type-pill[aria-expanded="true"] { background: var(--color-surface-02); border-color: var(--color-border-default); }
+.pill-name { font-size: 13px; font-weight: 600; line-height: 1.5; color: var(--color-content-muted); white-space: nowrap; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+.av { border-radius: var(--radius-full); background: var(--color-surface-04); color: var(--color-content-on-fill); display: flex; align-items: center; justify-content: center; flex: none; overflow: hidden; }
+.av .av-svg { display: flex; width: 58%; height: 58%; }
+.av .av-svg svg { width: 100%; height: 100%; }
+.av-28 { width: 28px; height: 28px; }
+.av-48 { width: 48px; height: 48px; }
+.popover { position: absolute; top: calc(100% + 10px); right: 0; background: var(--color-surface-overlay); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); box-shadow: var(--elevation-lg); z-index: 300; opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity .18s ease, transform .18s ease, visibility .18s; }
+.popover.is-open { opacity: 1; visibility: visible; transform: none; }
+.profile-pop { width: 288px; padding: var(--space-8); }
+.pop-profile { display: flex; gap: var(--space-12); align-items: center; padding: var(--space-12); border-radius: var(--radius-md); width: 100%; text-align: left; text-decoration: none; }
+.pop-id { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.pop-name { font-size: var(--text-body-16); font-weight: 600; line-height: 1.3; color: var(--color-content-default); }
+.pop-taste { font-size: var(--text-body-14); font-weight: 500; line-height: 1.3; color: var(--color-content-subtle); }
+.pop-divider { height: 1px; background: var(--color-border-subtle); margin: var(--space-6) var(--space-8); }
+.pop-menu { display: flex; flex-direction: column; }
+.pop-item { display: flex; align-items: center; gap: var(--space-10); padding: var(--space-12); border-radius: var(--radius-md); font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-default); text-decoration: none; width: 100%; text-align: left; background: none; border: 0; }
+.pop-item:hover { background: var(--color-neutral-subtle); }
+.pop-item svg { width: 18px; height: 18px; color: var(--color-content-neutral-muted); flex: none; }
+/* 로그인/게스트 토글 (공용) */
+html .guest-only { display: none; }
+.is-guest .auth-only { display: none; }
+.btn-login { display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 var(--space-20); border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-content-on-fill); font-size: var(--text-body-14); font-weight: 600; text-decoration: none; border: 0; transition: background .16s ease; }
+.btn-login:hover { background: var(--color-primary-hover); }
+.is-guest .btn-login { display: inline-flex; }
+
+/* ============================================================
+   About 레이아웃 공용
+   ============================================================ */
+.about { flex: 1 0 auto; width: 100%; }
+.abt-inner { max-width: 1280px; margin: 0 auto; padding: 0 60px; }
+.abt-section { padding: 96px 0; }
+.abt-eyebrow { text-align: center; font-size: 13px; font-weight: 700; letter-spacing: .1em; color: var(--color-primary); }
+.abt-title { text-align: center; font-size: clamp(26px, 3.2vw, 34px); font-weight: 600; line-height: 1.32; color: var(--scent-green-950); margin-top: var(--space-16); }
+.abt-lead { text-align: center; font-size: var(--text-body-16); color: var(--color-content-neutral-muted); line-height: 1.8; margin-top: var(--space-16); max-width: 720px; margin-left: auto; margin-right: auto; }
+.abt-head { margin-bottom: 56px; }
+
+/* ---------- Hero ---------- */
+.abt-hero { background: var(--color-background); padding: 128px 0 96px; }
+.abt-hero h1 { text-align: center; font-size: clamp(30px, 4vw, 44px); font-weight: 700; line-height: 1.35; color: var(--scent-green-950); }
+
+/* ---------- WHY SCENTRIP ---------- */
+.abt-why { background: var(--scent-green-50); }
+.why-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-24); }
+.why-card { background: var(--color-surface-overlay); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); overflow: hidden; }
+.why-card-top { height: 200px; padding: var(--space-20); }
+.why-card-top .num { font-size: var(--text-body-14); font-weight: 700; color: var(--color-content-neutral-subtle); }
+.why-card:nth-child(1) .why-card-top { background: #f4ece1; }
+.why-card:nth-child(2) .why-card-top { background: #efe9df; }
+.why-card:nth-child(3) .why-card-top { background: #e9eef2; }
+.why-card-body { padding: var(--space-24); }
+.why-card-body h3 { font-size: var(--text-heading-20); font-weight: 600; color: var(--color-content-neutral); }
+.why-card-body p { margin-top: var(--space-10); font-size: var(--text-body-14); color: var(--color-content-neutral-muted); line-height: 1.7; }
+
+.get-panel { margin-top: var(--space-24); background: var(--gradient-depth); border-radius: var(--radius-2xl); padding: 44px 48px; display: grid; grid-template-columns: 300px 1fr; gap: var(--space-40); align-items: start; }
+.get-head .get-label { font-size: 12px; font-weight: 700; letter-spacing: .1em; color: color-mix(in srgb, #fff 60%, transparent); }
+.get-head h3 { margin-top: var(--space-16); font-size: var(--text-heading-24); font-weight: 600; color: #fff; line-height: 1.4; }
+.get-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-32) var(--space-40); }
+.get-item .k { font-size: 11px; font-weight: 600; font-style: italic; letter-spacing: .08em; color: color-mix(in srgb, #fff 55%, transparent); }
+.get-item .t { margin-top: var(--space-6); font-size: var(--text-body-16); font-weight: 600; color: #fff; }
+.get-item .d { margin-top: var(--space-4); font-size: var(--text-body-14); color: color-mix(in srgb, #fff 68%, transparent); line-height: 1.6; }
+
+/* ---------- 4 SCENT AXES ---------- */
+.abt-axes { background: color-mix(in srgb, var(--scent-green-100) 55%, var(--color-background)); }
+.axes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-24); }
+.axis-card { background: var(--color-surface-overlay); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); padding: 28px; }
+.axis-top { display: flex; align-items: center; justify-content: space-between; padding-bottom: var(--space-16); border-bottom: 1px solid var(--color-border-subtle); }
+.axis-top .num { font-size: var(--text-body-14); font-weight: 700; color: var(--color-content-neutral-subtle); }
+.axis-top .name { font-size: 12px; font-weight: 700; letter-spacing: .1em; color: var(--color-content-neutral-subtle); }
+.axis-poles { display: flex; align-items: center; gap: var(--space-16); margin-top: var(--space-24); }
+.pole { flex: 1 1 0; min-width: 0; }
+.pole.right { text-align: right; }
+.pole-badge { width: 30px; height: 30px; border-radius: var(--radius-full); background: var(--color-primary); color: #fff; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+.pole-name { margin-top: var(--space-10); font-size: var(--text-heading-20); font-weight: 600; color: var(--color-content-neutral); }
+.pole-desc { margin-top: var(--space-4); font-size: 13px; color: var(--color-content-neutral-muted); line-height: 1.6; }
+.axis-mid { width: 56px; height: 1px; background: var(--color-border-strong); flex: none; }
+
+/* ---------- 16 SCENT TYPES ---------- */
+.abt-types { background: var(--color-background); }
+.abt-types .abt-head { text-align: left; margin-bottom: 40px; }
+.abt-types .abt-eyebrow { text-align: left; }
+.abt-types .abt-title { text-align: left; margin-top: var(--space-12); }
+.types-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-16); }
+.type-card { border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); padding: var(--space-20); }
+.type-code { font-size: var(--text-heading-24); font-weight: 700; color: var(--scent-green-950); letter-spacing: .02em; }
+.type-mood { margin-top: var(--space-6); font-size: 13px; font-weight: 600; color: var(--color-primary); }
+.type-alias { margin-top: var(--space-16); font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-neutral); }
+.type-scent { margin-top: var(--space-2); font-size: var(--text-caption-12); color: var(--color-content-neutral-muted); }
+
+/* ---------- SCENT TO PLACE ---------- */
+.abt-place { background: var(--color-neutral-bg); }
+.place-row { display: flex; align-items: center; gap: 72px; }
+.place-arch { flex: 0 0 46%; max-width: 46%; }
+.place-arch img { width: 100%; aspect-ratio: 5 / 6; object-fit: cover; border-radius: 999px 999px var(--radius-2xl) var(--radius-2xl); }
+.place-info { flex: 1 1 0; min-width: 0; }
+.place-info .abt-eyebrow, .place-info .abt-title, .place-info .abt-lead { text-align: left; margin-left: 0; }
+.place-info .abt-title { margin-top: var(--space-12); }
+.place-info .abt-lead { margin-top: var(--space-16); }
+.place-card { margin-top: 28px; display: flex; gap: var(--space-16); padding: var(--space-16); background: var(--color-surface-overlay); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); box-shadow: var(--elevation-sm); }
+.place-card .thumb { width: 108px; height: 108px; border-radius: var(--radius-lg); object-fit: cover; flex: none; }
+.place-card .pc-body { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
+.pc-badge { display: inline-flex; align-items: center; gap: var(--space-6); align-self: flex-start; padding: var(--space-4) var(--space-10); border: 1px solid var(--color-border-default); border-radius: var(--radius-full); font-size: 13px; font-weight: 600; color: var(--color-content-subtle); }
+.pc-badge svg { width: 14px; height: 14px; color: var(--color-primary); }
+.pc-name { margin-top: var(--space-10); font-size: var(--text-heading-20); font-weight: 600; color: var(--color-content-neutral); }
+.pc-sub { margin-top: var(--space-2); font-size: var(--text-body-14); color: var(--color-content-neutral-muted); }
+.pc-tags { margin-top: var(--space-12); display: flex; flex-wrap: wrap; gap: var(--space-6); }
+.pc-tags span { padding: 3px var(--space-10); border-radius: var(--radius-full); background: var(--color-surface-01); border: 1px solid var(--color-border-default); font-size: var(--text-caption-12); font-weight: 600; color: var(--color-content-subtle); }
+
+/* ---------- CTA ---------- */
+.abt-cta { background: var(--color-background); padding: 40px 0 96px; }
+.cta-panel { position: relative; overflow: hidden; background: var(--gradient-depth); border-radius: var(--radius-2xl); padding: 88px 40px; text-align: center; }
+.cta-panel .blob { position: absolute; border-radius: var(--radius-full); background: #fff; filter: blur(90px); opacity: .08; pointer-events: none; }
+.cta-panel .blob.a { width: 320px; height: 320px; top: -120px; right: -60px; }
+.cta-panel .blob.b { width: 260px; height: 260px; bottom: -120px; left: -40px; }
+.cta-eyebrow { position: relative; font-size: 12px; font-weight: 700; letter-spacing: .12em; color: color-mix(in srgb, #fff 60%, transparent); }
+.cta-title { position: relative; margin-top: var(--space-16); font-size: clamp(24px, 3vw, 32px); font-weight: 700; line-height: 1.4; color: #fff; }
+.cta-lead { position: relative; margin-top: var(--space-16); font-size: var(--text-body-14); color: color-mix(in srgb, #fff 72%, transparent); line-height: 1.7; }
+.cta-btn { position: relative; display: inline-flex; align-items: center; gap: var(--space-8); margin-top: var(--space-32); height: 46px; padding: 0 var(--space-24); border-radius: var(--radius-full); background: #fff; color: var(--scent-green-950); font-size: var(--text-body-14); font-weight: 700; text-decoration: none; transition: transform .16s ease, box-shadow .16s ease; }
+.cta-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(0,0,0,.18); }
+.cta-btn svg { width: 16px; height: 16px; }
+
+/* ---------- Footer ---------- */
+.footer { padding-top: 36px; width: 100%; margin-top: auto; }
+.footer-inner { background: var(--color-neutral-bg); padding: 48px 60px; display: flex; flex-direction: column; gap: var(--space-40); overflow: hidden; width: 100%; }
+.footer-top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-24); width: 100%; }
+.footer-brand-col { display: flex; flex-direction: column; gap: var(--space-20); width: 300px; flex: none; }
+.footer-brand { display: flex; align-items: center; gap: var(--space-6); }
+.footer-desc { font-size: 15px; font-weight: 500; line-height: 1.5; color: var(--color-content-neutral-muted); }
+.footer-nav { flex: 1 0 0; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: var(--space-12); font-size: 15px; font-weight: 500; line-height: 1.5; color: var(--color-content-neutral-muted); text-align: right; }
+.footer-nav a { color: inherit; text-decoration: none; white-space: nowrap; }
+.footer-nav a:hover { color: var(--color-content-neutral); }
+.footer-bottom { display: flex; align-items: center; justify-content: space-between; gap: var(--space-24); width: 100%; padding-top: var(--space-40); border-top: 1px solid var(--color-neutral-border); font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; white-space: nowrap; }
+.footer-copy { color: var(--color-content-neutral-subtle); }
+.footer-legal { display: flex; gap: var(--space-20); }
+.footer-legal a { text-decoration: none; white-space: nowrap; }
+.footer-legal .lgl-muted { color: var(--color-content-neutral-muted); }
+.footer-legal .lgl-strong { color: var(--color-content-neutral-muted); }
+
+/* ---------- 반응형 ---------- */
+@media (max-width: 1120px) {
+  .abt-inner { padding: 0 32px; }
+  .abt-section { padding: 72px 0; }
+  .why-cards { grid-template-columns: 1fr; }
+  .get-panel { grid-template-columns: 1fr; gap: var(--space-24); padding: 32px; }
+  .axes-grid { grid-template-columns: 1fr; }
+  .types-grid { grid-template-columns: repeat(2, 1fr); }
+  .place-row { flex-direction: column; gap: 40px; }
+  .place-arch { flex: none; max-width: 460px; width: 100%; }
+  .nav { padding: 0 20px; }
+  .nav-list { gap: var(--space-24); }
+  .footer-inner { padding: 48px 32px; }
+  .footer-top { flex-direction: column; align-items: flex-start; gap: var(--space-20); }
+  .footer-nav { align-items: flex-start; text-align: left; }
+}
+@media (max-width: 560px) {
+  .nav-center { display: none; }
+  .abt-inner { padding: 0 20px; }
+  .abt-hero { padding: 80px 0 64px; }
+  .types-grid { grid-template-columns: 1fr; }
+  .get-grid { grid-template-columns: 1fr; }
+  .cta-panel { padding: 56px 24px; }
+  .footer-inner { padding: 40px 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <!-- ======================= Nav ======================= -->
+  <nav class="nav" aria-label="주 메뉴">
+    <a class="brand" href="home.html" aria-label="Scentrip 홈">
+      <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="brand-name">Scentrip</span>
+    </a>
+    <div class="nav-center">
+      <div class="nav-list">
+        <a class="nav-link" href="#">소식</a>
+        <a class="nav-link" href="place-recommend.html">탐색</a>
+        <a class="nav-link" href="#">내 여행</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <a class="btn-login guest-only" href="#" data-login role="button">로그인</a>
+      <div class="profile auth-only">
+        <button class="type-pill" id="profilePill" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="profilePop">
+          <span class="pill-name">이서연</span>
+          <span class="av av-28" aria-hidden="true"><span class="av-svg"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg></span></span>
+        </button>
+        <div class="popover profile-pop" id="profilePop" role="menu">
+          <div class="pop-profile" aria-hidden="true">
+            <span class="av av-48" aria-hidden="true"><span class="av-svg"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg></span></span>
+            <span class="pop-id">
+              <span class="pop-name">이서연</span>
+              <span class="pop-taste">WHAN · 시간을 수집하는 감성가</span>
+            </span>
+          </div>
+          <div class="pop-divider"></div>
+          <div class="pop-menu">
+            <a class="pop-item" href="mypage.html#account" data-view-link="account" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg> 계정 설정</a>
+            <a class="pop-item" href="mypage.html#reviews" data-view-link="reviews" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M88,96a8,8,0,0,1,8-8h64a8,8,0,0,1,0,16H96A8,8,0,0,1,88,96Zm8,40h64a8,8,0,0,0,0-16H96a8,8,0,0,0,0,16ZM232,64V152a8,8,0,0,1-2.34,5.66l-64,64A8,8,0,0,1,160,224H56a16,16,0,0,1-16-16V64A16,16,0,0,1,56,48H216A16,16,0,0,1,232,64ZM56,208h96V160a8,8,0,0,1,8-8h48V64H56Zm120-40v28.7L204.69,168Z"/></svg> 내 리뷰</a>
+            <a class="pop-item" href="mypage.html#support" data-view-link="support" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M201.89,54.66A104.06,104.06,0,0,0,24,128v56a24,24,0,0,0,24,24H64a24,24,0,0,0,24-24V152a24,24,0,0,0-24-24H40.35A88,88,0,0,1,190.51,69.34,87.42,87.42,0,0,1,215.65,128H192a24,24,0,0,0-24,24v32a24,24,0,0,0,24,24h16a24,24,0,0,0,1.94-.08A24,24,0,0,1,186,214.31l-.06,0A24.06,24.06,0,0,1,168,232H128a8,8,0,0,0,0,16h40a40.07,40.07,0,0,0,36.35-23.32A40,40,0,0,0,232,186V128A103.41,103.41,0,0,0,201.89,54.66Z"/></svg> 고객센터</a>
+            <div class="pop-divider"></div>
+            <button class="pop-item" type="button" data-logout role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M124,216a12,12,0,0,1-12,12H48a12,12,0,0,1-12-12V40A12,12,0,0,1,48,28h64a12,12,0,0,1,0,24H60V204h52A12,12,0,0,1,124,216Zm108.49-96.49-40-40a12,12,0,0,0-17,17L195,116H112a12,12,0,0,0,0,24h83l-19.52,19.51a12,12,0,0,0,17,17l40-40A12,12,0,0,0,232.49,119.51Z"/></svg> 로그아웃</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="about">
+    <!-- ① Hero -->
+    <section class="abt-hero">
+      <div class="abt-inner">
+        <h1>좋아하는 향을 따라가면,<br>나에게 맞는 여행이 보입니다.</h1>
+      </div>
+    </section>
+
+    <!-- ② WHY SCENTRIP -->
+    <section class="abt-section abt-why">
+      <div class="abt-inner">
+        <div class="abt-head">
+          <p class="abt-eyebrow">WHY SCENTRIP</p>
+          <h2 class="abt-title">향 취향을 여행의 기준으로 바꾸는<br>맞춤 여행 추천 서비스</h2>
+          <p class="abt-lead">사람마다 같은 장소에서도 기억하는 감각은 다릅니다. 누군가는 숲의 젖은 흙을, 누군가는 햇살에 마른 나무를 오래 기억하죠. Scentrip은 이 차이를 16가지 향 타입으로 분류해 ‘나다운 여행’을 찾도록 돕습니다.</p>
+        </div>
+
+        <div class="why-cards">
+          <article class="why-card">
+            <div class="why-card-top"><span class="num">01</span></div>
+            <div class="why-card-body">
+              <h3>향 취향 테스트</h3>
+              <p>향을 잘 몰라도 괜찮아요. 익숙한 장면 중 더 마음이 가는 쪽을 골라보세요.</p>
+            </div>
+          </article>
+          <article class="why-card">
+            <div class="why-card-top"><span class="num">02</span></div>
+            <div class="why-card-body">
+              <h3>나의 향 타입 확인</h3>
+              <p>네 가지 감각의 조합으로 나만의 향 타입과 여행 성향을 발견합니다.</p>
+            </div>
+          </article>
+          <article class="why-card">
+            <div class="why-card-top"><span class="num">03</span></div>
+            <div class="why-card-body">
+              <h3>여행지 추천</h3>
+              <p>내 향의 분위기와 닮은 장소, 계절, 동선을 취향 일치도와 함께 만나보세요.</p>
+            </div>
+          </article>
+        </div>
+
+        <div class="get-panel">
+          <div class="get-head">
+            <p class="get-label">WHAT YOU GET</p>
+            <h3>검사 후에는 이런 결과를<br>확인할 수 있어요.</h3>
+          </div>
+          <div class="get-grid">
+            <div class="get-item"><p class="k">TYPE</p><p class="t">나의 향 취향 유형</p><p class="d">16가지 중 나를 가장 잘 나타내는 향 타입과 한 줄 정의</p></div>
+            <div class="get-item"><p class="k">SCENT</p><p class="t">대표 향과 감각 키워드</p><p class="d">좋아할 가능성이 높은 향 무드와 쉽게 떠올릴 수 있는 향 표현</p></div>
+            <div class="get-item"><p class="k">PLACE</p><p class="t">취향 맞춤 여행지</p><p class="d">내 향의 분위기와 닮은 국내 장소와 취향 일치도</p></div>
+            <div class="get-item"><p class="k">ROUTE</p><p class="t">여행 코스와 머무는 방식</p><p class="d">장소를 즐기기 좋은 계절, 공간, 테마별 추천 동선</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ③ 4 SCENT AXES -->
+    <section class="abt-section abt-axes">
+      <div class="abt-inner">
+        <div class="abt-head">
+          <p class="abt-eyebrow">4 SCENT AXES</p>
+          <h2 class="abt-title">네 가지 감각이 만나<br>하나의 향 타입이 됩니다.</h2>
+          <p class="abt-lead">향의 온도와 무게, 수분감, 자연스러움에 대한 취향을 조합해 총 16가지 Scentrip 유형을 완성합니다.</p>
+        </div>
+        <div class="axes-grid" id="axesGrid"></div>
+      </div>
+    </section>
+
+    <!-- ④ 16 SCENT TYPES -->
+    <section class="abt-section abt-types">
+      <div class="abt-inner">
+        <div class="abt-head">
+          <p class="abt-eyebrow">16 SCENT TYPES</p>
+          <h2 class="abt-title">열여섯 가지 향,<br>열여섯 가지 여행 방식</h2>
+        </div>
+        <div class="types-grid" id="typesGrid"></div>
+      </div>
+    </section>
+
+    <!-- ⑤ SCENT TO PLACE -->
+    <section class="abt-section abt-place">
+      <div class="abt-inner">
+        <div class="place-row">
+          <div class="place-arch">
+            <img src="../assets/route/g3.jpg" alt="가을빛 호숫가 숲 산책 풍경">
+          </div>
+          <div class="place-info">
+            <p class="abt-eyebrow">SCENT TO PLACE</p>
+            <h2 class="abt-title">좋아하는 향은<br>머물고 싶은 장면을 말해줍니다.</h2>
+            <p class="abt-lead">비 내린 숲의 향을 좋아한다면, 나무와 흙의 감각을 충분히 느낄 수 있는 고요한 산책 여행을 추천해요.</p>
+            <div class="place-card">
+              <img class="thumb" src="../assets/route/big.jpg" alt="담양 메타세쿼이아길">
+              <div class="pc-body">
+                <span class="pc-badge"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg>AI 매칭 88%</span>
+                <p class="pc-name">담양 메타세쿼이아길</p>
+                <p class="pc-sub">초록 공기가 깊어지는 느린 산책</p>
+                <div class="pc-tags"><span>젖은 나무</span><span>이끼</span><span>서늘한 공기</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ⑥ CTA -->
+    <section class="abt-cta">
+      <div class="abt-inner">
+        <div class="cta-panel">
+          <span class="blob a" aria-hidden="true"></span>
+          <span class="blob b" aria-hidden="true"></span>
+          <p class="cta-eyebrow">YOUR SCENT, YOUR JOURNEY</p>
+          <h2 class="cta-title">아직 만나지 못한 여행이<br>당신이 좋아하는 향 속에 있을지도 몰라요.</h2>
+          <p class="cta-lead">약 3분이면 나의 향 타입과 꼭 맞는 여행지를 발견할 수 있어요.</p>
+          <a class="cta-btn" href="onboarding-test.html">향 취향 테스트 시작하기
+            <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ======================= Footer ======================= -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-brand-col">
+          <span class="footer-brand">
+            <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="brand-name">Scentrip</span>
+          </span>
+          <p class="footer-desc">나만의 취향을 찾아 떠나는 특별한 여행,<br>센트립이 당신의 여정을 함께합니다.</p>
+        </div>
+        <nav class="footer-nav">
+          <a href="about.html">센트립 소개</a>
+          <a href="#">공지사항</a>
+          <a href="#">FAQ</a>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <span class="footer-copy">email · contact</span>
+        <div class="footer-legal">
+          <a href="#" class="lgl-muted">이용약관</a>
+          <a href="#" class="lgl-strong">개인정보처리방침</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+/* ---------- 4 감각 축 ---------- */
+const AXES = [
+  { n:'01', name:'TEMPERATURE', a:['W','따뜻한','햇살 든 나무와 꿀의 온기'], b:['C','차가운','새벽 호수와 서늘한 공기'] },
+  { n:'02', name:'WEIGHT',      a:['H','묵직한','깊고 천천히 남는 여운'],   b:['L','가벼운','바람처럼 산뜻한 잔향'] },
+  { n:'03', name:'MOISTURE',    a:['A','촉촉한','이슬과 비 내린 숲의 물기'], b:['D','건조한','종이와 코튼의 보송함'] },
+  { n:'04', name:'TEXTURE',     a:['N','자연적인','숲과 흙에서 온 그대로의 향'], b:['R','정제된','깔끔하게 다듬어진 분위기'] },
+];
+document.getElementById('axesGrid').innerHTML = AXES.map(x => `
+  <article class="axis-card">
+    <div class="axis-top"><span class="num">${x.n}</span><span class="name">${x.name}</span></div>
+    <div class="axis-poles">
+      <div class="pole">
+        <span class="pole-badge">${x.a[0]}</span>
+        <p class="pole-name">${x.a[1]}</p>
+        <p class="pole-desc">${x.a[2]}</p>
+      </div>
+      <span class="axis-mid" aria-hidden="true"></span>
+      <div class="pole right">
+        <span class="pole-badge">${x.b[0]}</span>
+        <p class="pole-name">${x.b[1]}</p>
+        <p class="pole-desc">${x.b[2]}</p>
+      </div>
+    </div>
+  </article>`).join('');
+
+/* ---------- 16 향 타입 ---------- */
+const TYPES = [
+  ['WHAN','빈티지 우디','시간을 수집하는 감성가','나무 향을 닮은 여행 취향','#f5ede5'],
+  ['WHAR','골든 허니 레진','품격을 완성하는 큐레이터','꿀 향을 닮은 여행 취향','#f5f0e5'],
+  ['WHDN','러스틱 레더','본질을 찾아 떠나는 개척자','가죽 향을 닮은 여행 취향','#f5e8e5'],
+  ['WHDR','블랙 티 우디','고요를 음미하는 사색가','홍차 향을 닮은 여행 취향','#f5e7e5'],
+  ['WLAN','모스 포레스트','순간을 사랑하는 낭만가','숲 향을 닮은 여행 취향','#edf5e5'],
+  ['WLAR','선샤인 플로럴','분위기를 만드는 스타일리스트','꽃 향을 닮은 여행 취향','#f5f0e5'],
+  ['WLDN','와일드 허브','우연을 즐기는 발견가','허브 향을 닮은 여행 취향','#f3f5e5'],
+  ['WLDR','웜 코튼','취향을 설계하는 디자이너','코튼 향을 닮은 여행 취향','#f5efe5'],
+  ['CHAN','딥 아쿠아','풍경에 머무는 몽상가','바다 향을 닮은 여행 취향','#e5f1f5'],
+  ['CHAR','실키 아이리스','우아함을 담는 미학가','아이리스 향을 닮은 여행 취향','#eae5f5'],
+  ['CHDN','쿨 시더','자유를 닮은 방랑자','삼나무 향을 닮은 여행 취향','#e5f5ed'],
+  ['CHDR','미네랄 잉크 우디','의미를 기록하는 관찰자','오래된 책 향을 닮은 여행 취향','#e5eaf5'],
+  ['CLAN','그린 시트러스','생기를 쫓는 모험가','라임 향을 닮은 여행 취향','#eaf5e5'],
+  ['CLAR','오렌지 블라썸','감각을 담아내는 연출가','오렌지꽃 향을 닮은 여행 취향','#f5ece5'],
+  ['CLDN','마린 우디','길을 만드는 노마드','바다 향을 닮은 여행 취향','#e5eff5'],
+  ['CLDR','알데하이드 코튼','여백을 사랑하는 미니멀리스트','비누 향을 닮은 여행 취향','#e5f0f5'],
+];
+document.getElementById('typesGrid').innerHTML = TYPES.map(t => `
+  <article class="type-card" style="background:${t[4]}">
+    <p class="type-code">${t[0]}</p>
+    <p class="type-mood">${t[1]}</p>
+    <p class="type-alias">${t[2]}</p>
+    <p class="type-scent">${t[3]}</p>
+  </article>`).join('');
+
+/* ---------- 프로필 팝오버 ---------- */
+const pill = document.getElementById('profilePill');
+const pop = document.getElementById('profilePop');
+pill.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const open = pop.classList.toggle('is-open');
+  pill.setAttribute('aria-expanded', String(open));
+});
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.profile')) { pop.classList.remove('is-open'); pill.setAttribute('aria-expanded','false'); }
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { pop.classList.remove('is-open'); pill.setAttribute('aria-expanded','false'); } });
+</script>
+<script>
+document.addEventListener('click',function(e){
+  var lo=e.target.closest('[data-logout]'), li=e.target.closest('[data-login]');
+  if(lo){e.preventDefault();try{localStorage.setItem('scentrip_auth','out');}catch(x){}location.href='home.html';}
+  if(li){e.preventDefault();try{localStorage.setItem('scentrip_auth','in');}catch(x){}location.reload();}
+});
+</script>
+</body>
+</html>

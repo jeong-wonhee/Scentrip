@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scentrip — 향을 따라 떠오르다 (커버 시안)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="../reference/tokens.css">
+<style>
+/* ============================================================
+   Scentrip — 몰입형 커버/인트로 시안
+   레퍼런스 무드 융합: 그린 그레인 오로라(FLOAT) + 점 그리드 별밭 + 점선 pill
+   · 단일 다크 월드로 의도적으로 커밋 (라이트 테마 없음)
+   · 색은 브랜드 Scent Green/Teal 램프 기반
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink: #eef4ee;
+  --ink-muted: rgba(238,244,238,.60);
+  --hair: rgba(238,244,238,.32);
+  --cream: #f3efe1;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-family, "Pretendard", sans-serif);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  background: #0a160e;
+  -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+  min-height: 100vh;
+}
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2px solid var(--cream); outline-offset: 4px; border-radius: 4px; }
+
+/* ---------- 무대 ---------- */
+.cover {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  isolation: isolate;
+  /* 위(어둠) → 아래(밝은 그린) 세로 그라디언트 — 레퍼런스의 다크→라이트 흐름 */
+  background:
+    linear-gradient(180deg, #08130d 0%, #0e2016 34%, #1d3a2a 64%, #35594524 88%, #567b6540 100%),
+    #0a160e;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 오로라 — 크게 번진 빛웅덩이 3개가 아주 느리게 표류 */
+.aurora { position: absolute; inset: -20% -10%; z-index: 0; pointer-events: none; filter: blur(72px) saturate(115%); }
+.aurora span { position: absolute; display: block; border-radius: 50%; opacity: .9; mix-blend-mode: screen; }
+.blob-cream { width: 46vw; height: 46vw; left: 4%; top: 34%; background: radial-gradient(circle at 50% 50%, rgba(243,239,225,.72), rgba(243,239,225,0) 66%); animation: drift1 26s ease-in-out infinite; }
+.blob-teal  { width: 42vw; height: 42vw; right: 2%;  top: 8%;  background: radial-gradient(circle at 50% 50%, rgba(72,150,150,.60), rgba(72,150,150,0) 66%); animation: drift2 32s ease-in-out infinite; }
+.blob-green { width: 52vw; height: 52vw; left: 26%; top: 52%; background: radial-gradient(circle at 50% 50%, rgba(58,120,86,.62), rgba(58,120,86,0) 68%); animation: drift3 38s ease-in-out infinite; }
+@keyframes drift1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(6%,-5%) scale(1.12)} }
+@keyframes drift2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-7%,6%) scale(1.08)} }
+@keyframes drift3 { 0%,100%{transform:translate(0,0) scale(1.05)} 50%{transform:translate(4%,-6%) scale(.94)} }
+
+/* 점 그리드 별밭 — 위쪽에 은은하게, 아래로 갈수록 사라짐 */
+.dots {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background-image: radial-gradient(rgba(238,244,238,.55) 1px, transparent 1.6px);
+  background-size: 34px 34px;
+  -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.9) 0%, rgba(0,0,0,.5) 42%, rgba(0,0,0,0) 74%);
+          mask-image: linear-gradient(180deg, rgba(0,0,0,.9) 0%, rgba(0,0,0,.5) 42%, rgba(0,0,0,0) 74%);
+  opacity: .5;
+}
+
+/* 그레인 — 필름 노이즈 오버레이 */
+.grain {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  opacity: .16; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+}
+
+/* ---------- 상단 바 ---------- */
+.top { position: relative; z-index: 5; display: flex; align-items: center; justify-content: space-between; padding: 28px clamp(24px, 5vw, 64px); }
+.brand { display: flex; align-items: center; gap: 8px; }
+.brand-bars { display: flex; align-items: flex-end; gap: 3px; height: 20px; }
+.brand-bars i { display: block; width: 4px; border-radius: 999px; background: var(--cream); }
+.brand-bars i:nth-child(1){ height: 8px; opacity:.5; } .brand-bars i:nth-child(2){ height: 18px; } .brand-bars i:nth-child(3){ height: 12px; opacity:.7; }
+.brand-name { font-size: 18px; font-weight: 600; letter-spacing: .01em; color: var(--ink); }
+.top-link { font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-muted); }
+.top-link:hover { color: var(--ink); }
+
+/* ---------- 히어로 ---------- */
+.hero {
+  position: relative; z-index: 5; flex: 1 0 auto;
+  width: 100%; max-width: 1200px; margin: 0 auto;
+  padding: clamp(24px, 5vw, 56px) clamp(24px, 5vw, 64px) 40px;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  align-items: center; gap: clamp(24px, 4vw, 64px);
+}
+.hero-copy { max-width: 34ch; }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .34em; text-transform: uppercase; color: rgba(243,239,225,.72); }
+.title {
+  margin-top: 22px;
+  font-size: clamp(52px, 8.5vw, 116px); font-weight: 700; line-height: .96;
+  letter-spacing: -0.035em; color: var(--ink); text-wrap: balance;
+  text-shadow: 0 2px 40px rgba(6,18,11,.45);
+}
+.title .light { display: block; font-weight: 200; letter-spacing: -0.01em; color: rgba(238,244,238,.9); }
+.lead { margin-top: 26px; font-size: clamp(15px, 1.5vw, 18px); line-height: 1.7; color: var(--ink-muted); }
+.cta {
+  display: inline-flex; align-items: center; gap: 10px; margin-top: 34px;
+  height: 56px; padding: 0 28px; border-radius: 999px;
+  background: var(--cream); color: #12271b; font-size: 15px; font-weight: 700;
+  box-shadow: 0 14px 40px rgba(0,0,0,.35), 0 0 0 1px rgba(243,239,225,.2);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.cta svg { width: 18px; height: 18px; transition: transform .2s ease; }
+.cta:hover { transform: translateY(-2px); box-shadow: 0 20px 52px rgba(0,0,0,.42), 0 0 40px rgba(243,239,225,.28); }
+.cta:hover svg { transform: translateX(4px); }
+
+/* 점선 pill 클러스터 — 향 계열이 별처럼 떠 있음 */
+.pills { position: relative; min-height: 340px; }
+.pill {
+  position: absolute; display: inline-flex; align-items: center;
+  padding: 13px 22px; border-radius: 999px;
+  border: 1.5px dotted rgba(238,244,238,.5);
+  font-size: 13px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase;
+  color: rgba(238,244,238,.9); white-space: nowrap;
+  background: rgba(12,24,16,.18); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  transition: border-color .2s ease, color .2s ease, transform .2s ease, background .2s ease;
+}
+.pill:hover { border-color: var(--cream); color: var(--cream); background: rgba(243,239,225,.08); }
+.pill .dot { width: 5px; height: 5px; border-radius: 999px; background: currentColor; margin-right: 10px; opacity: .8; }
+/* 흩뿌린 배치 + 개별 부유 */
+.pill.p1 { top: 4%;  left: 2%;   animation: bob 7s ease-in-out infinite; }
+.pill.p2 { top: 2%;  right: 0%;  animation: bob 8.5s ease-in-out .4s infinite; }
+.pill.p3 { top: 34%; left: 20%;  animation: bob 7.8s ease-in-out .9s infinite; }
+.pill.p4 { top: 40%; right: 4%;  animation: bob 9s ease-in-out .2s infinite; }
+.pill.p5 { top: 70%; left: 6%;   animation: bob 8s ease-in-out .7s infinite; }
+.pill.p6 { top: 74%; right: 14%; animation: bob 7.4s ease-in-out 1.1s infinite; }
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+
+/* ---------- 하단 하이라인 타이포 스트립 ---------- */
+.strip {
+  position: relative; z-index: 5;
+  display: flex; align-items: center; gap: clamp(12px, 3vw, 40px);
+  padding: 22px clamp(24px, 5vw, 64px) 34px;
+  font-size: clamp(11px, 1.1vw, 13px); letter-spacing: .18em; text-transform: uppercase;
+  color: rgba(238,244,238,.7);
+}
+.strip .rule { flex: 1 1 auto; height: 1px; background: var(--hair); }
+.strip b { font-weight: 600; color: var(--ink); }
+
+/* ---------- 진입 애니메이션 ---------- */
+.reveal { opacity: 0; transform: translateY(16px); filter: blur(6px); animation: rise 1s cubic-bezier(.22,.61,.36,1) forwards; }
+.d1 { animation-delay: .15s; } .d2 { animation-delay: .3s; } .d3 { animation-delay: .48s; } .d4 { animation-delay: .66s; } .d5 { animation-delay: .8s; }
+@keyframes rise { to { opacity: 1; transform: none; filter: blur(0); } }
+.pill.reveal { transform: translateY(20px); }
+
+/* ---------- 반응형 ---------- */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; gap: 40px; }
+  .pills { min-height: 0; display: flex; flex-wrap: wrap; gap: 12px; }
+  .pill { position: static; animation: none; }
+  .pill.p3, .pill.p5 { transform: translateY(6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aurora span, .pill { animation: none !important; }
+  .reveal { animation: none; opacity: 1; transform: none; filter: none; }
+}
+</style>
+</head>
+<body>
+<div class="cover">
+  <div class="aurora" aria-hidden="true">
+    <span class="blob-cream"></span>
+    <span class="blob-teal"></span>
+    <span class="blob-green"></span>
+  </div>
+  <div class="dots" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="top">
+    <a class="brand" href="home.html" aria-label="Scentrip 홈">
+      <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="brand-name">Scentrip</span>
+    </a>
+    <a class="top-link" href="home.html">건너뛰기</a>
+  </header>
+
+  <main class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow reveal d1">Scent type finder · 16 scents</p>
+      <h1 class="title reveal d2">향을 따라<span class="light">떠오르다</span></h1>
+      <p class="lead reveal d3">좋아하는 향은 머물고 싶은 장면을 말해줍니다. 네 가지 감각으로 나의 향 타입을 찾고, 그 향과 닮은 다음 여행을 만나보세요.</p>
+      <a class="cta reveal d4" href="onboarding-test.html">향 취향 테스트 시작
+        <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg>
+      </a>
+    </div>
+
+    <div class="pills" aria-label="향 계열">
+      <span class="pill p1"><span class="dot"></span>Woody</span>
+      <span class="pill p2"><span class="dot"></span>Floral</span>
+      <span class="pill p3"><span class="dot"></span>Citrus</span>
+      <span class="pill p4"><span class="dot"></span>Mossy</span>
+      <span class="pill p5"><span class="dot"></span>Aquatic</span>
+      <span class="pill p6"><span class="dot"></span>Musk</span>
+    </div>
+  </main>
+
+  <footer class="strip reveal d5">
+    <b>Scentrip</b>
+    <span class="rule"></span>
+    <span>Notes of</span>
+    <span class="rule"></span>
+    <span>your</span>
+    <span class="rule"></span>
+    <b>Journey</b>
+  </footer>
+</div>
+</body>
+</html>
