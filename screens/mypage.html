@@ -1157,7 +1157,7 @@ function startReviewEdit(id){
   $('#reText').setAttribute('aria-invalid','false'); $('#reTextErr').classList.remove('show');
   $('#reStarErr').classList.remove('show');
   $('#reDate').value = dotToDash(r.date);
-  state.ui.editPhotos = r.photos ? r.photos.map(p => ({ ...p })) : [];
+  state.ui.editPhotos = r.photos ? r.photos.map(url => ({ url })) : [];
   renderPhotos();
   navigate('review-edit');
 }
@@ -1187,7 +1187,7 @@ $('#reviewForm').addEventListener('submit', (e) => {
 
   r.rating = rating; r.text = text;
   if ($('#reDate').value) r.date = dashToDot($('#reDate').value);
-  r.photos = state.ui.editPhotos.map(p => ({ ...p }));
+  r.photos = state.ui.editPhotos.map(p => p.url);
   state.ui.editingId = null;
   renderReviews();
   navigate('reviews');
