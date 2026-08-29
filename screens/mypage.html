@@ -6,6 +6,7 @@
 <title>Scentrip — 마이페이지</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="../reference/tokens.css">
+<link rel="stylesheet" href="../reference/components.css">
 <style>
 /* ============================================================
    Scentrip — 마이페이지 (Desktop Web)
@@ -209,16 +210,7 @@ html .guest-only { display: none; }
    ============================================================ */
 .rv-toolbar { display: flex; align-items: center; gap: var(--space-12); }
 .dropdown { position: relative; }
-.dd-btn { display: inline-flex; align-items: center; gap: var(--space-8); height: 44px; padding: 0 var(--space-16); border: 1px solid var(--color-neutral-border); border-radius: var(--radius-full); background: var(--color-surface-overlay); font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-neutral); transition: border-color .14s ease, background .14s ease; }
-.dd-btn:hover, .dd-btn[aria-expanded="true"] { border-color: var(--color-border-strong); background: var(--color-surface-01); }
-.dd-btn svg { width: 16px; height: 16px; color: var(--color-content-neutral-muted); transition: transform .18s ease; }
-.dd-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
-.dd-menu { left: 0; right: auto; width: 160px; padding: var(--space-6); }
-.dd-item { display: flex; align-items: center; justify-content: space-between; gap: var(--space-8); width: 100%; padding: var(--space-10) var(--space-12); border-radius: var(--radius-md); font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-neutral); text-align: left; }
-.dd-item:hover { background: var(--color-neutral-subtle); }
-.dd-item[aria-selected="true"] { color: var(--color-primary); font-weight: 600; }
-.dd-item .ck { width: 16px; height: 16px; opacity: 0; color: var(--color-primary); }
-.dd-item[aria-selected="true"] .ck { opacity: 1; }
+.dd-menu { min-width: 160px; }
 
 .rv-list { display: flex; flex-direction: column; gap: var(--space-16); }
 .rv { position: relative; padding: var(--space-24); background: var(--color-surface-overlay); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); display: flex; flex-direction: column; gap: var(--space-12); }
@@ -335,20 +327,8 @@ html .guest-only { display: none; }
 /* ============================================================
    Toast / Modal
    ============================================================ */
-.toast { position: fixed; left: 50%; bottom: 36px; transform: translate(-50%, 20px); background: var(--scent-green-900); color: #fff; padding: var(--space-14) var(--space-24); border-radius: var(--radius-full); font-size: var(--text-body-14); font-weight: 600; box-shadow: var(--elevation-xl); display: flex; align-items: center; gap: var(--space-10); z-index: 600; opacity: 0; visibility: hidden; transition: opacity .24s ease, transform .24s ease, visibility .24s; max-width: 520px; }
-.toast.show { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
-.toast svg { width: 18px; height: 18px; flex: none; color: var(--emerald-300); }
-.toast.err { background: var(--red-950); }
-.toast.err svg { color: var(--red-300); }
 
-.modal-bg { position: fixed; inset: 0; background: var(--color-state-scrim); display: none; align-items: center; justify-content: center; z-index: 500; padding: var(--space-32); overflow-y: auto; }
-.modal-bg.show { display: flex; }
-.modal { background: var(--color-surface-overlay); border-radius: var(--radius-2xl); padding: var(--space-32); max-width: 460px; width: 100%; box-shadow: var(--elevation-xl); max-height: calc(100vh - 64px); overflow-y: auto; margin: auto; }
-.modal h2 { font-size: var(--text-heading-24); font-weight: 600; color: var(--color-content-default); margin-bottom: var(--space-8); line-height: 1.35; }
-.modal h2.danger { color: var(--color-content-error); }
-.modal > p { font-size: var(--text-body-14); color: var(--color-content-neutral-muted); line-height: 1.7; margin-bottom: var(--space-24); }
-.modal .field { margin-bottom: var(--space-8); }
-.modal-actions { display: flex; gap: var(--space-12); justify-content: flex-end; margin-top: var(--space-24); }
+.modal-box .field { margin: 0; }
 
 /* ============================================================
    Footer (home.html과 동일)
@@ -519,11 +499,11 @@ html .guest-only { display: none; }
 
         <div class="rv-toolbar">
           <div class="dropdown" id="regionDd">
-            <button class="dd-btn" id="regionBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="regionMenu">
+            <button class="chip-btn" id="regionBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="regionMenu">
               <span id="regionLabel">지역</span>
-              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M215.39,92.94A8,8,0,0,0,208,88H48a8,8,0,0,0-5.66,13.66l80,80a8,8,0,0,0,11.32,0l80-80A8,8,0,0,0,215.39,92.94Z"/></svg>
+              <span class="caret" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></svg></span>
             </button>
-            <div class="popover dd-menu" id="regionMenu" role="menu"></div>
+            <div class="menu dd-menu" id="regionMenu" role="menu"></div>
           </div>
         </div>
 
@@ -709,11 +689,16 @@ html .guest-only { display: none; }
 
 <!-- ======================= 모달 ======================= -->
 <!-- 리뷰 삭제 -->
-<div class="modal-bg" id="delModal" data-modal role="dialog" aria-modal="true" aria-labelledby="delTitle">
-  <div class="modal">
-    <h2 id="delTitle">리뷰를 삭제할까요?</h2>
-    <p>삭제한 리뷰는 복구할 수 없습니다. 정말 삭제하시겠어요?</p>
-    <div class="modal-actions">
+<div class="modal-scrim" id="delModal" data-modal role="dialog" aria-modal="true" aria-labelledby="delTitle">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <h2 id="delTitle" class="danger">리뷰를 삭제할까요?</h2>
+        <p>삭제한 리뷰는 복구할 수 없습니다. 정말 삭제하시겠어요?</p>
+      </div>
+      <button class="modal-close" type="button" aria-label="닫기" data-close-modal><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
+    </div>
+    <div class="modal-foot">
       <button class="btn btn-ghost" type="button" data-close-modal>취소</button>
       <button class="btn btn-danger" type="button" id="delConfirm">삭제</button>
     </div>
@@ -721,9 +706,12 @@ html .guest-only { display: none; }
 </div>
 
 <!-- 이름 수정 -->
-<div class="modal-bg" id="nameModal" data-modal role="dialog" aria-modal="true" aria-labelledby="nameTitle">
-  <div class="modal">
-    <h2 id="nameTitle">이름 수정</h2>
+<div class="modal-scrim" id="nameModal" data-modal role="dialog" aria-modal="true" aria-labelledby="nameTitle">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2 id="nameTitle">이름 수정</h2>
+      <button class="modal-close" type="button" aria-label="닫기" data-close-modal><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
+    </div>
     <div class="field">
       <label for="nameInput">이름</label>
       <input class="input" id="nameInput" type="text" maxlength="20" data-autofocus>
@@ -733,7 +721,7 @@ html .guest-only { display: none; }
         <span id="nameErrText">이름을 확인해 주세요.</span>
       </p>
     </div>
-    <div class="modal-actions">
+    <div class="modal-foot">
       <button class="btn btn-ghost" type="button" data-close-modal>취소</button>
       <button class="btn btn-primary" type="button" id="nameSave">저장</button>
     </div>
@@ -741,9 +729,12 @@ html .guest-only { display: none; }
 </div>
 
 <!-- 이메일 수정 -->
-<div class="modal-bg" id="emailModal" data-modal role="dialog" aria-modal="true" aria-labelledby="emailTitle">
-  <div class="modal">
-    <h2 id="emailTitle">이메일 수정</h2>
+<div class="modal-scrim" id="emailModal" data-modal role="dialog" aria-modal="true" aria-labelledby="emailTitle">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2 id="emailTitle">이메일 수정</h2>
+      <button class="modal-close" type="button" aria-label="닫기" data-close-modal><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
+    </div>
     <div class="field">
       <label for="emailInput">이메일</label>
       <input class="input" id="emailInput" type="email" autocomplete="email" data-autofocus>
@@ -753,7 +744,7 @@ html .guest-only { display: none; }
         <span id="emailErrText">올바른 이메일 주소를 입력해 주세요.</span>
       </p>
     </div>
-    <div class="modal-actions">
+    <div class="modal-foot">
       <button class="btn btn-ghost" type="button" data-close-modal>취소</button>
       <button class="btn btn-primary" type="button" id="emailSave">저장</button>
     </div>
@@ -831,9 +822,9 @@ function toast(msg, kind){
   const t = $('#toast');
   $('#toastMsg').textContent = msg;
   t.classList.toggle('err', kind === 'error');
-  t.classList.add('show');
+  t.classList.add('is-open');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+  toastTimer = setTimeout(() => t.classList.remove('is-open'), 2600);
 }
 
 /* 아바타(기본 사람 실루엣) 주입 */
@@ -850,7 +841,7 @@ function openModal(id){
   if (!bg) return;
   lastFocused = document.activeElement;
   closePopovers();
-  bg.classList.add('show');
+  bg.classList.add('is-open');
   openModalEl = bg;
   $('.page').setAttribute('aria-hidden','true');
   const target = bg.querySelector('[data-autofocus]') || bg.querySelector(FOCUSABLE);
@@ -858,7 +849,7 @@ function openModal(id){
 }
 function closeModal(){
   if (!openModalEl) return;
-  openModalEl.classList.remove('show');
+  openModalEl.classList.remove('is-open');
   openModalEl = null;
   $('.page').removeAttribute('aria-hidden');
   if (lastFocused && document.contains(lastFocused)) lastFocused.focus();
@@ -973,13 +964,13 @@ function renderRegionMenu(){
   regionMenu.replaceChildren();
   regionOptions().forEach(reg => {
     const b = document.createElement('button');
-    b.type = 'button'; b.className = 'dd-item'; b.setAttribute('role','menuitemradio');
+    b.type = 'button'; b.className = 'menu-item'; b.setAttribute('role','menuitemradio');
     b.dataset.region = reg;
     const selected = state.ui.region === reg;
     b.setAttribute('aria-selected', String(selected));
     b.setAttribute('aria-checked', String(selected));
     const label = document.createElement('span'); label.textContent = reg === 'all' ? '전체' : reg;
-    const ck = svgIcon(CHECK_PATH, 'ck');
+    const ck = svgIcon(CHECK_PATH, 'check');
     b.append(label, ck);
     regionMenu.appendChild(b);
   });
@@ -988,6 +979,7 @@ regionMenu.addEventListener('click', (e) => {
   const item = e.target.closest('[data-region]');
   if (!item) return;
   state.ui.region = item.dataset.region;
+  regionBtn.classList.toggle('is-active', state.ui.region !== 'all');
   $('#regionLabel').textContent = state.ui.region === 'all' ? '지역' : state.ui.region;
   closePopovers();
   renderRegionMenu();
