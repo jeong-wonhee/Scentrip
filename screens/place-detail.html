@@ -160,7 +160,8 @@ html .guest-only { display: none; }
 .footer-nav a { color: inherit; text-decoration: none; white-space: nowrap; }
 .footer-nav a:hover { color: var(--color-content-neutral); }
 .footer-bottom { display: flex; align-items: center; justify-content: space-between; gap: var(--space-24); width: 100%; padding-top: var(--space-40); border-top: 1px solid var(--color-neutral-border); font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; white-space: nowrap; }
-.footer-copy { color: var(--color-content-neutral-subtle); }
+.footer-copy { font-weight: 400; color: var(--color-content-neutral-muted); text-decoration: none; }
+.footer-copy:hover { color: var(--color-content-neutral); }
 .footer-legal { display: flex; gap: var(--space-20); }
 .footer-legal a { text-decoration: none; white-space: nowrap; }
 .footer-legal .lgl-muted { color: var(--color-content-neutral-muted); }
@@ -339,7 +340,7 @@ html .guest-only { display: none; }
         </nav>
       </div>
       <div class="footer-bottom">
-        <span class="footer-copy">email · contact</span>
+        <a class="footer-copy" href="mailto:info.scentrip@gmail.com">info.scentrip@gmail.com</a>
         <div class="footer-legal">
           <a href="#" class="lgl-muted">이용약관</a>
           <a href="#" class="lgl-strong">개인정보처리방침</a>
