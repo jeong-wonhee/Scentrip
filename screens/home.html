@@ -300,6 +300,32 @@ html .guest-only { display: none; }
   font-weight: 600;
   cursor: pointer;
 }
+
+/* ---------- 동선 만들기 모달 (Figma node 677:3566) ---------- */
+.rm-scrim { position: fixed; inset: 0; z-index: 900; display: flex; align-items: center; justify-content: center; padding: var(--space-24); background: var(--color-state-scrim); opacity: 0; transition: opacity .16s ease; }
+.rm-scrim[hidden] { display: none; }
+.rm-scrim.is-open { opacity: 1; }
+.rm { width: 100%; max-width: 600px; max-height: calc(100vh - 48px); overflow-y: auto; padding: var(--space-32); display: flex; flex-direction: column; gap: var(--space-24); background: var(--color-surface-overlay); border-radius: var(--radius-2xl); box-shadow: var(--elevation-xl); transform: translateY(8px) scale(.985); transition: transform .18s cubic-bezier(.22,.61,.36,1); }
+.rm-scrim.is-open .rm { transform: none; }
+.rm-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-16); }
+.rm-head h2 { font-size: var(--text-heading-24); font-weight: 600; line-height: 1.3; color: var(--color-content-neutral); }
+.rm-close { width: 36px; height: 36px; flex: none; display: flex; align-items: center; justify-content: center; border: 0; border-radius: var(--radius-md); background: var(--color-neutral-subtle); color: var(--color-content-neutral-muted); transition: background .14s ease, color .14s ease; }
+.rm-close svg { width: 16px; height: 16px; }
+.rm-close:hover { background: var(--color-neutral-border); color: var(--color-content-neutral); }
+.rm-opts { display: flex; flex-direction: column; gap: var(--space-12); }
+.rm-opt { display: flex; align-items: center; gap: var(--space-16); width: 100%; padding: var(--space-16); border: 1px solid var(--color-neutral-border); border-radius: var(--radius-lg); background: var(--color-surface-overlay); text-align: left; transition: border-color .14s ease, background .14s ease, box-shadow .14s ease; }
+.rm-opt:hover { border-color: var(--color-border-strong); background: var(--color-surface-01); }
+.rm-opt.is-on { border-color: var(--color-primary); box-shadow: inset 0 0 0 1px var(--color-primary); background: var(--color-surface-overlay); }
+.rm-ic { width: 48px; height: 48px; flex: none; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--color-surface-01); color: var(--color-primary); }
+.rm-ic svg { width: 22px; height: 22px; }
+.rm-tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.rm-tx b { font-size: var(--text-body-16); font-weight: 600; line-height: 1.45; color: var(--color-content-neutral); }
+.rm-tx span { font-size: var(--text-body-14); font-weight: 400; line-height: 1.5; color: var(--color-content-neutral-muted); }
+.rm-foot { display: flex; justify-content: flex-end; }
+.rm-next { height: 44px; padding: 0 var(--space-24); border: 0; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-content-on-fill); font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; transition: background .16s ease; }
+.rm-next:hover { background: var(--color-primary-hover); }
+.rm-next:active { background: var(--color-primary-active); }
+@media (max-width: 560px) { .rm { padding: var(--space-24); gap: var(--space-20); } .rm-opt { gap: var(--space-12); padding: var(--space-12); } .rm-ic { width: 40px; height: 40px; } }
 </style>
 <script>(function(){try{if((localStorage.getItem("scentrip_auth")||"in")==="out")document.documentElement.classList.add("is-guest");}catch(e){}})();</script>
 </head>
@@ -316,7 +342,7 @@ html .guest-only { display: none; }
       <div class="nav-list">
         <a class="nav-link" href="#">소식</a>
         <a class="nav-link" href="place-recommend.html">탐색</a>
-        <a class="nav-link" href="#">내 여행</a>
+        <a class="nav-link" href="my-trip.html">내 여행</a>
       </div>
     </div>
     <div class="nav-right">
@@ -410,7 +436,7 @@ html .guest-only { display: none; }
         <h2>센트립 AI로 나만의 여행 동선을 제작해보세요</h2>
         <p>원하는 조건으로 커스텀할 수 있어요</p>
       </div>
-      <a class="ai-banner-btn" href="#"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg>나만의 동선 만들기</a>
+      <a class="ai-banner-btn" href="#" data-make-route><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg>나만의 동선 만들기</a>
     </div>
   </section>
 
@@ -613,6 +639,65 @@ document.addEventListener('click',function(e){
   if(lo){e.preventDefault();try{localStorage.setItem('scentrip_auth','out');}catch(x){}location.href='home.html';}
   if(li){e.preventDefault();try{localStorage.setItem('scentrip_auth','in');}catch(x){}location.reload();}
 });
+</script>
+
+<!-- ============ 동선 만들기 모달 ============ -->
+<div class="rm-scrim" id="makeModal" hidden>
+  <div class="rm" role="dialog" aria-modal="true" aria-labelledby="rmTitle">
+    <div class="rm-head">
+      <h2 id="rmTitle">동선 만들기</h2>
+      <button class="rm-close" type="button" aria-label="닫기"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
+    </div>
+    <div class="rm-opts" role="radiogroup" aria-labelledby="rmTitle">
+      <button class="rm-opt is-on" type="button" role="radio" aria-checked="true" data-mode="ai">
+        <span class="rm-ic" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg></span>
+        <span class="rm-tx"><b>AI에게 여행지 추천 받기</b><span>내 취향과 조건에 맞는 여행지를 추천해드려요</span></span>
+      </button>
+      <button class="rm-opt" type="button" role="radio" aria-checked="false" data-mode="region">
+        <span class="rm-ic" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M128,16a88.1,88.1,0,0,0-88,88c0,75.3,80,132.17,83.41,134.55a8,8,0,0,0,9.18,0C136,236.17,216,179.3,216,104A88.1,88.1,0,0,0,128,16Zm0,56a32,32,0,1,1-32,32A32,32,0,0,1,128,72Z"/></svg></span>
+        <span class="rm-tx"><b>원하는 지역의 동선 추천 받기</b><span>선택한 지역 안에서 취향에 맞는 동선을 만들어드려요</span></span>
+      </button>
+      <button class="rm-opt" type="button" role="radio" aria-checked="false" data-mode="saved">
+        <span class="rm-ic" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M240,94c0,70-103.79,126.66-108.21,129a8,8,0,0,1-7.58,0C119.79,220.66,16,164,16,94A62.07,62.07,0,0,1,78,32c20.65,0,38.73,8.88,50,23.89C139.27,40.88,157.35,32,178,32A62.07,62.07,0,0,1,240,94Z"/></svg></span>
+        <span class="rm-tx"><b>찜한 장소로 동선 추천 받기</b><span>찜한 장소를 포함해 이동하기 좋은 동선을 만들어드려요</span></span>
+      </button>
+    </div>
+    <div class="rm-foot"><button class="rm-next" type="button">다음</button></div>
+  </div>
+</div>
+<script>
+/* 동선 만들기 진입 — 배너·버튼 어디서 눌러도 같은 모달이 뜬다.
+   [다음] 이후의 제작 플로우 화면은 아직 없어서 지금은 모달만 닫힌다. */
+(function () {
+  const scrim = document.getElementById("makeModal");
+  const opts = [...scrim.querySelectorAll(".rm-opt")];
+  let opener = null;
+  function open(trigger) {
+    opener = trigger;
+    scrim.hidden = false;
+    void scrim.offsetWidth;   // 강제 리플로우 — 백그라운드 탭에서 rAF가 멈춰도 전이가 시작되게
+    scrim.classList.add("is-open");
+    (scrim.querySelector(".rm-opt.is-on") || opts[0]).focus();
+  }
+  function close() {
+    scrim.classList.remove("is-open");
+    setTimeout(() => { scrim.hidden = true; if (opener) opener.focus(); }, 160);
+  }
+  document.addEventListener("click", (e) => {
+    const trigger = e.target.closest("[data-make-route]");
+    if (trigger) { e.preventDefault(); open(trigger); return; }
+    if (scrim.hidden) return;
+    if (e.target.closest(".rm-next")) {
+      const on = scrim.querySelector(".rm-opt.is-on");
+      if (on && on.dataset.mode === "saved") { location.href = "route-create.html"; return; }
+      close(); return;   // AI·지역 방식의 다음 화면은 아직 없음
+    }
+    if (e.target === scrim || e.target.closest(".rm-close")) { close(); return; }
+    const opt = e.target.closest(".rm-opt");
+    if (opt) opts.forEach((o) => { const on = o === opt; o.classList.toggle("is-on", on); o.setAttribute("aria-checked", on ? "true" : "false"); });
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !scrim.hidden) close(); });
+})();
 </script>
 </body>
 </html>

@@ -130,6 +130,72 @@ html .guest-only { display: none; }
 .filter-opt .check { width: 16px; height: 16px; color: var(--color-content-subtle); opacity: 0; flex: none; }
 .filter-opt.is-selected .check { opacity: 1; }
 
+/* ---------- 지역 필터 — 시·도 레일 + 시·군·구 리스트 ----------
+   패널 자체는 무채색으로 두고 색은 '선택'에만 쓴다 (레일 선택 pill · 선택된 행 + 체크).
+   행 구분은 박스가 아니라 헤어라인, 선택 표시는 체크박스가 아니라
+   기존 필터 드롭다운(.filter-opt)과 같은 오른쪽 체크 아이콘. */
+.region-pop { width: 520px; max-width: calc(100vw - 40px); padding: 0; border-radius: var(--radius-xl); box-shadow: var(--elevation-lg); overflow: hidden; display: flex; flex-direction: column; }
+.rg-search { padding: var(--space-16) var(--space-16) var(--space-12); }
+.rg-field { position: relative; display: flex; align-items: center; }
+.rg-field > svg { position: absolute; right: var(--space-16); width: 18px; height: 18px; color: var(--color-content-neutral-subtle); pointer-events: none; transition: opacity .12s ease; }
+.rg-clear { position: absolute; right: var(--space-12); display: none; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: var(--radius-md); background: none; color: var(--color-content-neutral-subtle); transition: background .14s ease, color .14s ease; }
+.rg-clear svg { width: 18px; height: 18px; }
+.rg-clear:hover { background: var(--color-neutral-border); color: var(--color-content-neutral); }
+.rg-clear.is-on { display: inline-flex; }
+.rg-field.is-filled > svg { opacity: 0; }
+.rg-input { width: 100%; height: 46px; padding: 0 42px 0 var(--space-16); border: 1px solid transparent; border-radius: var(--radius-lg); background: var(--color-neutral-bg); font-family: inherit; letter-spacing: inherit; font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-neutral); outline: none; transition: border-color .14s ease; }
+.rg-input::placeholder { color: var(--color-content-neutral-subtle); font-weight: 400; }
+.rg-input:focus { border-color: var(--color-neutral-border); }
+.rg-input::-webkit-search-cancel-button { -webkit-appearance: none; }
+
+.rg-body { display: flex; align-items: stretch; height: 316px; }
+.rg-body.is-searching .rg-rail { display: none; }   /* 검색 결과는 시·도와 무관하므로 레일을 접는다 */
+.rg-rail { position: relative; width: 152px; flex: none; overflow-y: auto; padding: var(--space-8) var(--space-16); background: var(--color-neutral-bg); display: flex; flex-direction: column; gap: var(--space-2); }
+.rg-sido { display: flex; align-items: center; gap: var(--space-8); width: 100%; height: 40px; flex: none; padding: 0 var(--space-16); border: 0; background: none; border-radius: var(--radius-md); font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; color: var(--color-content-neutral-muted); text-align: left; transition: background .14s ease, color .14s ease; }
+.rg-sido:hover { color: var(--color-content-neutral); }
+.rg-sido.is-active { background: var(--color-surface-overlay); color: var(--color-primary); box-shadow: var(--elevation-xs); }   /* 정렬 세그먼트의 흰 pill과 같은 강조 */
+.rg-sido.is-off { color: var(--color-content-neutral-disabled); cursor: default; }
+.rg-cnt { margin-left: auto; font-size: var(--text-caption-12); font-weight: 600; line-height: 1.5; color: var(--color-primary); font-variant-numeric: tabular-nums; flex: none; }
+
+.rg-list { flex: 1 0 0; min-width: 0; overflow-y: auto; padding: 0 var(--space-16) var(--space-12); display: flex; flex-direction: column; }
+.rg-row { display: flex; align-items: center; gap: var(--space-8); width: 100%; min-height: 48px; flex: none; padding: var(--space-12) 0; border: 0; border-bottom: 1px solid var(--color-border-subtle); background: none; text-align: left; }
+.rg-row:last-child { border-bottom: 0; }
+.rg-row:hover .rg-box { border-color: var(--color-content-neutral-subtle); }
+.rg-row.is-on:hover .rg-box { border-color: var(--color-primary); }
+.rg-row.is-off { color: var(--color-content-neutral-disabled); cursor: default; }
+.rg-label { flex: 1 0 0; min-width: 0; display: flex; align-items: baseline; gap: var(--space-4); font-size: var(--text-body-14); font-weight: 400; line-height: 1.5; color: var(--color-content-neutral); }
+.rg-name { min-width: 0; }
+.rg-label em { font-style: normal; margin-left: var(--space-4); font-size: var(--text-caption-12); font-weight: 400; color: var(--color-content-neutral-subtle); }
+.rg-row.is-off .rg-label { color: var(--color-content-neutral-disabled); }
+.rg-box { width: 20px; height: 20px; flex: none; display: flex; align-items: center; justify-content: center; border: 1px solid var(--color-neutral-border); border-radius: var(--radius-sm); background: var(--color-surface-overlay); transition: background .14s ease, border-color .14s ease; }
+.rg-box svg { width: 13px; height: 13px; color: var(--color-content-on-fill); opacity: 0; transform: scale(.5); transition: transform .16s cubic-bezier(.22,.61,.36,1), opacity .12s ease; }
+.rg-row.is-on .rg-box { background: var(--color-primary); border-color: var(--color-primary); }
+.rg-row.is-part .rg-box { background: var(--color-neutral-border); border-color: var(--color-neutral-border); }
+.rg-row.is-on .rg-box svg, .rg-row.is-part .rg-box svg { opacity: 1; transform: none; }
+.rg-row.is-off .rg-box { background: var(--color-neutral-bg); border-color: var(--color-border-subtle); }
+.rg-all { position: sticky; top: 0; z-index: 1; background: var(--color-surface-overlay); border-bottom-color: var(--color-neutral-border); }
+.rg-all .rg-label { font-weight: 500; }
+.rg-hit { background: none; color: var(--color-primary); font-weight: 600; }
+.rg-hint { padding: var(--space-12) 0 var(--space-4); font-size: var(--text-caption-12); font-weight: 500; line-height: 1.5; color: var(--color-content-neutral-subtle); }
+.rg-empty { margin: auto 0; display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-6); padding: var(--space-32) var(--space-16); }
+.rg-empty b { font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-neutral); }
+.rg-empty span { font-size: var(--text-body-14); font-weight: 400; color: var(--color-content-neutral-muted); }
+
+.rg-foot { display: flex; align-items: center; gap: var(--space-8); padding: var(--space-12) var(--space-16); border-top: 1px solid var(--color-border-subtle); background: var(--color-surface-overlay); }
+.rg-reset, .rg-apply { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-6); height: 44px; border-radius: var(--radius-lg); font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; border: 0; white-space: nowrap; transition: background .16s ease, color .16s ease; }
+.rg-reset { flex: none; padding: 0 var(--space-16); background: none; color: var(--color-content-neutral-muted); }
+.rg-reset svg { width: 16px; height: 16px; }
+.rg-reset:hover { background: var(--color-neutral-subtle); color: var(--color-content-neutral); }
+.rg-reset:disabled { color: var(--color-content-neutral-disabled); cursor: not-allowed; pointer-events: none; }
+.rg-apply { flex: 1 0 0; padding: 0 var(--space-24); background: var(--color-primary); color: var(--color-content-on-fill); }
+.rg-apply:hover { background: var(--color-primary-hover); }
+.rg-apply:active { background: var(--color-primary-active); }
+
+@media (max-width: 640px) {
+  .rg-rail { width: 112px; }
+  .rg-body { height: 280px; }
+}
+
 /* 취향 타입 옵션 — 액센트 컬러 아바타(추후 캐릭터 일러스트 자리) + 타이틀/서브텍스트 */
 .filter[data-key="taste"] .filter-pop {
   width: 480px;
@@ -218,7 +284,7 @@ html .guest-only { display: none; }
       <div class="nav-list">
         <a class="nav-link" href="#">소식</a>
         <a class="nav-link is-selected" href="#">탐색</a>
-        <a class="nav-link" href="#">내 여행</a>
+        <a class="nav-link" href="my-trip.html">내 여행</a>
       </div>
     </div>
     <div class="nav-right">
@@ -362,7 +428,7 @@ grid.innerHTML = PLACES.map(placeCard).join("");
    모든 필터는 여러 개 선택 가능. 취향타입은 기본적으로 본인 타입(나무 향)이 선택된 상태이고,
    X를 누르면 아무것도 선택되지 않은 '취향타입' 필터 슬롯이 남아 다시 선택할 수 있다. */
 const FILTERS = [
-  { key: "region", label: "지역", opts: ["서울", "강원", "경상", "전라", "충청", "제주"] },
+  { key: "region", label: "지역", type: "region", opts: [] },   // 옵션은 아래 지역 패널 모듈이 직접 그린다
   { key: "feature", label: "특징", opts: ["자연경관", "감성 카페", "전시·예술", "액티비티", "포토스팟"] },
   { key: "taste", label: "취향", opts: [
     "감성가 타입", "큐레이터 타입", "개척자 타입", "사색가 타입",
@@ -427,12 +493,235 @@ function updateChip(key) {
 }
 FILTERS.forEach((f) => updateChip(f.key));
 
+const RG_SCALE = 1;   // 장소 기준 지역별 데이터 밀도
+const RG_NOUN = "장소";
+const RG_CTA_NOUN = "여행장소";
+
+/* ---------- 지역 필터 — 시·도 레일 + 시·군·구 체크리스트 ----------
+   applied.region 토큰: "강원"(도 전체) | "강원>강릉시"(개별 시군구)
+   한 도의 유효 시군구를 모두 고르면 자동으로 도 토큰으로 접힌다.
+   패널 안에서는 드래프트로만 담아두고 [적용]을 눌러야 결과에 반영된다. */
+const RG_UNITS = [
+  ["서울", [["종로구",6],["중구",2],["용산구",3],["성동구",3],["광진구",0],["마포구",4],["서대문구",0],["영등포구",0],["강남구",2],["서초구",0],["송파구",1],["강서구",0]]],
+  ["부산", [["중구",1],["서구",0],["동구",0],["영도구",2],["남구",0],["해운대구",5],["수영구",3],["사하구",0],["기장군",2]]],
+  ["대구", [["중구",2],["동구",0],["남구",0],["북구",0],["수성구",0],["달서구",0],["달성군",1]]],
+  ["인천", [["중구",3],["미추홀구",0],["연수구",1],["남동구",0],["서구",0],["강화군",2],["옹진군",1]]],
+  ["광주", [["동구",1],["서구",0],["남구",0],["북구",0],["광산구",0]]],
+  ["대전", [["동구",0],["중구",1],["서구",0],["유성구",1],["대덕구",0]]],
+  ["울산", [["중구",0],["남구",1],["동구",0],["북구",0],["울주군",2]]],
+  ["세종", [["세종시",1]]],
+  ["경기", [["수원시",2],["성남시",0],["고양시",1],["용인시",0],["안산시",0],["남양주시",0],["파주시",3],["포천시",1],["가평군",3],["양평군",2]]],
+  ["강원", [["춘천시",3],["원주시",0],["강릉시",9],["동해시",1],["태백시",0],["속초시",5],["삼척시",1],["홍천군",0],["평창군",4],["정선군",1],["인제군",0],["양양군",3]]],
+  ["충북", [["청주시",1],["충주시",0],["제천시",1],["보은군",0],["영동군",0],["괴산군",0],["단양군",3]]],
+  ["충남", [["천안시",0],["공주시",2],["보령시",1],["아산시",0],["서산시",0],["부여군",2],["예산군",0],["태안군",3]]],
+  ["전북", [["전주시",5],["군산시",2],["익산시",0],["정읍시",0],["남원시",1],["무주군",1],["부안군",0],["고창군",1]]],
+  ["전남", [["목포시",1],["여수시",6],["순천시",4],["나주시",0],["광양시",0],["담양군",2],["보성군",2],["완도군",1],["해남군",0],["신안군",1]]],
+  ["경북", [["포항시",2],["경주시",9],["안동시",4],["구미시",0],["영주시",2],["문경시",1],["청송군",0],["영덕군",1],["울릉군",2]]],
+  ["경남", [["창원시",1],["진주시",2],["통영시",4],["사천시",0],["김해시",0],["거제시",2],["남해군",3],["하동군",1],["함양군",0]]],
+  ["제주", [["제주시",7],["서귀포시",9]]],
+];
+const REGIONS = RG_UNITS.map(([name, units]) => {
+  const list = units.map(([n, c]) => ({ name: n, count: Math.round(c * RG_SCALE) }));
+  return { name, units: list, count: list.reduce((s, u) => s + u.count, 0) };
+});
+function rgTotal() { return REGIONS.reduce((s, r) => s + r.count, 0); }
+function rgFind(name) { return REGIONS.find((r) => r.name === name); }
+function rgLive(r) { return r.units.filter((u) => u.count > 0).map((u) => r.name + ">" + u.name); }
+function rgCountOf(token) {
+  const [s, u] = token.split(">");
+  const r = rgFind(s); if (!r) return 0;
+  if (!u) return r.count;
+  const hit = r.units.find((x) => x.name === u);
+  return hit ? hit.count : 0;
+}
+function rgSumOf(list) { return list.reduce((s, t) => s + rgCountOf(t), 0); }
+function rgSum() { return rgSumOf(applied.region); }
+function rgTitle(token) { const [s, u] = token.split(">"); return u ? u : s + " 전체"; }
+function rgSummaryOf(list) { return !list.length ? "지역" : (list.length === 1 ? rgTitle(list[0]) : `${rgTitle(list[0])} 외 ${list.length - 1}`); }
+function rgSummary() { return rgSummaryOf(applied.region); }
+
+const rgIconSearch = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/></svg>';
+const rgIconReset = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224,128a96,96,0,0,1-94.71,96H128A95.38,95.38,0,0,1,62.1,197.8a8,8,0,0,1,11-11.63A80,80,0,1,0,71.43,71.39a3.07,3.07,0,0,1-.26.25L44.59,96H72a8,8,0,0,1,0,16H24a8,8,0,0,1-8-8V56a8,8,0,0,1,16,0V85.8L60.25,60A96,96,0,0,1,224,128Z"/></svg>';
+const rgIconCheck = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/></svg>';
+
+const rgIconX = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm37.66,130.34a8,8,0,0,1-11.32,11.32L128,139.31l-26.34,26.35a8,8,0,0,1-11.32-11.32L116.69,128,90.34,101.66a8,8,0,0,1,11.32-11.32L128,116.69l26.34-26.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>';
+
+const rgFilter = chipsWrap.querySelector('.filter[data-key="region"]');
+const rgPop = rgFilter.querySelector(".filter-pop");
+rgPop.classList.add("region-pop");
+rgPop.removeAttribute("role");
+rgPop.innerHTML = `
+  <div class="rg-search">
+    <div class="rg-field">
+      ${rgIconSearch}
+      <input class="rg-input" id="rgInput" type="search" placeholder="지역명 검색 (예: 경주, 강원)" aria-label="지역명 검색" autocomplete="off">
+      <button class="rg-clear" type="button" aria-label="검색어 지우기">${rgIconX}</button>
+    </div>
+  </div>
+  <div class="rg-body">
+    <div class="rg-rail" role="tablist" aria-label="시·도"></div>
+    <div class="rg-list" role="group" aria-label="시·군·구"></div>
+  </div>
+  <div class="rg-foot">
+    <button class="rg-reset" type="button">${rgIconReset}초기화</button>
+    <button class="rg-apply" type="button"></button>
+  </div>`;
+
+const rgInput = rgPop.querySelector(".rg-input");
+const rgBody = rgPop.querySelector(".rg-body");
+const rgClear = rgPop.querySelector(".rg-clear");
+const rgRail = rgPop.querySelector(".rg-rail");
+const rgListEl = rgPop.querySelector(".rg-list");
+const rgResetBtn = rgPop.querySelector(".rg-reset");
+const rgApplyBtn = rgPop.querySelector(".rg-apply");
+
+let rgDraft = [];
+let rgQuery = "";
+let rgActive = (REGIONS.find((r) => r.count > 0) || REGIONS[0]).name;
+
+function rgIsOn(token) {
+  const [s, u] = token.split(">");
+  return rgDraft.includes(token) || (!!u && rgDraft.includes(s));
+}
+function rgToggle(token) {
+  const [sido, unit] = token.split(">");
+  const r = rgFind(sido); if (!r) return;
+  const set = new Set(rgDraft);
+  if (set.has(sido)) { set.delete(sido); rgLive(r).forEach((t) => set.add(t)); }   // 도 전체 → 개별로 펼치기
+  if (!unit) {
+    const all = rgLive(r);
+    const on = all.every((t) => set.has(t));
+    all.forEach((t) => (on ? set.delete(t) : set.add(t)));
+  } else {
+    set.has(token) ? set.delete(token) : set.add(token);
+  }
+  REGIONS.forEach((rr) => {                                                        // 전부 선택되면 도 토큰으로 접기
+    const all = rgLive(rr);
+    if (all.length && all.every((t) => set.has(t))) { all.forEach((t) => set.delete(t)); set.add(rr.name); }
+  });
+  rgDraft = REGIONS.flatMap((rr) => [rr.name, ...rgLive(rr)]).filter((t) => set.has(t));
+}
+
+function rgRow(token, label, sub, count, cls) {
+  const off = count === 0;
+  const on = !off && rgIsOn(token);
+  return `<button class="rg-row${cls ? " " + cls : ""}${on ? " is-on" : ""}${off ? " is-off" : ""}" type="button" role="checkbox" aria-checked="${on}" data-token="${token}"${off ? " disabled" : ""}>
+    <span class="rg-box" aria-hidden="true">${rgIconCheck}</span>
+    <span class="rg-label"><span class="rg-name">${label}</span>${sub ? `<em>${sub}</em>` : ""}</span>
+  </button>`;
+}
+function rgPickedCount(r) {   // 이 시·도에서 몇 곳을 골랐는지
+  return rgDraft.includes(r.name) ? rgLive(r).length : rgDraft.filter((t) => t.startsWith(r.name + ">")).length;
+}
+function rgRenderRail() {
+  rgRail.innerHTML = REGIONS.map((r) => {
+    const off = r.count === 0;
+    const picked = rgDraft.some((t) => t.split(">")[0] === r.name);
+    const isAct = !rgQuery && r.name === rgActive;   // 검색 중에는 레일에 현재 시·도가 없다
+    const cls = [isAct ? "is-active" : "", off ? "is-off" : "", picked ? "is-picked" : ""].filter(Boolean).join(" ");
+    return `<button class="rg-sido${cls ? " " + cls : ""}" type="button" role="tab" aria-selected="${isAct}" data-sido="${r.name}"${off ? " disabled" : ""}>
+      <span>${r.name}</span>${picked ? `<b class="rg-cnt">${rgPickedCount(r)}</b>` : ""}
+    </button>`;
+  }).join("");
+  const act = rgRail.querySelector(".rg-sido.is-active");   // 선택된 시·도는 레일 안에서 항상 보이게
+  if (act) {
+    const top = act.offsetTop, bottom = top + act.offsetHeight;
+    if (top < rgRail.scrollTop) rgRail.scrollTop = top - 8;
+    else if (bottom > rgRail.scrollTop + rgRail.clientHeight) rgRail.scrollTop = bottom - rgRail.clientHeight + 8;
+  }
+}
+function rgMark(text, q) {                                  // 검색어와 겹치는 글자만 강조
+  const i = text.indexOf(q);
+  return i < 0 ? text : `${text.slice(0, i)}<mark class="rg-hit">${text.slice(i, i + q.length)}</mark>${text.slice(i + q.length)}`;
+}
+function rgRenderList(keepScroll) {
+  const top = rgListEl.scrollTop;
+  rgBody.classList.toggle("is-searching", !!rgQuery);       // 검색 중에는 시·도 레일이 필요 없다
+  rgClear.classList.toggle("is-on", !!rgQuery);
+  rgClear.parentElement.classList.toggle("is-filled", !!rgQuery);   // 돋보기 ↔ 지우기 교체
+  if (rgQuery) {
+    const q = rgQuery;
+    const hits = [];
+    REGIONS.forEach((r) => {
+      const hitSido = r.name.includes(q);
+      if (hitSido && r.count > 0) hits.push({ token: r.name, label: r.name + " 전체", sub: "시·도 전체", count: r.count });
+      r.units.forEach((u) => { if (hitSido || u.name.includes(q)) hits.push({ token: r.name + ">" + u.name, label: u.name, sub: r.name, count: u.count }); });
+    });
+    hits.sort((a, b) => (b.count > 0) - (a.count > 0));   // 데이터 있는 지역 먼저, 그 안에서는 지리 순서 유지
+    rgListEl.innerHTML = hits.length
+      ? `<p class="rg-hint">검색 결과 ${hits.length}곳</p>` + hits.map((h) => rgRow(h.token, rgMark(h.label, q), h.sub, h.count)).join("")
+      : `<div class="rg-empty"><b>‘${q}’에 맞는 지역이 없어요</b><span>시·도나 시·군·구 이름으로 검색해 보세요</span></div>`;
+  } else {
+    const r = rgFind(rgActive);
+    const all = rgLive(r);
+    const on = all.length > 0 && all.every((t) => rgDraft.includes(t) || rgDraft.includes(r.name));
+    const some = !on && all.some((t) => rgIsOn(t));
+    rgListEl.innerHTML = rgRow(r.name, r.name + " 전체", "", r.count, "rg-all" + (some ? " is-part" : ""))
+      + r.units.map((u) => rgRow(r.name + ">" + u.name, u.name, "", u.count)).join("");
+  }
+  rgListEl.scrollTop = keepScroll ? top : 0;
+}
+const RG_CAP = 1000;   // 이 이상은 정확한 수를 세는 의미가 없어 'N개 이상'으로 끊는다
+function rgCountText(n) { return n >= RG_CAP ? `총 ${RG_CAP.toLocaleString()}개 이상 ${RG_NOUN}` : `총 ${n.toLocaleString()}개 ${RG_NOUN}`; }
+function rgRenderFoot() {
+  const n = rgDraft.length ? rgSumOf(rgDraft) : rgTotal();
+  rgApplyBtn.textContent = n >= RG_CAP
+    ? `${RG_CTA_NOUN} ${RG_CAP.toLocaleString()}개 이상 보기`
+    : `${RG_CTA_NOUN} ${n.toLocaleString()}개 보기`;
+  rgResetBtn.disabled = !rgDraft.length;
+}
+function rgRender(keepScroll) { rgRenderRail(); rgRenderList(keepScroll); rgRenderFoot(); }
+function rgSyncChip() { updateChip("region"); rgFilter.querySelector(".chip-label").textContent = rgSummary(); }
+
+/* 패널이 560px라 칩 위치에 따라 오른쪽으로 넘칠 수 있어 뷰포트 안으로 당겨준다 */
+function rgPlace() {
+  rgPop.style.left = "0px";
+  const r = rgPop.getBoundingClientRect();
+  const over = r.right - (window.innerWidth - 16);
+  if (over > 0) rgPop.style.left = -Math.min(over, Math.max(0, r.left - 16)) + "px";
+}
+window.addEventListener("resize", rgPlace);
+
+/* 칩을 열 때마다 현재 적용값을 드래프트로 복사 (chipsWrap 위임 핸들러보다 먼저 실행됨) */
+rgFilter.querySelector(".chip-btn").addEventListener("click", () => {
+  rgDraft = [...applied.region];
+  rgQuery = ""; rgInput.value = "";
+  if (rgDraft.length) rgActive = rgDraft[0].split(">")[0];
+  rgRender();
+  requestAnimationFrame(rgPlace);
+});
+/* 레일·리스트는 클릭 즉시 다시 그려져 타깃이 DOM에서 떨어져 나간다.
+   그대로 두면 바깥 클릭 판정(closest(".filter"))이 실패해 팝오버가 닫히므로 여기서 전파를 끊는다. */
+rgRail.addEventListener("click", (e) => {
+  e.stopPropagation();
+  const b = e.target.closest(".rg-sido"); if (!b || b.disabled) return;
+  rgActive = b.dataset.sido; rgQuery = ""; rgInput.value = "";
+  rgRenderRail(); rgRenderList();
+});
+rgListEl.addEventListener("click", (e) => {
+  e.stopPropagation();
+  const b = e.target.closest(".rg-row"); if (!b || b.disabled) return;
+  rgToggle(b.dataset.token);
+  if (rgQuery) rgActive = b.dataset.token.split(">")[0];   // 검색을 지우면 방금 고른 시·도로 돌아가게
+  rgRender(true);
+});
+rgInput.addEventListener("input", () => { rgQuery = rgInput.value.trim(); rgRenderList(); rgRenderRail(); });
+rgInput.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); rgApplyBtn.click(); } });
+rgClear.addEventListener("click", (e) => { e.stopPropagation(); rgInput.value = ""; rgQuery = ""; rgRenderList(); rgRenderRail(); rgInput.focus(); });
+rgResetBtn.addEventListener("click", (e) => { e.stopPropagation(); rgDraft = []; rgRender(); });
+rgApplyBtn.addEventListener("click", () => {
+  applied.region = [...rgDraft];
+  rgSyncChip(); closePops(); applyView();
+});
+rgRender();
+document.getElementById("count").textContent = rgCountText(rgTotal());
+
 const countEl = document.getElementById("count");
 function closePops() {
   chipsWrap.querySelectorAll(".filter-pop.is-open").forEach((p) => p.classList.remove("is-open"));
   chipsWrap.querySelectorAll('.chip-btn[aria-expanded="true"]').forEach((b) => b.setAttribute("aria-expanded", "false"));
 }
-function hashCount(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return 4 + (h % 17); }
+function hashCount(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return Math.max(3, Math.round(rgTotal() * (15 + (h % 45)) / 100)); }
 
 let sortKey = "match";
 function applyView() {
@@ -442,10 +731,12 @@ function applyView() {
     const cards = [...grid.children].sort((a, b) => asc ? a.dataset[sortKey] - b.dataset[sortKey] : b.dataset[sortKey] - a.dataset[sortKey]);
     // 취향타입은 개인화 기준값이라 개수에 영향 X, 나머지 필터가 결과를 좁힌다
     const active = FILTERS.filter((f) => f.key !== "taste" && applied[f.key].length).map((f) => applied[f.key].join(",")).join("|");
-    const n = active ? hashCount(active) : 24;
+    const others = FILTERS.filter((f) => f.key !== "taste" && f.key !== "region" && applied[f.key].length).length;
+    let n = applied.region.length ? rgSum() : (active ? hashCount(active) : rgTotal());
+    if (applied.region.length && others) n = Math.max(2, Math.round(n * 0.55));
     const shown = Math.min(n, cards.length);
     cards.forEach((c, i) => { c.style.display = i < shown ? "" : "none"; grid.appendChild(c); });
-    countEl.textContent = `총 ${n}개 장소`;
+    countEl.textContent = rgCountText(n);
     grid.style.opacity = "1";
   }, 180);
 }

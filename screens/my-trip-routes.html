@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Scentrip — 탐색 · 여행 동선</title>
+<title>Scentrip — 내 여행 · 내 동선</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="../reference/tokens.css">
 <style>
@@ -273,18 +273,65 @@ html .guest-only { display: none; }
 .footer-legal .lgl-muted { color: var(--color-content-neutral-muted); }
 .footer-legal .lgl-strong { color: var(--color-content-neutral-muted); }
 
+/* ---------- 내 여행 · 서브탭 ---------- */
+.subtabs { display: flex; justify-content: center; gap: var(--space-40); width: 100%; padding: 0 60px; border-bottom: 1px solid var(--color-border-subtle); background: var(--color-surface-overlay); }
+.subtab { position: relative; padding: var(--space-16) var(--space-4) var(--space-12); font-size: var(--text-body-18); font-weight: 600; line-height: 1.5; color: var(--color-content-neutral-subtle); text-decoration: none; transition: color .14s ease; }
+.subtab:hover { color: var(--color-content-neutral-muted); }
+.subtab.is-active { color: var(--color-content-neutral); }
+.subtab.is-active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--color-content-neutral); }
+
+/* ---------- 로그인 게이트 ---------- */
+.guest-gate { flex: 1 0 auto; align-items: center; justify-content: center; padding: 80px var(--space-32); }
+.is-guest .guest-gate { display: flex; }
+.gate-card { max-width: 480px; width: 100%; text-align: center; display: flex; flex-direction: column; align-items: center; gap: var(--space-16); padding: 56px 40px; background: var(--color-surface-overlay); border: 1px solid var(--color-border-default); border-radius: var(--radius-2xl); box-shadow: var(--elevation-md); }
+.gate-icon { width: 72px; height: 72px; border-radius: var(--radius-full); background: var(--color-surface-01); color: var(--color-primary); display: flex; align-items: center; justify-content: center; }
+.gate-icon svg { width: 34px; height: 34px; }
+.gate-card h1 { font-size: var(--text-title-28); font-weight: 600; line-height: 1.35; color: var(--color-content-neutral); }
+.gate-card p { font-size: var(--text-body-14); line-height: 1.8; color: var(--color-content-neutral-muted); }
+.gate-card .btn-login { margin-top: var(--space-12); height: 48px; padding: 0 var(--space-32); font-size: var(--text-body-16); }
+
+/* ---------- 내 동선 ---------- */
+.section { padding-top: 28px; }
+.mt-head { display: flex; align-items: baseline; gap: var(--space-8); }
+.mt-head h2 { font-size: var(--text-heading-24); font-weight: 600; line-height: 1.25; color: var(--color-content-neutral); }
+.mt-head .n { font-size: var(--text-heading-24); font-weight: 600; line-height: 1.25; color: var(--color-primary); font-variant-numeric: tabular-nums; }
+.mt-bar { display: flex; align-items: center; gap: var(--space-16); width: 100%; }
+.mt-bar .filter-chips { flex: 1 1 auto; }
+.btn-make { flex: none; display: inline-flex; align-items: center; gap: var(--space-6); height: 44px; padding: 0 var(--space-16); border: 0; border-radius: var(--radius-full); background: var(--gradient-depth); color: #fff; font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; white-space: nowrap; transition: opacity .16s ease; }
+.btn-make svg { width: 16px; height: 16px; }
+.btn-make:hover { opacity: .92; }
+
+.row3 { grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: var(--space-20); row-gap: var(--space-40); }
+.route-card[hidden] { display: none; }
+.route-card { gap: var(--space-16); }
+.route-title { font-size: var(--text-body-18); white-space: normal; }
+.route-desc, .route-meta { font-size: var(--text-body-14); }
+.route-photo { transition: border-color .16s ease, box-shadow .16s ease; }
+.route-card:hover .route-photo { border-color: var(--color-border-strong); box-shadow: var(--elevation-md); }
+.heart-btn { position: absolute; top: 12px; right: 12px; z-index: 3; padding: 0; border: 0; background: none; line-height: 0; transition: transform .14s ease; }
+.heart-btn:hover { transform: scale(1.1); }
+.heart-btn .heart { position: static; color: var(--color-primary); filter: drop-shadow(0 1px 2px rgba(255,255,255,.9)); }
+
+.mt-empty[hidden] { display: none; }   /* display:flex가 hidden 속성을 덮어쓰지 않게 */
+.mt-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-6); padding: 64px var(--space-24); border: 1px dashed var(--color-border-strong); border-radius: var(--radius-xl); }
+.mt-empty b { font-size: var(--text-body-16); font-weight: 600; color: var(--color-content-neutral); }
+.mt-empty span { font-size: var(--text-body-14); color: var(--color-content-neutral-muted); }
+
 /* ---------- 반응형 ---------- */
 @media (max-width: 1120px) {
-  .tabs, .featured, .ai-banner-sec, .section, .footer-inner { padding-left: 32px; padding-right: 32px; }
-  .row3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .subtabs, .section, .footer-inner { padding-left: 32px; padding-right: 32px; }
+  .row3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 820px) {
   .nav { padding: 0 20px; }
-  .featured-row { grid-template-columns: 1fr; }
+  .row3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mt-bar { flex-wrap: wrap; }
+  .mt-bar .divider-v { display: none; }
 }
 @media (max-width: 560px) {
   .nav-center { display: none; }
   .row3 { grid-template-columns: 1fr; }
+  .subtabs { gap: var(--space-24); }
 }
 
 /* ---------- 동선 만들기 모달 (Figma node 677:3566) ---------- */
@@ -327,8 +374,8 @@ html .guest-only { display: none; }
     <div class="nav-center">
       <div class="nav-list">
         <a class="nav-link" href="#">소식</a>
-        <a class="nav-link is-selected" href="place-recommend.html">탐색</a>
-        <a class="nav-link" href="my-trip.html">내 여행</a>
+        <a class="nav-link" href="place-recommend.html">탐색</a>
+        <a class="nav-link is-selected" href="my-trip.html">내 여행</a>
       </div>
     </div>
     <div class="nav-right">
@@ -359,61 +406,47 @@ html .guest-only { display: none; }
     </div>
   </nav>
 
-  <!-- ============ 탭 ============ -->
-  <div class="tabs">
-    <a class="tab" href="place-recommend.html">여행 장소</a>
-    <a class="tab is-active" href="route.html">여행 동선</a>
+  <!-- ============ 서브탭 ============ -->
+  <div class="subtabs auth-only">
+    <a class="subtab" href="my-trip.html">내 장소</a>
+    <a class="subtab is-active" href="my-trip-routes.html">내 동선</a>
   </div>
 
-  <!-- ============ 추천 동선 (featured) ============ -->
-  <section class="featured section">
-    <div class="featured-head">
-      <div class="featured-title">
-        <span class="spark" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg></span>
-        <h2>이서연님을 위한 AI 맞춤 동선</h2>
-      </div>
-      <div class="carousel-arrows">
-        <button class="arrow-btn" type="button" aria-label="이전"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/></svg></button>
-        <button class="arrow-btn" type="button" aria-label="다음"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></button>
-      </div>
-    </div>
-    <div class="featured-row" id="featuredRow"></div>
-    <div class="carousel-dots" aria-hidden="true"><i class="active"></i><i></i><i></i></div>
-  </section>
-
-  <!-- ============ AI 동선 제작 배너 ============ -->
-  <section class="ai-banner-sec">
-    <div class="ai-banner">
-      <div class="ai-banner-tx">
-        <h2>센트립 AI로 나만의 여행 동선을 제작해보세요</h2>
-        <p>원하는 조건으로 커스텀할 수 있어요</p>
-      </div>
-      <a class="ai-banner-btn" href="#" data-make-route><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg>나만의 동선 만들기</a>
-    </div>
-  </section>
-
-  <!-- ============ 필터 + 그리드 ============ -->
-  <section class="section">
-    <div class="guest-banner guest-only">
-      <div class="gb-text">
-        <b>로그인하고 내 취향에 맞는 동선을 매칭받아 보세요</b>
-        <span>향 취향 검사 결과로 AI가 매칭도 높은 여행 동선을 추천해 드려요.</span>
-      </div>
+  <!-- ============ 로그인 게이트 (게스트 전용) ============ -->
+  <section class="guest-gate guest-only" aria-labelledby="gateTitle">
+    <div class="gate-card">
+      <span class="gate-icon" aria-hidden="true">
+        <svg viewBox="0 0 256 256" fill="currentColor"><path d="M178,32c-20.65,0-38.73,8.88-50,23.89C116.73,40.88,98.65,32,78,32A62.07,62.07,0,0,0,16,94c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,220.66,240,164,240,94A62.07,62.07,0,0,0,178,32Zm-50,174c-18.26-11.06-96-64.11-96-112A46.06,46.06,0,0,1,78,48c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0C142.22,58.36,158.55,48,178,48a46.06,46.06,0,0,1,46,46C224,141.87,146.24,194.93,128,206Z"/></svg>
+      </span>
+      <h1 id="gateTitle">로그인이 필요해요</h1>
+      <p>내 여행은 로그인 후 이용할 수 있어요.<br>저장한 장소와 동선을 한곳에서 확인해 보세요.</p>
       <button class="btn-login" type="button" data-login>로그인</button>
     </div>
-    <div class="filterbar">
-      <div class="filter-left">
-        <div class="segmented" id="sortSeg">
-          <button class="seg is-active" type="button" data-sort="match">취향 매칭순</button>
-          <button class="seg" type="button" data-sort="pop">인기순</button>
-        </div>
-        <div class="divider-v" aria-hidden="true"></div>
-        <div class="filter-chips" id="filterChips"></div>
+  </section>
+
+  <!-- ============ 내 동선 ============ -->
+  <section class="section auth-only">
+    <div class="mt-head">
+      <h2>내 동선</h2><span class="n" id="count">12</span>
+    </div>
+    <div class="mt-bar">
+      <div class="segmented" id="ownerSeg" role="tablist">
+        <button class="seg is-active" type="button" data-owner="all">전체</button>
+        <button class="seg" type="button" data-owner="others">추천 동선</button>
+        <button class="seg" type="button" data-owner="mine">내가 만든 동선</button>
       </div>
-      <p class="count" id="count">총 24개 동선</p>
+      <div class="divider-v" aria-hidden="true"></div>
+      <div class="filter-chips" id="filterChips"></div>
+      <button class="btn-make" type="button" data-make-route>
+        <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg>
+        동선 만들기
+      </button>
     </div>
     <div class="row3" id="routeGrid"></div>
-    <div class="more-wrap"><button class="more-btn" type="button">더보기</button></div>
+    <div class="mt-empty" id="empty" hidden>
+      <b>조건에 맞는 동선이 없어요</b>
+      <span>필터를 조정하면 저장한 다른 동선을 볼 수 있어요.</span>
+    </div>
   </section>
 
   <!-- ============ Footer ============ -->
@@ -448,50 +481,22 @@ html .guest-only { display: none; }
 <script>
 const starFour = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg>';
 const heart = '<svg class="heart" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M178,32c-20.65,0-38.73,8.88-50,23.89C116.73,40.88,98.65,32,78,32A62.07,62.07,0,0,0,16,94c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,220.66,240,164,240,94A62.07,62.07,0,0,0,178,32Zm-50,174c-18.26-11.06-96-64.11-96-112A46.06,46.06,0,0,1,78,48c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0C142.22,58.36,158.55,48,178,48a46.06,46.06,0,0,1,46,46C224,141.87,146.24,194.93,128,206Z"/></svg>';
-const heartDark = heart.replace('class="heart"', 'class="heart heart-dark"');
+const heartFill = '<svg class="heart" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,94c0,70-103.79,126.66-108.21,129a8,8,0,0,1-7.58,0C119.79,220.66,16,164,16,94A62.07,62.07,0,0,1,78,32c20.65,0,38.73,8.88,50,23.89C139.27,40.88,157.35,32,178,32A62.07,62.07,0,0,1,240,94Z"/></svg>';
 const caret = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></svg>';
 const xCircle = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm37.66,130.34a8,8,0,0,1-11.32,11.32L128,139.31l-26.34,26.35a8,8,0,0,1-11.32-11.32L116.69,128,90.34,101.66a8,8,0,0,1,11.32-11.32L128,116.69l26.34-26.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>';
 
 const check = '<svg class="check" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/></svg>';
 
-/* ---------- 추천 동선(featured) 카드 ---------- */
-function featuredCard() {
-  return `
-    <article class="featured-card">
-      <div class="fc-head">
-        <div class="fc-badgerow">
-          <span class="badge">${starFour}<span>AI 매칭 88%</span></span>
-          ${heartDark}
-        </div>
-        <div class="fc-title">
-          <p class="t1">이서연님의 취향을 만족시켜줄</p>
-          <p class="t2">운치있는 담양 당일치기 코스</p>
-        </div>
-        <div class="fc-meta"><span>5개 장소</span><span>·</span><span>경북 안동</span><span>·</span><span>여유로운 코스</span></div>
-      </div>
-      <div class="fc-photos">
-        <div class="fc-big"><img src="../assets/route/big.jpg" alt=""></div>
-        <div class="fc-grid">
-          <div><img src="../assets/route/g1.jpg" alt=""></div>
-          <div><img src="../assets/route/g2.jpg" alt=""></div>
-          <div><img src="../assets/route/g3.jpg" alt=""></div>
-          <div><img src="../assets/route/g4.jpg" alt=""></div>
-        </div>
-      </div>
-    </article>`;
-}
-document.getElementById("featuredRow").innerHTML = featuredCard() + featuredCard();
-
 /* ---------- 동선 카드 (지도+마커) ---------- */
-function routeCard(r) {
+function routeCard(r, i) {
   return `
-    <article class="route-card" data-match="${r.match}" data-pop="${r.pop}">
+    <article class="route-card" data-i="${i}">
       <div class="route-photo">
         <img class="route-map" src="../assets/home/map.jpg" alt="">
         <svg class="route-lines" viewBox="0 0 371 200" preserveAspectRatio="none" aria-hidden="true"><polyline points="202.67,39 280.67,100 240.67,120 210.67,160 310.67,150"/></svg>
         <div class="route-inset"><img src="../assets/home/${r.inset}.jpg" alt=""></div>
         <span class="badge">${starFour}<span>AI 매칭 ${r.match}%</span></span>
-        ${heart}
+        <button class="heart-btn" type="button" data-unsave aria-label="${r.name} 저장 해제">${heartFill}</button>
         <span class="route-marker m1">1</span><span class="route-marker m2">2</span><span class="route-marker m3">3</span><span class="route-marker m4">4</span><span class="route-marker m5">5</span>
       </div>
       <div class="route-body">
@@ -504,18 +509,18 @@ function routeCard(r) {
 
 /* match(취향 매칭%) · pop(인기) 값을 넣어 정렬이 실제로 보이게 한다 */
 const ROUTES = [
-  { inset:"inset1", place:"[강릉]", name:"강릉 해안 드라이브 동선", desc:"시원한 바다를 끼고 달리는 최고의 힐링 코스", meta:"6개 장소 · 1박2일 · 부지런한 코스 · OOO 취향", match:96, pop:1240 },
-  { inset:"inset2", place:"[연무장길]", name:"성수동 힙플레이스 탐방", desc:"요즘 가장 뜨거운 팝업과 카페만 모았습니다", meta:"6개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:88, pop:4200 },
-  { inset:"inset3", place:"[황리단길]", name:"경주 황리단길 감성 산책", desc:"한옥의 고즈넉함과 맛집을 동시에 즐기는 여행", meta:"4개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:94, pop:2050 },
-  { inset:"inset1", place:"[애월]", name:"제주 서쪽 일몰 투어", desc:"제주 바다의 붉은 노을을 감상하는 완벽한 동선", meta:"5개 장소 · 2박3일 · 여유로운 코스 · OOO 취향", match:85, pop:3100 },
-  { inset:"inset2", place:"[광안리 해수욕장]", name:"부산 광안리 야경 코스", desc:"화려한 도시의 밤과 파도 소리를 즐기는 산책", meta:"5개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:91, pop:3800 },
-  { inset:"inset3", place:"[전주 한옥마을]", name:"전주 먹거리 투어", desc:"길거리 음식부터 한정식까지 전주의 맛을 찾아서", meta:"6개 장소 · 1박2일 · 부지런한 코스 · OOO 취향", match:83, pop:2700 },
-  { inset:"inset1", place:"[서피비치]", name:"양양 서핑 & 카페 여행", desc:"파도를 즐기고 힙한 서퍼들의 아지트를 방문하세요", meta:"4개 장소 · 1박2일 · 부지런한 코스 · OOO 취향", match:95, pop:1580 },
-  { inset:"inset2", place:"[개항장 거리]", name:"인천 개항장 시간 여행", desc:"근대의 정취가 남은 골목을 걷는 레트로 여행", meta:"5개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:82, pop:990 },
-  { inset:"inset3", place:"[수원 화성]", name:"수원 성곽길 트래킹", desc:"유네스코 세계유산 성곽을 걷는 힐링 코스", meta:"5개 장소 · 당일치기 · 부지런한 코스 · OOO 취향", match:90, pop:2300 },
-  { inset:"inset1", place:"[죽녹원]", name:"담양 죽녹원 힐링 로드", desc:"초록빛 대나무 숲길에서 마음까지 시원해지는 산책", meta:"4개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:93, pop:1720 },
-  { inset:"inset2", place:"[대관령 양떼목장]", name:"강릉 양떼 힐링 투어", desc:"드넓은 초원과 귀여운 양떼를 만나는 힐링 코스", meta:"5개 장소 · 1박2일 · 여유로운 코스 · OOO 취향", match:87, pop:5100 },
-  { inset:"inset3", place:"[경복궁]", name:"서울 궁궐 야간 개장 코스", desc:"달빛 아래 만나는 조선 궁궐의 고즈넉한 아름다움", meta:"6개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:89, pop:6400 },
+  { inset:"inset1", place:"[강릉]", name:"강릉 해안 드라이브 동선", sido:"강원", unit:"강릉시", period:"1박 2일", pace:"부지런한 코스", theme:"자연·힐링", owner:"others", desc:"시원한 바다를 끼고 달리는 최고의 힐링 코스", meta:"6개 장소 · 1박2일 · 부지런한 코스 · OOO 취향", match:96, pop:1240 },
+  { inset:"inset2", place:"[연무장길]", name:"성수동 힙플레이스 탐방", sido:"서울", unit:"성동구", period:"당일치기", pace:"여유로운 코스", theme:"맛집·카페", owner:"others", desc:"요즘 가장 뜨거운 팝업과 카페만 모았습니다", meta:"6개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:88, pop:4200 },
+  { inset:"inset3", place:"[황리단길]", name:"경주 황리단길 감성 산책", sido:"경북", unit:"경주시", period:"당일치기", pace:"여유로운 코스", theme:"역사·문화", owner:"mine", desc:"한옥의 고즈넉함과 맛집을 동시에 즐기는 여행", meta:"4개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:94, pop:2050 },
+  { inset:"inset1", place:"[애월]", name:"제주 서쪽 일몰 투어", sido:"제주", unit:"제주시", period:"2박 3일", pace:"여유로운 코스", theme:"자연·힐링", owner:"others", desc:"제주 바다의 붉은 노을을 감상하는 완벽한 동선", meta:"5개 장소 · 2박3일 · 여유로운 코스 · OOO 취향", match:85, pop:3100 },
+  { inset:"inset2", place:"[광안리 해수욕장]", name:"부산 광안리 야경 코스", sido:"부산", unit:"수영구", period:"당일치기", pace:"여유로운 코스", theme:"야경", owner:"others", desc:"화려한 도시의 밤과 파도 소리를 즐기는 산책", meta:"5개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:91, pop:3800 },
+  { inset:"inset3", place:"[전주 한옥마을]", name:"전주 먹거리 투어", sido:"전북", unit:"전주시", period:"1박 2일", pace:"부지런한 코스", theme:"맛집·카페", owner:"mine", desc:"길거리 음식부터 한정식까지 전주의 맛을 찾아서", meta:"6개 장소 · 1박2일 · 부지런한 코스 · OOO 취향", match:83, pop:2700 },
+  { inset:"inset1", place:"[서피비치]", name:"양양 서핑 & 카페 여행", sido:"강원", unit:"양양군", period:"1박 2일", pace:"부지런한 코스", theme:"액티비티", owner:"others", desc:"파도를 즐기고 힙한 서퍼들의 아지트를 방문하세요", meta:"4개 장소 · 1박2일 · 부지런한 코스 · OOO 취향", match:95, pop:1580 },
+  { inset:"inset2", place:"[개항장 거리]", name:"인천 개항장 시간 여행", sido:"인천", unit:"중구", period:"당일치기", pace:"여유로운 코스", theme:"역사·문화", owner:"others", desc:"근대의 정취가 남은 골목을 걷는 레트로 여행", meta:"5개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:82, pop:990 },
+  { inset:"inset3", place:"[수원 화성]", name:"수원 성곽길 트래킹", sido:"경기", unit:"수원시", period:"당일치기", pace:"부지런한 코스", theme:"역사·문화", owner:"mine", desc:"유네스코 세계유산 성곽을 걷는 힐링 코스", meta:"5개 장소 · 당일치기 · 부지런한 코스 · OOO 취향", match:90, pop:2300 },
+  { inset:"inset1", place:"[죽녹원]", name:"담양 죽녹원 힐링 로드", sido:"전남", unit:"담양군", period:"당일치기", pace:"여유로운 코스", theme:"자연·힐링", owner:"others", desc:"초록빛 대나무 숲길에서 마음까지 시원해지는 산책", meta:"4개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:93, pop:1720 },
+  { inset:"inset2", place:"[대관령 양떼목장]", name:"강릉 양떼 힐링 투어", sido:"강원", unit:"평창군", period:"1박 2일", pace:"여유로운 코스", theme:"자연·힐링", owner:"others", desc:"드넓은 초원과 귀여운 양떼를 만나는 힐링 코스", meta:"5개 장소 · 1박2일 · 여유로운 코스 · OOO 취향", match:87, pop:5100 },
+  { inset:"inset3", place:"[경복궁]", name:"서울 궁궐 야간 개장 코스", sido:"서울", unit:"종로구", period:"당일치기", pace:"여유로운 코스", theme:"역사·문화", owner:"mine", desc:"달빛 아래 만나는 조선 궁궐의 고즈넉한 아름다움", meta:"6개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:89, pop:6400 },
 ];
 const grid = document.getElementById("routeGrid");
 grid.innerHTML = ROUTES.map(routeCard).join("");
@@ -556,9 +561,11 @@ function updateChip(key) {
 }
 FILTERS.forEach((f) => updateChip(f.key));
 
-const RG_SCALE = 0.4;   // 동선 기준 지역별 데이터 밀도
 const RG_NOUN = "동선";
-const RG_CTA_NOUN = "여행동선";
+const RG_CTA_NOUN = "동선";
+/* 저장한 동선이 곧 이 화면의 지역 데이터 — 저장이 없는 지역은 0건 → 비활성 */
+const RG_SAVED = {};
+ROUTES.forEach((r) => { const k = r.sido + ">" + r.unit; RG_SAVED[k] = (RG_SAVED[k] || 0) + 1; });
 
 /* ---------- 지역 필터 — 시·도 레일 + 시·군·구 체크리스트 ----------
    applied.region 토큰: "강원"(도 전체) | "강원>강릉시"(개별 시군구)
@@ -584,7 +591,7 @@ const RG_UNITS = [
   ["제주", [["제주시",7],["서귀포시",9]]],
 ];
 const REGIONS = RG_UNITS.map(([name, units]) => {
-  const list = units.map(([n, c]) => ({ name: n, count: Math.round(c * RG_SCALE) }));
+  const list = units.map(([n]) => ({ name: n, count: RG_SAVED[name + ">" + n] || 0 }));
   return { name, units: list, count: list.reduce((s, u) => s + u.count, 0) };
 });
 function rgTotal() { return REGIONS.reduce((s, r) => s + r.count, 0); }
@@ -725,7 +732,6 @@ function rgRenderList(keepScroll) {
   rgListEl.scrollTop = keepScroll ? top : 0;
 }
 const RG_CAP = 1000;   // 이 이상은 정확한 수를 세는 의미가 없어 'N개 이상'으로 끊는다
-function rgCountText(n) { return n >= RG_CAP ? `총 ${RG_CAP.toLocaleString()}개 이상 ${RG_NOUN}` : `총 ${n.toLocaleString()}개 ${RG_NOUN}`; }
 function rgRenderFoot() {
   const n = rgDraft.length ? rgSumOf(rgDraft) : rgTotal();
   rgApplyBtn.textContent = n >= RG_CAP
@@ -777,70 +783,76 @@ rgApplyBtn.addEventListener("click", () => {
   rgSyncChip(); closePops(); applyView();
 });
 rgRender();
-document.getElementById("count").textContent = rgCountText(rgTotal());
+document.getElementById("count").textContent = rgTotal();
 
 const countEl = document.getElementById("count");
+const emptyEl = document.getElementById("empty");
 function closePops() {
   chipsWrap.querySelectorAll(".filter-pop.is-open").forEach((p) => p.classList.remove("is-open"));
   chipsWrap.querySelectorAll('.chip-btn[aria-expanded="true"]').forEach((b) => b.setAttribute("aria-expanded", "false"));
 }
-function hashCount(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return Math.max(3, Math.round(rgTotal() * (15 + (h % 45)) / 100)); }
 
-let sortKey = "match";
+/* 저장 목록은 12개뿐이라 실제로 걸러낸다.
+   취향은 탐색 화면과 마찬가지로 개인화 기준값이라 결과를 좁히지 않는다. */
+let owner = "all";
+function hit(r) {
+  if (owner !== "all" && r.owner !== owner) return false;
+  if (applied.region.length) {
+    const ok = applied.region.some((t) => { const [sd, ut] = t.split(">"); return ut ? (r.sido === sd && r.unit === ut) : r.sido === sd; });
+    if (!ok) return false;
+  }
+  if (applied.period.length && !applied.period.includes(r.period)) return false;
+  if (applied.pace.length && !applied.pace.includes(r.pace)) return false;
+  if (applied.theme.length && !applied.theme.includes(r.theme)) return false;
+  return true;
+}
 function applyView() {
   grid.style.opacity = "0";
   setTimeout(() => {
-    const cards = [...grid.children].sort((a, b) => Number(b.dataset[sortKey]) - Number(a.dataset[sortKey]));
-    // 취향타입은 개인화 기준값이라 개수에 영향 X, 나머지 필터가 결과를 좁힌다
-    const active = FILTERS.filter((f) => f.key !== "taste" && applied[f.key].length).map((f) => applied[f.key].join(",")).join("|");
-    const others = FILTERS.filter((f) => f.key !== "taste" && f.key !== "region" && applied[f.key].length).length;
-    let n = applied.region.length ? rgSum() : (active ? hashCount(active) : rgTotal());
-    if (applied.region.length && others) n = Math.max(2, Math.round(n * 0.55));
-    const shown = Math.min(n, cards.length);
-    cards.forEach((c, i) => { c.style.display = i < shown ? "" : "none"; grid.appendChild(c); });
-    countEl.textContent = rgCountText(n);
+    let n = 0;
+    [...grid.children].forEach((el) => {
+      const on = hit(ROUTES[+el.dataset.i]);
+      el.hidden = !on;
+      if (on) n++;
+    });
+    countEl.textContent = n;
+    emptyEl.hidden = n > 0;
     grid.style.opacity = "1";
   }, 180);
 }
 
-/* 정렬 세그먼트 — 선택된 흰색 pill이 슬라이드로 이동 */
-const sortSeg = document.getElementById("sortSeg");
+/* 남이 만든 / 직접 만든 세그먼트 — 흰 pill이 슬라이드로 이동 */
+const ownerSeg = document.getElementById("ownerSeg");
 const segThumb = document.createElement("span");
 segThumb.className = "seg-thumb";
 segThumb.setAttribute("aria-hidden", "true");
-sortSeg.prepend(segThumb);
+ownerSeg.prepend(segThumb);
 function placeThumb(seg, instant) {
   if (instant) segThumb.style.transition = "none";
   segThumb.style.width = seg.offsetWidth + "px";
   segThumb.style.transform = "translateX(" + seg.offsetLeft + "px)";
   if (instant) { void segThumb.offsetWidth; segThumb.style.transition = ""; }
 }
-function repositionThumb() { const a = sortSeg.querySelector(".seg.is-active"); if (a) placeThumb(a, true); }
+function repositionThumb() { const a = ownerSeg.querySelector(".seg.is-active"); if (a) placeThumb(a, true); }
 requestAnimationFrame(repositionThumb);
 window.addEventListener("load", repositionThumb);
 window.addEventListener("resize", repositionThumb);
-sortSeg.addEventListener("click", (e) => {
+ownerSeg.addEventListener("click", (e) => {
   const btn = e.target.closest(".seg"); if (!btn) return;
-  sortSeg.querySelectorAll(".seg").forEach((s) => s.classList.remove("is-active"));
+  ownerSeg.querySelectorAll(".seg").forEach((x) => x.classList.remove("is-active"));
   btn.classList.add("is-active");
   placeThumb(btn, false);
-  sortKey = btn.dataset.sort;
+  owner = btn.dataset.owner;
   applyView();
 });
 
-/* 게스트(비로그인): 매칭 정렬 대신 인기순 기본, 취향 프리셋 해제, 헤딩 일반화 */
-if (document.documentElement.classList.contains("is-guest")) {
-  applied.taste = [];
-  const matchSeg = sortSeg.querySelector('.seg[data-sort="match"]');
-  const popSeg = sortSeg.querySelector('.seg[data-sort="pop"]');
-  if (matchSeg) matchSeg.classList.remove("is-active");
-  if (popSeg) popSeg.classList.add("is-active");
-  sortKey = "pop";
-  requestAnimationFrame(repositionThumb);
-  const fh = document.querySelector(".featured-title h2");
-  if (fh) fh.textContent = "지금 인기 있는 여행 동선";
-  document.querySelectorAll(".fc-title .t1").forEach((el) => { el.textContent = "여행자들에게 인기 있는"; });
-}
+/* 하트 = 저장 해제 */
+grid.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-unsave]"); if (!btn) return;
+  e.preventDefault(); e.stopPropagation();
+  btn.closest(".route-card").remove();
+  applyView();
+});
 
 /* 필터 드롭다운 (다중선택) */
 chipsWrap.addEventListener("click", (e) => {
