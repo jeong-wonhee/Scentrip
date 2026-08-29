@@ -3,14 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Scentrip — 탐색 · 여행 동선</title>
+<title>Scentrip — 동선 만들기 · 장소 선택</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="../reference/tokens.css">
 <link rel="stylesheet" href="../reference/components.css">
 <style>
 /* ============================================================
-   Scentrip — 탐색 · 여행 동선 (Figma node 50:323 이식)
-   색/라운드/타이포는 tokens.css var()만 사용.
+   Scentrip — 동선 만들기 · 장소 선택 (Figma node 677:3567 이식)
+   내 장소 화면(목록 + 지도)에 '선택 모드'를 입힌 화면. 카드/핀/필터 컴포넌트를 그대로 재사용한다.
+   탐색·장소 추천 화면의 헤더/필터/카드 컴포넌트를 그대로 재사용하고,
+   저장 목록 + 지도 패널 레이아웃만 이 화면 전용으로 추가했다.
+   색/라운드는 tokens.css var()만 사용. 28·36·44·56·60·200 등
+   토큰 스케일에 없는 값만 Figma 수치를 그대로 px로 적음.
    ============================================================ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -27,14 +31,18 @@ button { font-family: inherit; letter-spacing: inherit; cursor: pointer; }
 
 .page { display: flex; flex-direction: column; align-items: stretch; width: 100%; min-height: 100vh; }
 
-/* ---------- 브랜드 로고 ---------- */
+/* ---------- 브랜드 로고 (Nav·Footer 공용) ---------- */
 .brand { display: flex; align-items: center; gap: var(--space-6); height: 56px; width: 128px; text-decoration: none; }
 .brand-bars { display: flex; align-items: center; gap: var(--space-2); height: 24px; }
 .brand-bars i { display: block; width: 4px; border-radius: var(--radius-full); background: linear-gradient(180deg, #31493a, #418a8b); }
 .brand-bars i:nth-child(1) { height: 8px; }
 .brand-bars i:nth-child(2) { height: 18px; opacity: .7; }
 .brand-bars i:nth-child(3) { height: 12px; opacity: .4; }
-.brand-name { font-size: var(--text-heading-20); font-weight: 600; line-height: 1.25; background: linear-gradient(180deg, #31493a, #418a8b); -webkit-background-clip: text; background-clip: text; color: transparent; white-space: nowrap; }
+.brand-name {
+  font-size: var(--text-heading-20); font-weight: 600; line-height: 1.25;
+  background: linear-gradient(180deg, #31493a, #418a8b);
+  -webkit-background-clip: text; background-clip: text; color: transparent; white-space: nowrap;
+}
 
 /* ---------- Nav ---------- */
 .nav { display: flex; align-items: center; height: 56px; padding: 0 28px; width: 100%; background: var(--color-surface-overlay); position: relative; z-index: 10; justify-content: space-between; }
@@ -82,61 +90,23 @@ html .guest-only { display: none; }
 .guest-banner .gb-text b { font-size: var(--text-body-16); font-weight: 600; color: var(--color-content-neutral); }
 .guest-banner .gb-text span { font-size: var(--text-body-14); color: var(--color-content-neutral-muted); }
 
-/* ---------- 탭 ---------- */
+/* ---------- 탭 (여행 장소 / 여행 동선) ---------- */
 .tabs { display: flex; gap: 28px; align-items: flex-start; padding: 36px 60px; width: 100%; font-size: var(--text-title-32); font-weight: 600; line-height: 1.25; white-space: nowrap; }
 .tabs .tab { color: var(--color-content-neutral-disabled); text-decoration: none; }
 .tabs .tab.is-active { color: var(--color-primary); }
 
-/* ---------- 섹션 공용 ---------- */
-.section { padding: 36px 60px; width: 100%; background: var(--color-background); display: flex; flex-direction: column; gap: var(--space-24); }
+/* ---------- 콘텐츠 영역 ---------- */
+.content { display: flex; flex-direction: column; gap: 28px; align-items: center; padding: 20px 60px 36px; width: 100%; background: var(--color-background); }
 
-/* ---------- 추천 동선 (featured) ---------- */
-.featured { padding: 20px 60px 36px; }
-.featured-head { display: flex; align-items: center; gap: var(--space-24); width: 100%; }
-.featured-title { flex: 1 0 0; display: flex; gap: var(--space-8); align-items: center; min-width: 0; }
-.featured-title .spark { width: 28px; height: 28px; color: var(--color-primary); flex: none; }
-.featured-title h2 { font-size: var(--text-heading-24); font-weight: 600; line-height: 1.25; color: var(--color-content-neutral); }
-.carousel-arrows { display: flex; gap: var(--space-8); flex: none; }
-.arrow-btn { width: 36px; height: 36px; border-radius: var(--radius-full); border: 1px solid var(--color-neutral-border); background: var(--color-surface-overlay); display: flex; align-items: center; justify-content: center; color: var(--color-content-neutral-muted); }
-.arrow-btn svg { width: 16px; height: 16px; }
-.featured-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-24); }
-.featured-card { border: 1px solid var(--color-neutral-border); border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--elevation-lg); display: flex; flex-direction: column; background: var(--color-surface-overlay); }
-.fc-head { padding: var(--space-20); display: flex; flex-direction: column; gap: var(--space-12); }
-.fc-badgerow { display: flex; align-items: center; justify-content: space-between; }
-.fc-title { display: flex; flex-direction: column; gap: var(--space-4); }
-.fc-title .t1 { font-size: var(--text-body-16); font-weight: 500; line-height: 1.5; color: var(--color-content-neutral-muted); }
-.fc-title .t2 { font-size: var(--text-heading-24); font-weight: 600; line-height: 1.25; color: var(--color-content-neutral); }
-.fc-meta { display: flex; gap: var(--space-6); font-size: var(--text-body-14); font-weight: 500; line-height: 1.5; color: var(--color-content-neutral-subtle); white-space: nowrap; flex-wrap: wrap; }
-/* 사진 콜라주 — 카드 하단 full-bleed, 2px 간격, 4:3 가로형 타일(개별 라운드 없음) */
-.fc-photos { display: flex; gap: 2px; aspect-ratio: 8 / 3; min-height: 0; }
-.fc-big { flex: 1 1 50%; min-width: 0; min-height: 0; }
-.fc-big img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.fc-grid { flex: 1 1 50%; min-width: 0; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; }
-.fc-grid img { width: 100%; height: 100%; object-fit: cover; }
-.carousel-dots { display: flex; gap: var(--space-6); justify-content: center; align-items: center; width: 100%; }
-.carousel-dots i { width: 8px; height: 8px; border-radius: var(--radius-full); background: var(--color-neutral-border); }
-.carousel-dots i.active { width: 22px; background: var(--color-primary); }
-
-/* ---------- AI 동선 제작 배너 ---------- */
-.ai-banner-sec { padding: 12px 60px 24px; width: 100%; }
-.ai-banner { display: flex; align-items: center; gap: var(--space-24); padding: 32px 48px; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-2xl); background: linear-gradient(100deg, var(--scent-green-50), color-mix(in srgb, var(--scent-green-100) 55%, #fff)); }
-.ai-banner-tx { flex: 1 1 auto; min-width: 0; }
-.ai-banner-tx h2 { font-size: var(--text-heading-24); font-weight: 600; line-height: 1.3; color: var(--scent-green-950); }
-.ai-banner-tx p { margin-top: var(--space-8); font-size: var(--text-body-16); color: var(--color-content-neutral-muted); }
-.ai-banner-btn { flex: none; display: inline-flex; align-items: center; gap: var(--space-8); height: 52px; padding: 0 var(--space-24); border-radius: var(--radius-full); background: var(--gradient-depth); color: #fff; font-size: var(--text-body-16); font-weight: 600; text-decoration: none; transition: opacity .16s ease; }
-.ai-banner-btn:hover { opacity: .92; }
-.ai-banner-btn svg { width: 18px; height: 18px; }
-@media (max-width: 640px) { .ai-banner { flex-direction: column; align-items: flex-start; gap: var(--space-16); padding: 28px 24px; } }
-
-/* ---------- 필터 바 ---------- */
-.filterbar { display: flex; gap: var(--space-24); align-items: center; width: 100%; flex-wrap: wrap; }
-.filter-left { flex: 1 0 0; display: flex; gap: var(--space-24); align-items: center; min-width: 0; flex-wrap: wrap; }
+/* 필터 바 */
+.filterbar { display: flex; gap: var(--space-24); align-items: center; width: 100%; }
+.filter-left { flex: 1 0 0; display: flex; gap: var(--space-24); align-items: center; min-width: 0; }
 .segmented { position: relative; display: flex; gap: var(--space-4); padding: var(--space-4); background: var(--color-neutral-subtle); border-radius: 999px; }
 .seg { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; height: 36px; padding: 0 var(--space-16); border-radius: 999px; border: 0; background: none; font-size: var(--text-body-16); font-weight: 600; line-height: 1.5; color: var(--color-content-neutral-subtle); white-space: nowrap; transition: color .2s ease; }
 .seg.is-active { color: var(--color-content-default); }
 .seg-thumb { position: absolute; top: var(--space-4); bottom: var(--space-4); left: 0; width: 0; border-radius: 999px; background: var(--color-surface-overlay); box-shadow: var(--elevation-xs); z-index: 0; pointer-events: none; transition: transform .28s cubic-bezier(.22,.61,.36,1), width .28s cubic-bezier(.22,.61,.36,1); }
 .divider-v { width: 1px; height: 20px; background: var(--color-neutral-border); flex: none; }
-.filter-chips { display: flex; gap: var(--space-8); align-items: center; flex-wrap: wrap; }
+.filter-chips { display: flex; gap: var(--space-8); align-items: center; }
 .count { font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; color: var(--color-content-neutral-muted); white-space: nowrap; flex: none; }
 .seg { cursor: pointer; }
 
@@ -202,39 +172,44 @@ html .guest-only { display: none; }
   .rg-body { height: 280px; }
 }
 
-/* ---------- 동선 카드 그리드 ---------- */
-.row3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--space-24); row-gap: var(--space-48); align-items: start; transition: opacity .18s ease; }
-.route-card { display: flex; flex-direction: column; gap: var(--space-24); }
-.route-photo { position: relative; aspect-ratio: 371 / 200; overflow: hidden; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); }
-.route-map { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.route-photo .badge { position: absolute; top: 12px; left: 12px; z-index: 3; }
-.route-photo .heart { position: absolute; top: 12px; right: 12px; z-index: 3; }
-.route-inset { position: absolute; left: 3.2%; top: 28%; width: 33.4%; bottom: 6%; border: 2px solid #fff; border-radius: var(--radius-lg); overflow: hidden; z-index: 2; }
-.route-inset img { width: 100%; height: 100%; object-fit: cover; }
-.route-lines { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
-.route-lines polyline { fill: none; stroke: var(--color-content-subtle); stroke-width: 2; stroke-dasharray: 5 5; stroke-linecap: round; stroke-linejoin: round; }
-.route-marker { position: absolute; width: 24px; height: 24px; transform: translate(-50%, -50%); border-radius: var(--radius-full); border: 1px solid #fff; display: flex; align-items: center; justify-content: center; font-size: var(--text-caption-12); font-weight: 600; line-height: 1.5; color: #fff; z-index: 2; }
-.route-marker.m1 { left: 54.63%; top: 19.5%; background: var(--color-content-muted); }
-.route-marker.m2 { left: 75.65%; top: 50%;   background: var(--color-content-subtle); }
-.route-marker.m3 { left: 64.87%; top: 60%;   background: var(--color-content-subtle); }
-.route-marker.m4 { left: 56.78%; top: 80%;   background: var(--color-content-subtle); }
-.route-marker.m5 { left: 83.74%; top: 75%;   background: var(--color-content-disabled); }
-.route-body { display: flex; flex-direction: column; gap: var(--space-8); }
-.route-title { display: flex; gap: var(--space-6); font-size: var(--text-heading-20); font-weight: 600; line-height: 1.25; white-space: nowrap; }
-.route-title .place { color: var(--color-content-subtle); }
-.route-title .name { color: var(--color-content-neutral); }
-.route-desc { font-size: var(--text-body-16); font-weight: 400; line-height: 1.5; color: var(--color-content-neutral-muted); }
-.route-meta { display: flex; gap: var(--space-4); font-size: var(--text-body-16); font-weight: 500; line-height: 1.5; color: var(--color-content-neutral-subtle); white-space: nowrap; }
+/* 취향 타입 옵션 — 액센트 컬러 아바타(추후 캐릭터 일러스트 자리) + 타이틀/서브텍스트 */
+.filter[data-key="taste"] .filter-pop {
+  width: 480px;
+  max-height: 420px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+  align-content: start;
+}
+.filter[data-key="taste"] .filter-opt.opt-taste { width: 100%; }
+.filter-opt.opt-taste { padding: var(--space-10) var(--space-12); white-space: normal; }
+.opt-left { display: flex; align-items: center; gap: var(--space-10); min-width: 0; }
+.opt-avatar { width: 32px; height: 32px; border-radius: var(--radius-full); flex: none; }
+.opt-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.opt-title { font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-default); white-space: nowrap; }
+.opt-sub { font-size: var(--text-caption-11); color: var(--color-content-neutral-muted); white-space: nowrap; }
+.filter-opt.opt-taste.is-selected .opt-title { color: var(--color-content-subtle); font-weight: 600; }
 
+/* 카드 그리드 */
+.grid { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: var(--space-24); row-gap: var(--space-48); transition: opacity .18s ease; }
+.card { display: flex; flex-direction: column; gap: var(--space-24); }
+.card-photo {
+  position: relative; height: 200px; overflow: hidden;
+  border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl);
+  padding: var(--space-12); display: flex; flex-direction: column;
+}
+.card-photo .bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.card-top { position: relative; display: flex; gap: var(--space-8); align-items: flex-start; justify-content: flex-end; width: 100%; }
+.badge-wrap { flex: 1 0 0; display: flex; min-width: 0; }
 .badge { display: inline-flex; align-items: center; gap: var(--space-6); padding: var(--space-4) var(--space-10); border-radius: var(--radius-full); background: var(--color-surface-overlay); border: 1px solid var(--color-border-default); }
 .badge svg { width: 14px; height: 14px; color: var(--color-content-subtle); }
 .badge span { font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; color: var(--color-content-subtle); white-space: nowrap; }
 .heart { width: 28px; height: 28px; color: var(--color-surface-overlay); filter: drop-shadow(0 1px 2px rgba(0,0,0,.04)) drop-shadow(0 2px 4px rgba(0,0,0,.08)); flex: none; }
-.heart.heart-dark { color: var(--color-content-neutral-subtle); filter: none; }
-
-/* ---------- 더보기 ---------- */
-.more-wrap { display: flex; justify-content: center; padding-top: var(--space-8); }
-.more-btn { height: 44px; padding: 0 var(--space-24); border-radius: var(--radius-full); border: 1px solid var(--color-neutral-border); background: var(--color-surface-overlay); font-size: var(--text-body-16); font-weight: 600; color: var(--color-content-neutral-muted); }
+.card-body { display: flex; flex-direction: column; gap: var(--space-8); }
+.card-name { font-size: var(--text-heading-20); font-weight: 600; line-height: 1.25; color: var(--color-content-neutral); }
+.card-desc { font-size: var(--text-body-16); font-weight: 400; line-height: 1.5; color: var(--color-content-neutral-muted); }
+.card-meta { display: flex; gap: var(--space-8); font-size: var(--text-body-16); font-weight: 500; line-height: 1.5; color: var(--color-content-neutral-subtle); }
 
 /* ---------- Footer ---------- */
 .footer { padding-top: 36px; width: 100%; }
@@ -254,34 +229,141 @@ html .guest-only { display: none; }
 .footer-legal .lgl-muted { color: var(--color-content-neutral-muted); }
 .footer-legal .lgl-strong { color: var(--color-content-neutral-muted); }
 
+/* ---------- 내 여행 · 서브탭 ---------- */
+.subtabs { display: flex; justify-content: center; gap: var(--space-40); width: 100%; padding: 0 60px; border-bottom: 1px solid var(--color-border-subtle); background: var(--color-surface-overlay); }
+.subtab { position: relative; padding: var(--space-16) var(--space-4) var(--space-12); font-size: var(--text-body-18); font-weight: 600; line-height: 1.5; color: var(--color-content-neutral-subtle); text-decoration: none; transition: color .14s ease; }
+.subtab:hover { color: var(--color-content-neutral-muted); }
+.subtab.is-active { color: var(--color-content-neutral); }
+.subtab.is-active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--color-content-neutral); }
+
+/* ---------- 로그인 게이트 ---------- */
+.guest-gate { flex: 1 0 auto; align-items: center; justify-content: center; padding: 80px var(--space-32); }
+.is-guest .guest-gate { display: flex; }
+.gate-card { max-width: 480px; width: 100%; text-align: center; display: flex; flex-direction: column; align-items: center; gap: var(--space-16); padding: 56px 40px; background: var(--color-surface-overlay); border: 1px solid var(--color-border-default); border-radius: var(--radius-2xl); box-shadow: var(--elevation-md); }
+.gate-icon { width: 72px; height: 72px; border-radius: var(--radius-full); background: var(--color-surface-01); color: var(--color-primary); display: flex; align-items: center; justify-content: center; }
+.gate-icon svg { width: 34px; height: 34px; }
+.gate-card h1 { font-size: var(--text-title-28); font-weight: 600; line-height: 1.35; color: var(--color-content-neutral); }
+.gate-card p { font-size: var(--text-body-14); line-height: 1.8; color: var(--color-content-neutral-muted); }
+.gate-card .btn-login { margin-top: var(--space-12); height: 48px; padding: 0 var(--space-32); font-size: var(--text-body-16); }
+
+/* ---------- 저장 목록 + 지도 2단 ---------- */
+.content { padding: 28px 60px 40px; }
+.mt-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.78fr); gap: var(--space-32); align-items: start; width: 100%; }
+.mt-main { min-width: 0; display: flex; flex-direction: column; gap: var(--space-16); }
+.mt-head { display: flex; align-items: baseline; gap: var(--space-8); }
+.mt-head h2 { font-size: var(--text-heading-24); font-weight: 600; line-height: 1.25; color: var(--color-content-neutral); }
+.mt-head .n { font-size: var(--text-heading-24); font-weight: 600; line-height: 1.25; color: var(--color-primary); font-variant-numeric: tabular-nums; }
+.mt-bar { display: flex; align-items: center; gap: var(--space-12); }
+.mt-bar .filter-chips { flex: 1 1 auto; flex-wrap: wrap; }
+.mt-bar .chip-btn { height: 40px; font-size: var(--text-body-14); }
+.btn-make { flex: none; display: inline-flex; align-items: center; gap: var(--space-6); height: 40px; padding: 0 var(--space-16); border: 0; border-radius: var(--radius-full); background: var(--gradient-depth); color: #fff; font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; white-space: nowrap; transition: opacity .16s ease; }
+.btn-make svg { width: 16px; height: 16px; }
+.btn-make:hover { opacity: .92; }
+
+/* 카드 — 목록 폭이 좁아 탐색 화면보다 한 단계 축소 */
+.grid { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--space-16); row-gap: var(--space-32); }
+.card { gap: var(--space-12); }
+.card-photo { height: 150px; padding: var(--space-8); transition: border-color .16s ease, box-shadow .16s ease; }
+.card-name { font-size: var(--text-body-16); }
+.card-desc { font-size: var(--text-body-14); }
+.card-meta { font-size: 13px; gap: var(--space-6); }
+.card[hidden] { display: none; }
+.card:hover .card-photo, .card.is-hot .card-photo { border-color: var(--color-border-strong); box-shadow: var(--elevation-md); }
+.heart-btn { padding: 0; border: 0; background: none; line-height: 0; transition: transform .14s ease; }
+.heart-btn:hover { transform: scale(1.1); }
+.heart-btn .heart { color: var(--color-base-white); }
+
+.mt-empty[hidden] { display: none; }   /* display:flex가 hidden 속성을 덮어쓰지 않게 */
+.mt-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-6); padding: 56px var(--space-24); border: 1px dashed var(--color-border-strong); border-radius: var(--radius-xl); }
+.mt-empty b { font-size: var(--text-body-16); font-weight: 600; color: var(--color-content-neutral); }
+.mt-empty span { font-size: var(--text-body-14); color: var(--color-content-neutral-muted); }
+
+/* 지도 패널 — 실제 서비스에서는 지도 SDK가 들어갈 자리 */
+.mt-map { position: sticky; top: var(--space-24); aspect-ratio: 360 / 520; max-width: 100%; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); overflow: hidden; background: var(--mt-sea);
+  --mt-sea: #dce8f0; --mt-land: #f5f8f4; --mt-coast: #cddbd2; --mt-road: #e6e3d6; }
+.mt-map-plate { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mt-pins { position: absolute; inset: 0; }
+.pin { position: absolute; width: 26px; height: 34px; transform: translate(-50%, -100%); color: var(--color-primary); border: 0; background: none; padding: 0; }
+.pin svg { width: 100%; height: 100%; filter: drop-shadow(0 2px 4px rgba(27,35,29,.18)); transform-origin: 50% 100%; transition: transform .16s cubic-bezier(.22,.61,.36,1); }
+.pin[hidden] { display: none; }
+.pin:hover, .pin.is-on { color: var(--color-primary-active); z-index: 4; }
+.pin:hover svg, .pin.is-on svg { transform: scale(1.18); }
+
+/* 핀 호버 카드 — 목록 카드의 축약본 */
+.pin-card { position: absolute; left: 50%; bottom: calc(100% + 10px); width: 216px; display: flex; gap: var(--space-10); padding: var(--space-8); background: var(--color-surface-overlay); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); box-shadow: var(--elevation-lg); text-align: left; opacity: 0; visibility: hidden; transform: translate(-50%, 4px); transition: opacity .14s ease, transform .14s ease, visibility .14s; pointer-events: none; z-index: 5; }
+.pin:hover .pin-card, .pin.is-on .pin-card { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+.pin.at-left .pin-card { left: -8px; transform: translate(0, 4px); }
+.pin.at-left:hover .pin-card, .pin.at-left.is-on .pin-card { transform: translate(0, 0); }
+.pin.at-right .pin-card { left: auto; right: -8px; transform: translate(0, 4px); }
+.pin.at-right:hover .pin-card, .pin.at-right.is-on .pin-card { transform: translate(0, 0); }
+.pin.at-top .pin-card { bottom: auto; top: calc(100% + 4px); }
+.pin-card img { width: 56px; height: 56px; flex: none; border-radius: var(--radius-md); object-fit: cover; }
+.pc-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pc-name { font-size: var(--text-body-14); font-weight: 600; line-height: 1.4; color: var(--color-content-neutral); }
+.pc-desc { font-size: var(--text-caption-11); font-weight: 400; line-height: 1.45; color: var(--color-content-neutral-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.pc-meta { display: flex; align-items: center; gap: var(--space-4); margin-top: 2px; font-size: var(--text-caption-11); font-weight: 600; line-height: 1.5; color: var(--color-content-subtle); }
+.pc-meta svg { width: 11px; height: 11px; flex: none; }
+.mt-map-city text { font-family: var(--font-family); font-size: 11px; font-weight: 500; fill: var(--color-content-neutral-subtle); letter-spacing: var(--letter-spacing); }
+.mt-map-note { position: absolute; left: var(--space-12); bottom: var(--space-12); padding: var(--space-4) var(--space-10); border-radius: var(--radius-full); background: var(--alpha-white-70); backdrop-filter: blur(4px); font-size: var(--text-caption-11); font-weight: 500; color: var(--color-content-neutral-muted); }
+
+/* ---------- 동선 만들기 · 장소 선택 ---------- */
+.crumb { display: flex; align-items: center; gap: var(--space-6); font-size: var(--text-body-14); font-weight: 500; line-height: 1.5; color: var(--color-content-neutral-subtle); }
+.crumb a { color: inherit; text-decoration: none; }
+.crumb a:hover { color: var(--color-content-neutral-muted); }
+.crumb b { font-weight: 600; color: var(--color-content-neutral-muted); }
+.cr-title { font-size: var(--text-heading-24); font-weight: 600; line-height: 1.3; color: var(--color-content-neutral); }
+.cr-search { position: relative; display: flex; align-items: center; width: 260px; flex: none; }
+.cr-search svg { position: absolute; left: var(--space-12); width: 16px; height: 16px; color: var(--color-content-neutral-subtle); pointer-events: none; }
+.cr-search input { width: 100%; height: 40px; padding: 0 var(--space-12) 0 36px; border: 1px solid transparent; border-radius: var(--radius-lg); background: var(--color-neutral-bg); font-family: inherit; letter-spacing: inherit; font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-neutral); outline: none; transition: border-color .14s ease; }
+.cr-search input::placeholder { color: var(--color-content-neutral-subtle); font-weight: 400; }
+.cr-search input:focus { border-color: var(--color-neutral-border); }
+.cr-search input::-webkit-search-cancel-button { -webkit-appearance: none; }
+.sr-count { font-size: var(--text-body-14); font-weight: 500; line-height: 1.5; color: var(--color-content-neutral-muted); }
+.sr-count b { font-weight: 600; color: var(--color-content-neutral); }
+
+/* 카드 = 선택 토글 */
+.card { width: 100%; padding: 0; border: 0; background: none; text-align: left; }
+.card-photo { padding: var(--space-10); }
+.card .ck { position: absolute; top: var(--space-10); left: var(--space-10); z-index: 2; }
+.card.is-picked .card-photo { border-color: var(--color-primary); box-shadow: inset 0 0 0 1px var(--color-primary); }
+.card.is-picked .card-name { color: var(--color-primary); }
+
+/* 선택된 장소의 핀 */
+.pin.is-picked { color: var(--color-primary-active); }
+.pin.is-picked svg { transform: scale(1.1); }
+.pin-card .ck { position: absolute; top: var(--space-4); left: var(--space-4); }
+.pin-card .pc-thumb { position: relative; flex: none; }
+
+/* 하단 선택 바 — Figma에는 없지만 다음 단계로 넘어갈 수단이 필요해 추가 */
+.cr-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; padding: var(--space-16) 60px; background: var(--color-surface-overlay); border-top: 1px solid var(--color-border-subtle); box-shadow: 0 -4px 16px rgba(27,35,29,.06); transform: translateY(100%); transition: transform .22s cubic-bezier(.22,.61,.36,1); }
+.cr-bar.is-up { transform: none; }
+body.has-bar .page { padding-bottom: 76px; }   /* 고정 바가 푸터를 가리지 않게 */
+.cr-bar-inner { display: flex; align-items: center; gap: var(--space-16); }
+.cr-picked { flex: 1 1 auto; min-width: 0; font-size: var(--text-body-14); font-weight: 500; line-height: 1.5; color: var(--color-content-neutral-muted); }
+.cr-picked b { font-size: var(--text-body-16); font-weight: 600; color: var(--color-primary); }
+.cr-next { flex: none; height: 44px; padding: 0 var(--space-24); border: 0; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-content-on-fill); font-size: var(--text-body-14); font-weight: 600; transition: background .16s ease; }
+.cr-next:hover { background: var(--color-primary-hover); }
+.cr-next:disabled { background: var(--neutral-200); color: var(--color-content-neutral-disabled); cursor: not-allowed; }
+@media (max-width: 1220px) { .cr-bar { padding-left: 32px; padding-right: 32px; } }
+@media (max-width: 820px) { .mt-bar { flex-wrap: wrap; } .cr-search { width: 100%; } }
+
 /* ---------- 반응형 ---------- */
-@media (max-width: 1120px) {
-  .tabs, .featured, .ai-banner-sec, .section, .footer-inner { padding-left: 32px; padding-right: 32px; }
-  .row3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 1220px) {
+  .subtabs, .content, .footer-inner { padding-left: 32px; padding-right: 32px; }
+  .mt-split { grid-template-columns: 1fr; }
+  .mt-map { position: static; order: -1; width: 100%; max-width: 420px; margin: 0 auto; }
 }
 @media (max-width: 820px) {
   .nav { padding: 0 20px; }
-  .featured-row { grid-template-columns: 1fr; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mt-bar { flex-wrap: wrap; }
 }
 @media (max-width: 560px) {
   .nav-center { display: none; }
-  .row3 { grid-template-columns: 1fr; }
+  .grid { grid-template-columns: 1fr; }
+  .subtabs { gap: var(--space-24); }
 }
 
-/* ---------- 동선 만들기 모달 (Figma node 677:3566) ---------- */
-.rm-opts { display: flex; flex-direction: column; gap: var(--space-12); }
-.rm-opt { display: flex; align-items: center; gap: var(--space-16); width: 100%; padding: var(--space-16); border: 1px solid var(--color-neutral-border); border-radius: var(--radius-lg); background: var(--color-surface-overlay); text-align: left; transition: border-color .14s ease, background .14s ease, box-shadow .14s ease; }
-.rm-opt:hover { border-color: var(--color-border-strong); background: var(--color-surface-01); }
-.rm-opt.is-on { border-color: var(--color-primary); box-shadow: inset 0 0 0 1px var(--color-primary); background: var(--color-surface-overlay); }
-.rm-ic { width: 48px; height: 48px; flex: none; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--color-surface-01); color: var(--color-primary); }
-.rm-ic svg { width: 22px; height: 22px; }
-.rm-tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.rm-tx b { font-size: var(--text-body-16); font-weight: 600; line-height: 1.45; color: var(--color-content-neutral); }
-.rm-tx span { font-size: var(--text-body-14); font-weight: 400; line-height: 1.5; color: var(--color-content-neutral-muted); }
-.rm-next { height: 44px; padding: 0 var(--space-24); border: 0; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-content-on-fill); font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; transition: background .16s ease; }
-.rm-next:hover { background: var(--color-primary-hover); }
-.rm-next:active { background: var(--color-primary-active); }
-@media (max-width: 560px) { .rm-opt { gap: var(--space-12); padding: var(--space-12); } .rm-ic { width: 40px; height: 40px; } }
 </style>
 <script>(function(){try{if((localStorage.getItem("scentrip_auth")||"in")==="out")document.documentElement.classList.add("is-guest");}catch(e){}})();</script>
 </head>
@@ -297,7 +379,7 @@ html .guest-only { display: none; }
     <div class="nav-center">
       <div class="nav-list">
         <a class="nav-link" href="#">소식</a>
-        <a class="nav-link is-selected" href="place-recommend.html">탐색</a>
+        <a class="nav-link" href="place-recommend.html">탐색</a>
         <a class="nav-link" href="my-trip.html">내 여행</a>
       </div>
     </div>
@@ -329,62 +411,68 @@ html .guest-only { display: none; }
     </div>
   </nav>
 
-  <!-- ============ 탭 ============ -->
-  <div class="tabs">
-    <a class="tab" href="place-recommend.html">여행 장소</a>
-    <a class="tab is-active" href="route.html">여행 동선</a>
-  </div>
-
-  <!-- ============ 추천 동선 (featured) ============ -->
-  <section class="featured section">
-    <div class="featured-head">
-      <div class="featured-title">
-        <span class="spark" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg></span>
-        <h2>이서연님을 위한 AI 맞춤 동선</h2>
-      </div>
-      <div class="carousel-arrows">
-        <button class="arrow-btn" type="button" aria-label="이전"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/></svg></button>
-        <button class="arrow-btn" type="button" aria-label="다음"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></button>
-      </div>
-    </div>
-    <div class="featured-row" id="featuredRow"></div>
-    <div class="carousel-dots" aria-hidden="true"><i class="active"></i><i></i><i></i></div>
-  </section>
-
-  <!-- ============ AI 동선 제작 배너 ============ -->
-  <section class="ai-banner-sec">
-    <div class="ai-banner">
-      <div class="ai-banner-tx">
-        <h2>센트립 AI로 나만의 여행 동선을 제작해보세요</h2>
-        <p>원하는 조건으로 커스텀할 수 있어요</p>
-      </div>
-      <a class="ai-banner-btn" href="#" data-make-route><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg>나만의 동선 만들기</a>
-    </div>
-  </section>
-
-  <!-- ============ 필터 + 그리드 ============ -->
-  <section class="section">
-    <div class="guest-banner guest-only">
-      <div class="gb-text">
-        <b>로그인하고 내 취향에 맞는 동선을 매칭받아 보세요</b>
-        <span>향 취향 검사 결과로 AI가 매칭도 높은 여행 동선을 추천해 드려요.</span>
-      </div>
+  <!-- ============ 로그인 게이트 (게스트 전용) ============ -->
+  <section class="guest-gate guest-only" aria-labelledby="gateTitle">
+    <div class="gate-card">
+      <span class="gate-icon" aria-hidden="true">
+        <svg viewBox="0 0 256 256" fill="currentColor"><path d="M178,32c-20.65,0-38.73,8.88-50,23.89C116.73,40.88,98.65,32,78,32A62.07,62.07,0,0,0,16,94c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,220.66,240,164,240,94A62.07,62.07,0,0,0,178,32Zm-50,174c-18.26-11.06-96-64.11-96-112A46.06,46.06,0,0,1,78,48c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0C142.22,58.36,158.55,48,178,48a46.06,46.06,0,0,1,46,46C224,141.87,146.24,194.93,128,206Z"/></svg>
+      </span>
+      <h1 id="gateTitle">로그인이 필요해요</h1>
+      <p>동선 만들기는 로그인 후 이용할 수 있어요.<br>저장한 장소를 골라 나만의 동선을 만들어 보세요.</p>
       <button class="btn-login" type="button" data-login>로그인</button>
     </div>
-    <div class="filterbar">
-      <div class="filter-left">
-        <div class="segmented" id="sortSeg">
-          <button class="seg is-active" type="button" data-sort="match">취향 매칭순</button>
-          <button class="seg" type="button" data-sort="pop">인기순</button>
-        </div>
-        <div class="divider-v" aria-hidden="true"></div>
-        <div class="filter-chips" id="filterChips"></div>
-      </div>
-      <p class="count" id="count">총 24개 동선</p>
-    </div>
-    <div class="row3" id="routeGrid"></div>
-    <div class="more-wrap"><button class="more-btn" type="button">더보기</button></div>
   </section>
+
+  <!-- ============ 콘텐츠 ============ -->
+  <div class="content auth-only">
+    <div class="mt-split">
+
+      <!-- 왼쪽: 저장 목록 -->
+      <div class="mt-main">
+        <nav class="crumb" aria-label="현재 위치">
+          <a href="my-trip.html">동선 만들기</a><span aria-hidden="true">›</span><b>장소 선택</b>
+        </nav>
+        <h2 class="cr-title">여행 동선을 만들 장소를 선택해주세요</h2>
+        <div class="mt-bar">
+          <div class="filter-chips" id="filterChips"></div>
+          <div class="cr-search">
+            <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/></svg>
+            <input type="search" id="nameSearch" placeholder="장소명 검색" aria-label="장소명 검색" autocomplete="off">
+          </div>
+        </div>
+        <p class="sr-count">선택 가능한 장소 <b id="count">10</b>곳</p>
+        <div class="grid" id="grid"></div>
+        <div class="mt-empty" id="empty" hidden>
+          <b>조건에 맞는 장소가 없어요</b>
+          <span>필터나 검색어를 바꾸면 저장한 다른 장소를 볼 수 있어요.</span>
+        </div>
+      </div>
+
+      <!-- 오른쪽: 저장 위치 지도 -->
+      <div class="mt-map" id="map">
+        <svg class="mt-map-plate" viewBox="0 0 360 520" aria-hidden="true">
+          <rect x="0" y="0" width="360" height="520" fill="var(--mt-sea)"/>
+          <g fill="var(--mt-land)" stroke="var(--mt-coast)" stroke-width="1.5" stroke-linejoin="round">
+            <path d="M83.3,112.0 L94.4,136.0 L113.0,176.0 L60.9,192.0 L94.4,252.0 L83.3,280.0 L79.5,312.0 L75.8,348.0 L87.0,388.0 L105.6,388.0 L161.4,344.0 L176.3,352.0 L191.2,348.0 L243.3,344.0 L280.5,324.0 L299.1,292.0 L314.0,245.6 L302.8,212.0 L302.8,172.0 L287.9,136.0 L269.3,112.0 L243.3,76.0 L228.4,48.0 L146.5,68.0 L105.6,96.0 Z"/>
+            <ellipse cx="90.7" cy="460.0" rx="33.5" ry="16.0"/>
+          </g>
+          <g stroke="var(--mt-road)" stroke-width="1.4" fill="none" stroke-linecap="round"><path d="M123.4,126.4 L156.2,225.6 L243.3,262.4 L280.5,320.0"/><path d="M123.4,126.4 L265.6,112.0"/><path d="M156.2,225.6 L113.0,320.0"/></g>
+          <g class="mt-map-city"><text x="130.4" y="130.4">서울</text><text x="163.2" y="229.6">대전</text><text x="250.3" y="266.4">대구</text><text x="287.5" y="324.0">부산</text><text x="120.0" y="324.0">광주</text><text x="272.6" y="116.0">강릉</text><text x="96.2" y="456.8">제주</text></g>
+        </svg>
+        <div class="mt-pins" id="pins"></div>
+        <p class="mt-map-note">선택한 장소가 지도에 표시됩니다 · 실제 서비스에서는 지도 SDK로 대체</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ 선택 바 ============ -->
+  <div class="cr-bar auth-only" id="pickBar">
+    <div class="cr-bar-inner">
+      <p class="cr-picked"><b id="pickCount">0</b>개 장소 선택됨</p>
+      <button class="cr-next" type="button" id="pickNext" disabled>선택한 <span id="pickCountCta">0</span>개 장소로 동선 만들기</button>
+    </div>
+  </div>
 
   <!-- ============ Footer ============ -->
   <footer class="footer">
@@ -416,103 +504,121 @@ html .guest-only { display: none; }
 </div>
 
 <script>
+/* 카드 12장 — Figma의 이미지 순환 순서를 그대로 재현.
+   텍스트는 Figma 플레이스홀더(여행장소명 / Description / 지역 특징 취향 / AI 매칭 88%)를 동일하게 유지. */
 const starFour = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg>';
 const heart = '<svg class="heart" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M178,32c-20.65,0-38.73,8.88-50,23.89C116.73,40.88,98.65,32,78,32A62.07,62.07,0,0,0,16,94c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,220.66,240,164,240,94A62.07,62.07,0,0,0,178,32Zm-50,174c-18.26-11.06-96-64.11-96-112A46.06,46.06,0,0,1,78,48c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0C142.22,58.36,158.55,48,178,48a46.06,46.06,0,0,1,46,46C224,141.87,146.24,194.93,128,206Z"/></svg>';
-const heartDark = heart.replace('class="heart"', 'class="heart heart-dark"');
 const caret = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></svg>';
 const xCircle = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm37.66,130.34a8,8,0,0,1-11.32,11.32L128,139.31l-26.34,26.35a8,8,0,0,1-11.32-11.32L116.69,128,90.34,101.66a8,8,0,0,1,11.32-11.32L128,116.69l26.34-26.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>';
-
 const check = '<svg class="check" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/></svg>';
 
-/* ---------- 추천 동선(featured) 카드 ---------- */
-function featuredCard() {
-  return `
-    <article class="featured-card">
-      <div class="fc-head">
-        <div class="fc-badgerow">
-          <span class="badge">${starFour}<span>AI 매칭 88%</span></span>
-          ${heartDark}
-        </div>
-        <div class="fc-title">
-          <p class="t1">이서연님의 취향을 만족시켜줄</p>
-          <p class="t2">운치있는 담양 당일치기 코스</p>
-        </div>
-        <div class="fc-meta"><span>5개 장소</span><span>·</span><span>경북 안동</span><span>·</span><span>여유로운 코스</span></div>
-      </div>
-      <div class="fc-photos">
-        <div class="fc-big"><img src="../assets/route/big.jpg" alt=""></div>
-        <div class="fc-grid">
-          <div><img src="../assets/route/g1.jpg" alt=""></div>
-          <div><img src="../assets/route/g2.jpg" alt=""></div>
-          <div><img src="../assets/route/g3.jpg" alt=""></div>
-          <div><img src="../assets/route/g4.jpg" alt=""></div>
-        </div>
-      </div>
-    </article>`;
-}
-document.getElementById("featuredRow").innerHTML = featuredCard() + featuredCard();
+const heartFill = '<svg class="heart" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,94c0,70-103.79,126.66-108.21,129a8,8,0,0,1-7.58,0C119.79,220.66,16,164,16,94A62.07,62.07,0,0,1,78,32c20.65,0,38.73,8.88,50,23.89C139.27,40.88,157.35,32,178,32A62.07,62.07,0,0,1,240,94Z"/></svg>';
+const pinShape = '<svg viewBox="0 0 26 34" aria-hidden="true"><path fill="currentColor" d="M13 0C5.8 0 0 5.8 0 13c0 9.2 11.6 20.2 12.1 20.6a1.3 1.3 0 0 0 1.8 0C14.4 33.2 26 22.2 26 13 26 5.8 20.2 0 13 0Z"/><path fill="#fff" d="M13 19.6c-3.6-2.5-6-4.7-6-7.2 0-2 1.5-3.5 3.4-3.5 1 0 1.9.4 2.6 1.2.7-.8 1.6-1.2 2.6-1.2 1.9 0 3.4 1.5 3.4 3.5 0 2.5-2.4 4.7-6 7.2Z"/></svg>';
 
-/* ---------- 동선 카드 (지도+마커) ---------- */
-function routeCard(r) {
-  return `
-    <article class="route-card" data-match="${r.match}" data-pop="${r.pop}">
-      <div class="route-photo">
-        <img class="route-map" src="../assets/home/map.jpg" alt="">
-        <svg class="route-lines" viewBox="0 0 371 200" preserveAspectRatio="none" aria-hidden="true"><polyline points="202.67,39 280.67,100 240.67,120 210.67,160 310.67,150"/></svg>
-        <div class="route-inset"><img src="../assets/home/${r.inset}.jpg" alt=""></div>
-        <span class="badge">${starFour}<span>AI 매칭 ${r.match}%</span></span>
-        ${heart}
-        <span class="route-marker m1">1</span><span class="route-marker m2">2</span><span class="route-marker m3">3</span><span class="route-marker m4">4</span><span class="route-marker m5">5</span>
-      </div>
-      <div class="route-body">
-        <div class="route-title"><span class="place">${r.place}</span><span class="name">${r.name}</span></div>
-        <p class="route-desc">${r.desc}</p>
-        <div class="route-meta">${r.meta}</div>
-      </div>
-    </article>`;
-}
-
-/* match(취향 매칭%) · pop(인기) 값을 넣어 정렬이 실제로 보이게 한다 */
-const ROUTES = [
-  { inset:"inset1", place:"[강릉]", name:"강릉 해안 드라이브 동선", desc:"시원한 바다를 끼고 달리는 최고의 힐링 코스", meta:"6개 장소 · 1박2일 · 부지런한 코스 · OOO 취향", match:96, pop:1240 },
-  { inset:"inset2", place:"[연무장길]", name:"성수동 힙플레이스 탐방", desc:"요즘 가장 뜨거운 팝업과 카페만 모았습니다", meta:"6개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:88, pop:4200 },
-  { inset:"inset3", place:"[황리단길]", name:"경주 황리단길 감성 산책", desc:"한옥의 고즈넉함과 맛집을 동시에 즐기는 여행", meta:"4개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:94, pop:2050 },
-  { inset:"inset1", place:"[애월]", name:"제주 서쪽 일몰 투어", desc:"제주 바다의 붉은 노을을 감상하는 완벽한 동선", meta:"5개 장소 · 2박3일 · 여유로운 코스 · OOO 취향", match:85, pop:3100 },
-  { inset:"inset2", place:"[광안리 해수욕장]", name:"부산 광안리 야경 코스", desc:"화려한 도시의 밤과 파도 소리를 즐기는 산책", meta:"5개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:91, pop:3800 },
-  { inset:"inset3", place:"[전주 한옥마을]", name:"전주 먹거리 투어", desc:"길거리 음식부터 한정식까지 전주의 맛을 찾아서", meta:"6개 장소 · 1박2일 · 부지런한 코스 · OOO 취향", match:83, pop:2700 },
-  { inset:"inset1", place:"[서피비치]", name:"양양 서핑 & 카페 여행", desc:"파도를 즐기고 힙한 서퍼들의 아지트를 방문하세요", meta:"4개 장소 · 1박2일 · 부지런한 코스 · OOO 취향", match:95, pop:1580 },
-  { inset:"inset2", place:"[개항장 거리]", name:"인천 개항장 시간 여행", desc:"근대의 정취가 남은 골목을 걷는 레트로 여행", meta:"5개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:82, pop:990 },
-  { inset:"inset3", place:"[수원 화성]", name:"수원 성곽길 트래킹", desc:"유네스코 세계유산 성곽을 걷는 힐링 코스", meta:"5개 장소 · 당일치기 · 부지런한 코스 · OOO 취향", match:90, pop:2300 },
-  { inset:"inset1", place:"[죽녹원]", name:"담양 죽녹원 힐링 로드", desc:"초록빛 대나무 숲길에서 마음까지 시원해지는 산책", meta:"4개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:93, pop:1720 },
-  { inset:"inset2", place:"[대관령 양떼목장]", name:"강릉 양떼 힐링 투어", desc:"드넓은 초원과 귀여운 양떼를 만나는 힐링 코스", meta:"5개 장소 · 1박2일 · 여유로운 코스 · OOO 취향", match:87, pop:5100 },
-  { inset:"inset3", place:"[경복궁]", name:"서울 궁궐 야간 개장 코스", desc:"달빛 아래 만나는 조선 궁궐의 고즈넉한 아름다움", meta:"6개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:89, pop:6400 },
+/* 저장한 장소 10곳 — mx·my는 지도 플레이트(360×520 좌표계) 위 핀 위치 */
+const PLACES = [
+  { img:"frame9",  name:"강릉 안목해변",     desc:"파도 소리와 커피 향이 함께 흐르는 바다",   sido:"강원", unit:"강릉시",   feature:"자연경관",  match:96, mx:267.1, my:110.4 },
+  { img:"frame10", name:"속초 영금정",       desc:"동해 일출을 가장 가까이서 보는 정자",     sido:"강원", unit:"속초시",   feature:"포토스팟",  match:92, mx:243.3, my:76.0 },
+  { img:"frame11", name:"경주 황리단길",     desc:"한옥 사이사이 숨은 감성 카페 거리",       sido:"경북", unit:"경주시",   feature:"감성 카페", match:94, mx:288.7, my:265.6 },
+  { img:"frame9",  name:"익선동 한옥골목",   desc:"좁은 골목에 켜켜이 쌓인 서울의 시간",     sido:"서울", unit:"종로구",   feature:"감성 카페", match:88, mx:123.4, my:126.4 },
+  { img:"frame10", name:"성수동 연무장길",   desc:"공장 골목이 전시장이 되는 거리",          sido:"서울", unit:"성동구",   feature:"전시·예술", match:90, mx:128.7, my:130.4 },
+  { img:"frame11", name:"애월 한담해안길",   desc:"에메랄드빛 바다를 끼고 걷는 산책로",      sido:"제주", unit:"제주시",   feature:"자연경관",  match:95, mx:78.0, my:455.2 },
+  { img:"frame9",  name:"쇠소깍",           desc:"검은 현무암과 물빛이 만나는 계곡",        sido:"제주", unit:"서귀포시", feature:"포토스팟",  match:89, mx:96.7, my:470.4 },
+  { img:"frame10", name:"여수 낭만포차거리", desc:"밤바다 조명 아래 이어지는 포차 골목",     sido:"전남", unit:"여수시",   feature:"포토스팟",  match:85, mx:179.3, my:352.8 },
+  { img:"frame11", name:"통영 동피랑마을",   desc:"벽화 골목 끝에서 만나는 항구 전망",       sido:"경남", unit:"통영시",   feature:"포토스팟",  match:87, mx:229.9, my:344.8 },
+  { img:"frame9",  name:"대전 소제동",       desc:"철도 관사촌이 카페 거리로 바뀐 동네",     sido:"대전", unit:"중구",     feature:"감성 카페", match:83, mx:156.2, my:225.6 },
 ];
-const grid = document.getElementById("routeGrid");
-grid.innerHTML = ROUTES.map(routeCard).join("");
+const tick = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/></svg>';
+function placeCard(p, i) {
+  return `
+  <button class="card" type="button" data-i="${i}" aria-pressed="false">
+    <div class="card-photo">
+      <img class="bg" src="../assets/place/${p.img}.jpg" alt="">
+      <span class="ck ck-media" aria-hidden="true">${tick}</span>
+    </div>
+    <div class="card-body">
+      <p class="card-name">${p.name}</p>
+      <p class="card-desc">${p.desc}</p>
+      <div class="card-meta"><span>${p.sido} ${p.unit}</span><span>${p.feature}</span></div>
+    </div>
+  </button>`;
+}
+function pinEl(p, i) {
+  // 지도 가장자리 핀은 카드가 잘리지 않게 정렬 방향을 바꾼다
+  const edge = [p.mx < 110 ? "at-left" : "", p.mx > 250 ? "at-right" : "", p.my < 120 ? "at-top" : ""].filter(Boolean).join(" ");
+  return `<button class="pin ${edge}" type="button" data-i="${i}" style="left:${(p.mx / 360 * 100).toFixed(2)}%; top:${(p.my / 520 * 100).toFixed(2)}%" aria-label="${p.name}">
+    ${pinShape}
+    <span class="pin-card">
+      <span class="pc-thumb"><img src="../assets/place/${p.img}.jpg" alt=""><span class="ck ck-sm ck-media" aria-hidden="true">${tick}</span></span>
+      <span class="pc-body">
+        <b class="pc-name">${p.name}</b>
+        <span class="pc-desc">${p.desc}</span>
+        <span class="pc-meta">${p.sido} ${p.unit} · ${p.feature}</span>
+      </span>
+    </span>
+  </button>`;
+}
+const grid = document.getElementById("grid");
+const pinsWrap = document.getElementById("pins");
+grid.innerHTML = PLACES.map(placeCard).join("");
+pinsWrap.innerHTML = PLACES.map(pinEl).join("");
 
 /* ---------- 필터 칩 (다중선택 드롭다운) ----------
    모든 필터는 여러 개 선택 가능. 취향타입은 기본적으로 본인 타입(나무 향)이 선택된 상태이고,
    X를 누르면 아무것도 선택되지 않은 '취향타입' 필터 슬롯이 남아 다시 선택할 수 있다. */
 const FILTERS = [
   { key: "region", label: "지역", type: "region", opts: [] },   // 옵션은 아래 지역 패널 모듈이 직접 그린다
-  { key: "period", label: "기간", opts: ["당일치기", "1박 2일", "2박 3일", "3박 4일 이상"] },
-  { key: "pace",   label: "여유도", opts: ["여유로운 코스", "보통", "부지런한 코스"] },
-  { key: "theme",  label: "테마", opts: ["자연·힐링", "맛집·카페", "액티비티", "역사·문화", "야경"] },
-  { key: "taste",  label: "취향", opts: ["감성가 타입", "큐레이터 타입", "개척자 타입", "사색가 타입", "낭만가 타입", "미학가 타입", "방랑자 타입", "노마드 타입"], preset: ["감성가 타입"] },
+  { key: "feature", label: "특징", opts: ["자연경관", "감성 카페", "전시·예술", "액티비티", "포토스팟"] },
+  { key: "taste", label: "취향", opts: [
+    "감성가 타입", "큐레이터 타입", "개척자 타입", "사색가 타입",
+    "낭만가 타입", "스타일리스트 타입", "발견가 타입", "디자이너 타입",
+    "몽상가 타입", "미학가 타입", "방랑자 타입", "관찰자 타입",
+    "모험가 타입", "연출가 타입", "노마드 타입", "미니멀리스트 타입",
+  ], preset: ["감성가 타입"] },
 ];
 const applied = {};
 FILTERS.forEach((f) => { applied[f.key] = f.preset ? [...f.preset] : []; });
+
+// 취향 타입별 액센트 컬러 · 구분용 서브 텍스트 (onboarding-test.html TYPES의 spaces 기준으로 요약한 장소 특징)
+// 원형 아바타 자리는 추후 유형별 캐릭터 일러스트가 들어올 자리 — 아직 미완성이라 지금은 accent 컬러만 채운다.
+const TASTE_INFO = {
+  "감성가 타입": { accent: "#a66c3a", sub: "한옥·고택·전통시장 선호" },
+  "큐레이터 타입": { accent: "#a88124", sub: "클래식 호텔·헤리티지 숙소 선호" },
+  "개척자 타입": { accent: "#895143", sub: "산속 오두막·캠핑 선호" },
+  "사색가 타입": { accent: "#5e2c26", sub: "박물관·독립서점 탐방 선호" },
+  "낭만가 타입": { accent: "#57723b", sub: "숲길·자연 산책 선호" },
+  "스타일리스트 타입": { accent: "#dbb976", sub: "온실·플라워 카페 선호" },
+  "발견가 타입": { accent: "#93a343", sub: "오일장·시골 포구 선호" },
+  "디자이너 타입": { accent: "#c6b495", sub: "북카페·편집숍 선호" },
+  "몽상가 타입": { accent: "#306a7e", sub: "호숫가·전망데크 선호" },
+  "미학가 타입": { accent: "#6b4ca9", sub: "미술관·공연 관람 선호" },
+  "방랑자 타입": { accent: "#589375", sub: "고원·자연 풍경 선호" },
+  "관찰자 타입": { accent: "#2d3b58", sub: "간이역·근대역사관 선호" },
+  "모험가 타입": { accent: "#6cb946", sub: "계곡·폭포 전망 선호" },
+  "연출가 타입": { accent: "#e78940", sub: "해안 산책로·오션뷰 선호" },
+  "미니멀리스트 타입": { accent: "#9fc9db", sub: "북스테이·디자인 호텔 선호" },
+  "노마드 타입": { accent: "#3d85b8", sub: "섬·해안 자유여행 선호" },
+};
 
 const chipsWrap = document.getElementById("filterChips");
 chipsWrap.innerHTML = FILTERS.map((f) => `
   <div class="filter" data-key="${f.key}">
     <button class="chip-btn" type="button" aria-expanded="false"><span class="chip-label"></span><span class="caret"></span></button>
     <div class="filter-pop menu" role="listbox">
-      ${f.opts.map((o) => `<button class="filter-opt menu-item" type="button" data-value="${o}">${o}${check}</button>`).join("")}
+      ${f.opts.map((o) => {
+        const info = TASTE_INFO[o];
+        if (!info) return `<button class="filter-opt menu-item" type="button" data-value="${o}">${o}${check}</button>`;
+        return `<button class="filter-opt menu-item opt-taste" type="button" data-value="${o}">
+          <span class="opt-left">
+            <span class="opt-avatar" style="background:${info.accent}" aria-hidden="true"></span>
+            <span class="opt-text"><span class="opt-title">${o}</span><span class="opt-sub">${info.sub}</span></span>
+          </span>
+          ${check}
+        </button>`;
+      }).join("")}
     </div>
   </div>`).join("");
 
-const NOUN = "동선";
 function summary(vals, label) { return !vals.length ? label : (vals.length === 1 ? vals[0] : `${vals[0]} 외 ${vals.length - 1}`); }
 function updateChip(key) {
   const f = FILTERS.find((x) => x.key === key);
@@ -526,9 +632,12 @@ function updateChip(key) {
 }
 FILTERS.forEach((f) => updateChip(f.key));
 
-const RG_SCALE = 0.4;   // 동선 기준 지역별 데이터 밀도
-const RG_NOUN = "동선";
-const RG_CTA_NOUN = "여행동선";
+const RG_NOUN = "장소";
+const RG_CTA_NOUN = "장소";
+/* 탐색 화면과 달리 여기서는 '내가 저장한 장소'가 곧 지역 데이터다.
+   저장이 없는 지역은 자동으로 0건 → 비활성 처리된다. */
+const RG_SAVED = {};
+PLACES.forEach((p) => { const k = p.sido + ">" + p.unit; RG_SAVED[k] = (RG_SAVED[k] || 0) + 1; });
 
 /* ---------- 지역 필터 — 시·도 레일 + 시·군·구 체크리스트 ----------
    applied.region 토큰: "강원"(도 전체) | "강원>강릉시"(개별 시군구)
@@ -554,7 +663,7 @@ const RG_UNITS = [
   ["제주", [["제주시",7],["서귀포시",9]]],
 ];
 const REGIONS = RG_UNITS.map(([name, units]) => {
-  const list = units.map(([n, c]) => ({ name: n, count: Math.round(c * RG_SCALE) }));
+  const list = units.map(([n]) => ({ name: n, count: RG_SAVED[name + ">" + n] || 0 }));
   return { name, units: list, count: list.reduce((s, u) => s + u.count, 0) };
 });
 function rgTotal() { return REGIONS.reduce((s, r) => s + r.count, 0); }
@@ -695,7 +804,6 @@ function rgRenderList(keepScroll) {
   rgListEl.scrollTop = keepScroll ? top : 0;
 }
 const RG_CAP = 1000;   // 이 이상은 정확한 수를 세는 의미가 없어 'N개 이상'으로 끊는다
-function rgCountText(n) { return n >= RG_CAP ? `총 ${RG_CAP.toLocaleString()}개 이상 ${RG_NOUN}` : `총 ${n.toLocaleString()}개 ${RG_NOUN}`; }
 function rgRenderFoot() {
   const n = rgDraft.length ? rgSumOf(rgDraft) : rgTotal();
   rgApplyBtn.textContent = n >= RG_CAP
@@ -747,70 +855,92 @@ rgApplyBtn.addEventListener("click", () => {
   rgSyncChip(); closePops(); applyView();
 });
 rgRender();
-document.getElementById("count").textContent = rgCountText(rgTotal());
+document.getElementById("count").textContent = rgTotal();
 
 const countEl = document.getElementById("count");
+const emptyEl = document.getElementById("empty");
+const bar = document.getElementById("pickBar");
+const pickCountEl = document.getElementById("pickCount");
+const nextBtn = document.getElementById("pickNext");
+const ctaCountEl = document.getElementById("pickCountCta");
+const searchEl = document.getElementById("nameSearch");
+const picked = new Set();
+let nameQuery = "";
 function closePops() {
   chipsWrap.querySelectorAll(".filter-pop.is-open").forEach((p) => p.classList.remove("is-open"));
   chipsWrap.querySelectorAll('.chip-btn[aria-expanded="true"]').forEach((b) => b.setAttribute("aria-expanded", "false"));
 }
-function hashCount(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return Math.max(3, Math.round(rgTotal() * (15 + (h % 45)) / 100)); }
 
-let sortKey = "match";
+/* 취향은 개인화 기준값이라 결과를 좁히지 않는다 (다른 화면과 동일) */
+function hit(p) {
+  if (nameQuery && !(p.name + p.unit + p.sido).includes(nameQuery)) return false;
+  if (applied.region.length) {
+    const ok = applied.region.some((t) => { const [sd, ut] = t.split(">"); return ut ? (p.sido === sd && p.unit === ut) : p.sido === sd; });
+    if (!ok) return false;
+  }
+  if (applied.feature.length && !applied.feature.includes(p.feature)) return false;
+  return true;
+}
 function applyView() {
   grid.style.opacity = "0";
   setTimeout(() => {
-    const cards = [...grid.children].sort((a, b) => Number(b.dataset[sortKey]) - Number(a.dataset[sortKey]));
-    // 취향타입은 개인화 기준값이라 개수에 영향 X, 나머지 필터가 결과를 좁힌다
-    const active = FILTERS.filter((f) => f.key !== "taste" && applied[f.key].length).map((f) => applied[f.key].join(",")).join("|");
-    const others = FILTERS.filter((f) => f.key !== "taste" && f.key !== "region" && applied[f.key].length).length;
-    let n = applied.region.length ? rgSum() : (active ? hashCount(active) : rgTotal());
-    if (applied.region.length && others) n = Math.max(2, Math.round(n * 0.55));
-    const shown = Math.min(n, cards.length);
-    cards.forEach((c, i) => { c.style.display = i < shown ? "" : "none"; grid.appendChild(c); });
-    countEl.textContent = rgCountText(n);
+    let n = 0;
+    [...grid.children].forEach((el) => {
+      const on = hit(PLACES[+el.dataset.i]);
+      el.hidden = !on;
+      if (on) n++;
+    });
+    pinsWrap.querySelectorAll(".pin").forEach((el) => {
+      const card = grid.querySelector(`.card[data-i="${el.dataset.i}"]`);
+      el.hidden = !card || card.hidden;
+    });
+    countEl.textContent = n;
+    emptyEl.hidden = n > 0;
     grid.style.opacity = "1";
   }, 180);
 }
 
-/* 정렬 세그먼트 — 선택된 흰색 pill이 슬라이드로 이동 */
-const sortSeg = document.getElementById("sortSeg");
-const segThumb = document.createElement("span");
-segThumb.className = "seg-thumb";
-segThumb.setAttribute("aria-hidden", "true");
-sortSeg.prepend(segThumb);
-function placeThumb(seg, instant) {
-  if (instant) segThumb.style.transition = "none";
-  segThumb.style.width = seg.offsetWidth + "px";
-  segThumb.style.transform = "translateX(" + seg.offsetLeft + "px)";
-  if (instant) { void segThumb.offsetWidth; segThumb.style.transition = ""; }
+/* 선택 상태 — 카드·핀·하단 바가 같은 상태를 본다 */
+function syncPick() {
+  [...grid.children].forEach((el) => {
+    const on = picked.has(el.dataset.i);
+    el.classList.toggle("is-picked", on);
+    el.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+  pinsWrap.querySelectorAll(".pin").forEach((el) => el.classList.toggle("is-picked", picked.has(el.dataset.i)));
+  pickCountEl.textContent = picked.size;
+  ctaCountEl.textContent = picked.size;
+  nextBtn.disabled = picked.size < 1;   // 한 곳만 골라도 동선 생성 가능
+  bar.classList.toggle("is-up", picked.size > 0);
+  document.body.classList.toggle("has-bar", picked.size > 0);
 }
-function repositionThumb() { const a = sortSeg.querySelector(".seg.is-active"); if (a) placeThumb(a, true); }
-requestAnimationFrame(repositionThumb);
-window.addEventListener("load", repositionThumb);
-window.addEventListener("resize", repositionThumb);
-sortSeg.addEventListener("click", (e) => {
-  const btn = e.target.closest(".seg"); if (!btn) return;
-  sortSeg.querySelectorAll(".seg").forEach((s) => s.classList.remove("is-active"));
-  btn.classList.add("is-active");
-  placeThumb(btn, false);
-  sortKey = btn.dataset.sort;
-  applyView();
+grid.addEventListener("click", (e) => {
+  const card = e.target.closest(".card"); if (!card) return;
+  const i = card.dataset.i;
+  picked.has(i) ? picked.delete(i) : picked.add(i);
+  syncPick();
 });
+pinsWrap.addEventListener("click", (e) => {
+  const b = e.target.closest(".pin"); if (!b) return;
+  const i = b.dataset.i;
+  picked.has(i) ? picked.delete(i) : picked.add(i);   // 핀으로도 바로 선택
+  syncPick();
+});
+nextBtn.addEventListener("click", () => { /* 다음 단계(동선 편집) 화면은 아직 없음 */ });
+searchEl.addEventListener("input", () => { nameQuery = searchEl.value.trim(); applyView(); });
 
-/* 게스트(비로그인): 매칭 정렬 대신 인기순 기본, 취향 프리셋 해제, 헤딩 일반화 */
-if (document.documentElement.classList.contains("is-guest")) {
-  applied.taste = [];
-  const matchSeg = sortSeg.querySelector('.seg[data-sort="match"]');
-  const popSeg = sortSeg.querySelector('.seg[data-sort="pop"]');
-  if (matchSeg) matchSeg.classList.remove("is-active");
-  if (popSeg) popSeg.classList.add("is-active");
-  sortKey = "pop";
-  requestAnimationFrame(repositionThumb);
-  const fh = document.querySelector(".featured-title h2");
-  if (fh) fh.textContent = "지금 인기 있는 여행 동선";
-  document.querySelectorAll(".fc-title .t1").forEach((el) => { el.textContent = "여행자들에게 인기 있는"; });
+/* 카드 ↔ 핀 상호 하이라이트 */
+function link(i, on) {
+  const card = grid.querySelector(`.card[data-i="${i}"]`);
+  const pin = pinsWrap.querySelector(`.pin[data-i="${i}"]`);
+  if (card) card.classList.toggle("is-hot", on);
+  if (pin) pin.classList.toggle("is-on", on);
 }
+grid.addEventListener("mouseover", (e) => { const c = e.target.closest(".card"); if (c) link(c.dataset.i, true); });
+grid.addEventListener("mouseout",  (e) => { const c = e.target.closest(".card"); if (c) link(c.dataset.i, false); });
+pinsWrap.addEventListener("mouseover", (e) => { const b = e.target.closest(".pin"); if (b) link(b.dataset.i, true); });
+pinsWrap.addEventListener("mouseout",  (e) => { const b = e.target.closest(".pin"); if (b) link(b.dataset.i, false); });
+syncPick();
 
 /* 필터 드롭다운 (다중선택) */
 chipsWrap.addEventListener("click", (e) => {
@@ -820,7 +950,6 @@ chipsWrap.addEventListener("click", (e) => {
     e.stopPropagation();
     const filter = chipBtn.parentElement;
     const key = filter.dataset.key;
-    // 선택이 있는 상태에서 X(=.caret 자리) 클릭 → 전체 해제
     if (e.target.closest(".caret") && applied[key].length) { applied[key] = []; updateChip(key); closePops(); applyView(); return; }
     const pop = filter.querySelector(".filter-pop");
     const willOpen = !pop.classList.contains("is-open");
@@ -836,7 +965,7 @@ chipsWrap.addEventListener("click", (e) => {
     const arr = applied[key];
     const i = arr.indexOf(val);
     if (i >= 0) arr.splice(i, 1); else arr.push(val);
-    updateChip(key);      // 드롭다운은 열어둔 채로 여러 개 토글
+    updateChip(key);
     applyView();
     return;
   }
@@ -844,7 +973,7 @@ chipsWrap.addEventListener("click", (e) => {
 document.addEventListener("click", (e) => { if (!e.target.closest(".filter")) closePops(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") closePops(); });
 
-/* ---------- 프로필 팝오버 ---------- */
+/* 프로필 팝오버 */
 const pill = document.getElementById("profilePill");
 const pop = document.getElementById("profilePop");
 pill.addEventListener("click", (e) => {
@@ -865,63 +994,5 @@ document.addEventListener('click',function(e){
 });
 </script>
 
-<!-- ============ 동선 만들기 모달 ============ -->
-<div class="modal-scrim" id="makeModal" hidden>
-  <div class="modal-box modal-w-lg" role="dialog" aria-modal="true" aria-labelledby="rmTitle">
-    <div class="modal-head">
-      <h2 id="rmTitle">동선 만들기</h2>
-      <button class="modal-close" type="button" aria-label="닫기"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
-    </div>
-    <div class="rm-opts" role="radiogroup" aria-labelledby="rmTitle">
-      <button class="rm-opt is-on" type="button" role="radio" aria-checked="true" data-mode="ai">
-        <span class="rm-ic" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg></span>
-        <span class="rm-tx"><b>AI에게 여행지 추천 받기</b><span>내 취향과 조건에 맞는 여행지를 추천해드려요</span></span>
-      </button>
-      <button class="rm-opt" type="button" role="radio" aria-checked="false" data-mode="region">
-        <span class="rm-ic" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M128,16a88.1,88.1,0,0,0-88,88c0,75.3,80,132.17,83.41,134.55a8,8,0,0,0,9.18,0C136,236.17,216,179.3,216,104A88.1,88.1,0,0,0,128,16Zm0,56a32,32,0,1,1-32,32A32,32,0,0,1,128,72Z"/></svg></span>
-        <span class="rm-tx"><b>원하는 지역의 동선 추천 받기</b><span>선택한 지역 안에서 취향에 맞는 동선을 만들어드려요</span></span>
-      </button>
-      <button class="rm-opt" type="button" role="radio" aria-checked="false" data-mode="saved">
-        <span class="rm-ic" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M240,94c0,70-103.79,126.66-108.21,129a8,8,0,0,1-7.58,0C119.79,220.66,16,164,16,94A62.07,62.07,0,0,1,78,32c20.65,0,38.73,8.88,50,23.89C139.27,40.88,157.35,32,178,32A62.07,62.07,0,0,1,240,94Z"/></svg></span>
-        <span class="rm-tx"><b>찜한 장소로 동선 추천 받기</b><span>찜한 장소를 포함해 이동하기 좋은 동선을 만들어드려요</span></span>
-      </button>
-    </div>
-    <div class="modal-foot"><button class="rm-next" type="button">다음</button></div>
-  </div>
-</div>
-<script>
-/* 동선 만들기 진입 — 배너·버튼 어디서 눌러도 같은 모달이 뜬다.
-   [다음] 이후의 제작 플로우 화면은 아직 없어서 지금은 모달만 닫힌다. */
-(function () {
-  const scrim = document.getElementById("makeModal");
-  const opts = [...scrim.querySelectorAll(".rm-opt")];
-  let opener = null;
-  function open(trigger) {
-    opener = trigger;
-    scrim.hidden = false;
-    void scrim.offsetWidth;   // 강제 리플로우 — 백그라운드 탭에서 rAF가 멈춰도 전이가 시작되게
-    scrim.classList.add("is-open");
-    (scrim.querySelector(".rm-opt.is-on") || opts[0]).focus();
-  }
-  function close() {
-    scrim.classList.remove("is-open");
-    setTimeout(() => { scrim.hidden = true; if (opener) opener.focus(); }, 160);
-  }
-  document.addEventListener("click", (e) => {
-    const trigger = e.target.closest("[data-make-route]");
-    if (trigger) { e.preventDefault(); open(trigger); return; }
-    if (scrim.hidden) return;
-    if (e.target.closest(".rm-next")) {
-      const on = scrim.querySelector(".rm-opt.is-on");
-      if (on && on.dataset.mode === "saved") { location.href = "route-create.html"; return; }
-      close(); return;   // AI·지역 방식의 다음 화면은 아직 없음
-    }
-    if (e.target === scrim || e.target.closest(".modal-close")) { close(); return; }
-    const opt = e.target.closest(".rm-opt");
-    if (opt) opts.forEach((o) => { const on = o === opt; o.classList.toggle("is-on", on); o.setAttribute("aria-checked", on ? "true" : "false"); });
-  });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !scrim.hidden) close(); });
-})();
-</script>
 </body>
 </html>
