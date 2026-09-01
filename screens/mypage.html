@@ -462,7 +462,15 @@ html .guest-only { display: none; }
         <h2 class="view-title sr-only" id="t-account" tabindex="-1">계정 설정</h2>
 
         <div class="pf-summary">
-          <span class="av av-100" aria-hidden="true"><span class="av-svg"></span></span>
+          <button class="pf-avatar" type="button" id="avatarBtn" aria-label="프로필 사진 변경">
+            <span class="av av-100" aria-hidden="true"><span class="av-svg"></span></span>
+            <span class="pf-avatar-edit" aria-hidden="true">
+              <svg viewBox="0 0 256 256" fill="currentColor"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm-80,128a44,44,0,1,1,44-44A44.05,44.05,0,0,1,128,184Zm28-44a28,28,0,1,1-28-28A28,28,0,0,1,156,140Z"/></svg>
+              <b>사진 변경</b>
+            </span>
+          </button>
+          <input type="file" id="avatarInput" accept="image/*" hidden>
+          <button class="pf-avatar-reset" type="button" id="avatarReset" hidden>기본 이미지로</button>
           <div class="pf-id">
             <p class="pf-name" data-bind="nickname">이서연</p>
             <p class="pf-mail" data-bind="email">seoyeon@gmail.com</p>
@@ -830,6 +838,38 @@ function toast(msg, kind){
 
 /* 아바타(기본 사람 실루엣) 주입 */
 $$('.av .av-svg').forEach(el => { el.innerHTML = PERSON_SVG; });
+
+/* 프로필 사진 — 아바타를 눌러 사진을 고르면 이 화면의 아바타 3곳(내비·팝오버·프로필)에 함께 적용되고,
+   localStorage 에 남아 다른 화면의 내비 아바타에도 반영된다. */
+const AVATAR_KEY = 'scentrip_avatar';
+function paintAvatar(src) {
+  $$('.av').forEach(el => {
+    el.classList.toggle('has-photo', !!src);
+    el.style.backgroundImage = src ? `url("${src}")` : '';
+  });
+  $('#avatarReset').hidden = !src;
+}
+try { paintAvatar(localStorage.getItem(AVATAR_KEY) || ''); } catch (e) {}
+$('#avatarBtn').addEventListener('click', () => $('#avatarInput').click());
+$('#avatarInput').addEventListener('change', (e) => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { toast('이미지 파일만 올릴 수 있어요', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    paintAvatar(reader.result);
+    try { localStorage.setItem(AVATAR_KEY, reader.result); toast('프로필 사진을 변경했어요'); }
+    catch (x) { toast('사진 용량이 커서 이번 방문에만 적용돼요', 'error'); }   // localStorage 한도 초과
+  };
+  reader.onerror = () => toast('사진을 읽지 못했어요', 'error');
+  reader.readAsDataURL(file);
+});
+$('#avatarReset').addEventListener('click', () => {
+  paintAvatar('');
+  try { localStorage.removeItem(AVATAR_KEY); } catch (e) {}
+  toast('기본 이미지로 되돌렸어요');
+});
 
 /* ============================================================
    2. 모달 (포커스 트랩 · ESC · 포커스 복귀)
@@ -1260,6 +1300,19 @@ document.addEventListener('click',function(e){
   if(lo){e.preventDefault();try{localStorage.setItem('scentrip_auth','out');}catch(x){}location.href='home.html';}
   if(li){e.preventDefault();try{localStorage.setItem('scentrip_auth','in');}catch(x){}location.reload();}
 });
+</script>
+<script>
+/* 저장된 프로필 사진을 모든 아바타에 반영 (마이페이지에서 변경) */
+(function () {
+  try {
+    const src = localStorage.getItem("scentrip_avatar");
+    if (!src) return;
+    document.querySelectorAll(".av").forEach((el) => {
+      el.classList.add("has-photo");
+      el.style.backgroundImage = 'url("' + src + '")';
+    });
+  } catch (e) {}
+})();
 </script>
 </body>
 </html>
