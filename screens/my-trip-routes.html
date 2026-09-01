@@ -229,8 +229,6 @@ html .guest-only { display: none; }
 .badge { display: inline-flex; align-items: center; gap: var(--space-6); padding: var(--space-4) var(--space-10); border-radius: var(--radius-full); background: var(--color-surface-overlay); border: 1px solid var(--color-border-default); }
 .badge svg { width: 14px; height: 14px; color: var(--color-content-subtle); }
 .badge span { font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; color: var(--color-content-subtle); white-space: nowrap; }
-.heart { width: 28px; height: 28px; color: var(--color-surface-overlay); filter: drop-shadow(0 1px 2px rgba(0,0,0,.04)) drop-shadow(0 2px 4px rgba(0,0,0,.08)); flex: none; }
-.heart.heart-dark { color: var(--color-content-neutral-subtle); filter: none; }
 
 /* ---------- 더보기 ---------- */
 .more-wrap { display: flex; justify-content: center; padding-top: var(--space-8); }
@@ -291,7 +289,7 @@ html .guest-only { display: none; }
 .route-card:hover .route-photo { border-color: var(--color-border-strong); box-shadow: var(--elevation-md); }
 .heart-btn { position: absolute; top: 12px; right: 12px; z-index: 3; padding: 0; border: 0; background: none; line-height: 0; transition: transform .14s ease; }
 .heart-btn:hover { transform: scale(1.1); }
-.heart-btn .heart { position: static; color: var(--color-primary); filter: drop-shadow(0 1px 2px rgba(255,255,255,.9)); }
+.heart-btn .heart { position: static; }
 
 .mt-empty[hidden] { display: none; }   /* display:flex가 hidden 속성을 덮어쓰지 않게 */
 .mt-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-6); padding: 64px var(--space-24); border: 1px dashed var(--color-border-strong); border-radius: var(--radius-xl); }
@@ -450,8 +448,8 @@ html .guest-only { display: none; }
 
 <script>
 const starFour = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg>';
-const heart = '<svg class="heart" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M178,32c-20.65,0-38.73,8.88-50,23.89C116.73,40.88,98.65,32,78,32A62.07,62.07,0,0,0,16,94c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,220.66,240,164,240,94A62.07,62.07,0,0,0,178,32Zm-50,174c-18.26-11.06-96-64.11-96-112A46.06,46.06,0,0,1,78,48c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0C142.22,58.36,158.55,48,178,48a46.06,46.06,0,0,1,46,46C224,141.87,146.24,194.93,128,206Z"/></svg>';
-const heartFill = '<svg class="heart" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,94c0,70-103.79,126.66-108.21,129a8,8,0,0,1-7.58,0C119.79,220.66,16,164,16,94A62.07,62.07,0,0,1,78,32c20.65,0,38.73,8.88,50,23.89C139.27,40.88,157.35,32,178,32A62.07,62.07,0,0,1,240,94Z"/></svg>';
+const heart = '<svg class="heart heart-on-media" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path class="h-line" d="M178,32c-20.65,0-38.73,8.88-50,23.89C116.73,40.88,98.65,32,78,32A62.07,62.07,0,0,0,16,94c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,220.66,240,164,240,94A62.07,62.07,0,0,0,178,32Zm-50,174c-18.26-11.06-96-64.11-96-112A46.06,46.06,0,0,1,78,48c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0C142.22,58.36,158.55,48,178,48a46.06,46.06,0,0,1,46,46C224,141.87,146.24,194.93,128,206Z"/><path class="h-fill" d="M240,94c0,70-103.79,126.66-108.21,129a8,8,0,0,1-7.58,0C119.79,220.66,16,164,16,94A62.07,62.07,0,0,1,78,32c20.65,0,38.73,8.88,50,23.89C139.27,40.88,157.35,32,178,32A62.07,62.07,0,0,1,240,94Z"/></svg>';
+const heartFill = heart;   // 채움 여부는 .is-saved 로 결정된다
 const caret = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></svg>';
 const xCircle = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm37.66,130.34a8,8,0,0,1-11.32,11.32L128,139.31l-26.34,26.35a8,8,0,0,1-11.32-11.32L116.69,128,90.34,101.66a8,8,0,0,1,11.32-11.32L128,116.69l26.34-26.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>';
 
@@ -460,13 +458,13 @@ const check = '<svg class="check" viewBox="0 0 256 256" fill="currentColor" aria
 /* ---------- 동선 카드 (지도+마커) ---------- */
 function routeCard(r, i) {
   return `
-    <article class="route-card" data-i="${i}">
+    <article class="route-card is-saved" data-i="${i}">
       <div class="route-photo">
         <img class="route-map" src="../assets/home/map.jpg" alt="">
         <svg class="route-lines" viewBox="0 0 371 200" preserveAspectRatio="none" aria-hidden="true"><polyline points="202.67,39 280.67,100 240.67,120 210.67,160 310.67,150"/></svg>
         <div class="route-inset"><img src="../assets/home/${r.inset}.jpg" alt=""></div>
         <span class="badge">${starFour}<span>AI 매칭 ${r.match}%</span></span>
-        <button class="heart-btn" type="button" data-unsave aria-label="${r.name} 저장 해제">${heartFill}</button>
+        <button class="heart-btn" type="button" data-unsave aria-label="${r.name} 저장 해제" aria-pressed="true">${heart}</button>
         <span class="route-marker m1">1</span><span class="route-marker m2">2</span><span class="route-marker m3">3</span><span class="route-marker m4">4</span><span class="route-marker m5">5</span>
       </div>
       <div class="route-body">
@@ -492,8 +490,16 @@ const ROUTES = [
   { inset:"inset2", place:"[대관령 양떼목장]", name:"강릉 양떼 힐링 투어", sido:"강원", unit:"평창군", period:"1박 2일", pace:"여유로운 코스", theme:"자연·힐링", owner:"others", desc:"드넓은 초원과 귀여운 양떼를 만나는 힐링 코스", meta:"5개 장소 · 1박2일 · 여유로운 코스 · OOO 취향", match:87, pop:5100 },
   { inset:"inset3", place:"[경복궁]", name:"서울 궁궐 야간 개장 코스", sido:"서울", unit:"종로구", period:"당일치기", pace:"여유로운 코스", theme:"역사·문화", owner:"mine", desc:"달빛 아래 만나는 조선 궁궐의 고즈넉한 아름다움", meta:"6개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:89, pop:6400 },
 ];
+/* 내 장소와 같은 규칙: 저장 해제는 이번 방문에서 되돌릴 수 있게 남겨두고 다음 방문에 반영한다. */
+const UNSAVE_KEY = "scentrip_unsaved_routes";
+function readUnsaved() { try { return new Set(JSON.parse(localStorage.getItem(UNSAVE_KEY) || "[]")); } catch (e) { return new Set(); } }
+function writeUnsaved(set) { try { localStorage.setItem(UNSAVE_KEY, JSON.stringify([...set])); } catch (e) {} }
+const dropped = readUnsaved();
+const unsaved = new Set();
+const LIVE = ROUTES.map((r, i) => i).filter((i) => !dropped.has(ROUTES[i].name));
+
 const grid = document.getElementById("routeGrid");
-grid.innerHTML = ROUTES.map(routeCard).join("");
+grid.innerHTML = LIVE.map((i) => routeCard(ROUTES[i], i)).join("");
 
 /* ---------- 필터 칩 (다중선택 드롭다운) ----------
    모든 필터는 여러 개 선택 가능. 취향타입은 기본적으로 본인 타입(나무 향)이 선택된 상태이고,
@@ -535,7 +541,7 @@ const RG_NOUN = "동선";
 const RG_CTA_NOUN = "동선";
 /* 저장한 동선이 곧 이 화면의 지역 데이터 — 저장이 없는 지역은 0건 → 비활성 */
 const RG_SAVED = {};
-ROUTES.forEach((r) => { const k = r.sido + ">" + r.unit; RG_SAVED[k] = (RG_SAVED[k] || 0) + 1; });
+LIVE.forEach((i) => { const r = ROUTES[i], k = r.sido + ">" + r.unit; RG_SAVED[k] = (RG_SAVED[k] || 0) + 1; });   // 이미 빠진 동선은 지역 집계에서도 제외
 
 /* ---------- 지역 필터 — 시·도 레일 + 시·군·구 체크리스트 ----------
    applied.region 토큰: "강원"(도 전체) | "강원>강릉시"(개별 시군구)
@@ -753,7 +759,7 @@ rgApplyBtn.addEventListener("click", () => {
   rgSyncChip(); closePops(); applyView();
 });
 rgRender();
-document.getElementById("count").textContent = rgTotal();
+document.getElementById("count").textContent = LIVE.length;
 
 const countEl = document.getElementById("count");
 const emptyEl = document.getElementById("empty");
@@ -779,16 +785,17 @@ function hit(r) {
 function applyView() {
   grid.style.opacity = "0";
   setTimeout(() => {
-    let n = 0;
-    [...grid.children].forEach((el) => {
-      const on = hit(ROUTES[+el.dataset.i]);
-      el.hidden = !on;
-      if (on) n++;
-    });
-    countEl.textContent = n;
-    emptyEl.hidden = n > 0;
+    [...grid.children].forEach((el) => { el.hidden = !hit(ROUTES[+el.dataset.i]); });
+    refreshCount();
     grid.style.opacity = "1";
   }, 180);
+}
+
+/* 저장 토글처럼 목록 구성이 그대로일 때는 이것만 부른다 — 그리드를 페이드시키지 않는다 */
+function refreshCount() {
+  const shown = [...grid.children].filter((el) => !el.hidden).length;
+  countEl.textContent = shown;   // 하트를 눌러도 목록은 그대로 → 개수도 그대로. 해제는 다음 방문에 반영된다
+  emptyEl.hidden = shown > 0;
 }
 
 /* 남이 만든 / 직접 만든 세그먼트 — 흰 pill이 슬라이드로 이동 */
@@ -816,12 +823,18 @@ ownerSeg.addEventListener("click", (e) => {
   applyView();
 });
 
-/* 하트 = 저장 해제 */
+/* 하트 = 저장 토글. 목록에서 지우지 않고 다음 방문에 반영한다. */
 grid.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-unsave]"); if (!btn) return;
   e.preventDefault(); e.stopPropagation();
-  btn.closest(".route-card").remove();
-  applyView();
+  const card = btn.closest(".route-card");
+  const name = ROUTES[+card.dataset.i].name;
+  const saved = !card.classList.contains("is-saved");
+  card.classList.toggle("is-saved", saved);
+  btn.setAttribute("aria-pressed", saved ? "true" : "false");
+  btn.setAttribute("aria-label", `${name} ${saved ? "저장 해제" : "다시 저장"}`);
+  saved ? unsaved.delete(name) : unsaved.add(name);
+  writeUnsaved(new Set([...dropped, ...unsaved]));
 });
 
 /* 필터 드롭다운 (다중선택) */

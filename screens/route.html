@@ -229,8 +229,6 @@ html .guest-only { display: none; }
 .badge { display: inline-flex; align-items: center; gap: var(--space-6); padding: var(--space-4) var(--space-10); border-radius: var(--radius-full); background: var(--color-surface-overlay); border: 1px solid var(--color-border-default); }
 .badge svg { width: 14px; height: 14px; color: var(--color-content-subtle); }
 .badge span { font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; color: var(--color-content-subtle); white-space: nowrap; }
-.heart { width: 28px; height: 28px; color: var(--color-surface-overlay); filter: drop-shadow(0 1px 2px rgba(0,0,0,.04)) drop-shadow(0 2px 4px rgba(0,0,0,.08)); flex: none; }
-.heart.heart-dark { color: var(--color-content-neutral-subtle); filter: none; }
 
 /* ---------- 더보기 ---------- */
 .more-wrap { display: flex; justify-content: center; padding-top: var(--space-8); }
@@ -417,8 +415,8 @@ html .guest-only { display: none; }
 
 <script>
 const starFour = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg>';
-const heart = '<svg class="heart" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M178,32c-20.65,0-38.73,8.88-50,23.89C116.73,40.88,98.65,32,78,32A62.07,62.07,0,0,0,16,94c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,220.66,240,164,240,94A62.07,62.07,0,0,0,178,32Zm-50,174c-18.26-11.06-96-64.11-96-112A46.06,46.06,0,0,1,78,48c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0C142.22,58.36,158.55,48,178,48a46.06,46.06,0,0,1,46,46C224,141.87,146.24,194.93,128,206Z"/></svg>';
-const heartDark = heart.replace('class="heart"', 'class="heart heart-dark"');
+const heart = '<svg class="heart heart-on-media" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path class="h-line" d="M178,32c-20.65,0-38.73,8.88-50,23.89C116.73,40.88,98.65,32,78,32A62.07,62.07,0,0,0,16,94c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,220.66,240,164,240,94A62.07,62.07,0,0,0,178,32Zm-50,174c-18.26-11.06-96-64.11-96-112A46.06,46.06,0,0,1,78,48c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0C142.22,58.36,158.55,48,178,48a46.06,46.06,0,0,1,46,46C224,141.87,146.24,194.93,128,206Z"/><path class="h-fill" d="M240,94c0,70-103.79,126.66-108.21,129a8,8,0,0,1-7.58,0C119.79,220.66,16,164,16,94A62.07,62.07,0,0,1,78,32c20.65,0,38.73,8.88,50,23.89C139.27,40.88,157.35,32,178,32A62.07,62.07,0,0,1,240,94Z"/></svg>';
+const heartDark = heart.replace(' heart-on-media', '');   // 밝은 카드 위에서는 대비 보정이 필요 없다
 const caret = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></svg>';
 const xCircle = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm37.66,130.34a8,8,0,0,1-11.32,11.32L128,139.31l-26.34,26.35a8,8,0,0,1-11.32-11.32L116.69,128,90.34,101.66a8,8,0,0,1,11.32-11.32L128,116.69l26.34-26.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>';
 
@@ -921,6 +919,47 @@ document.addEventListener('click',function(e){
     if (opt) opts.forEach((o) => { const on = o === opt; o.classList.toggle("is-on", on); o.setAttribute("aria-checked", on ? "true" : "false"); });
   });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !scrim.hidden) close(); });
+})();
+</script>
+<script>
+/* 하트 = 저장 토글 (탐색·홈)
+   카드가 다 그려진 뒤 하트를 버튼으로 감싸고, 저장 상태를 localStorage 에서 복원한다.
+   내 여행과 반대로 여기서는 기본이 '저장 전'(빈 하트)이다. */
+(function () {
+  const KEY = "scentrip_saved_cards";
+  let saved;
+  try { saved = new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); } catch (e) { saved = new Set(); }
+  const persist = () => { try { localStorage.setItem(KEY, JSON.stringify([...saved])); } catch (e) {} };
+
+  document.querySelectorAll(".heart").forEach((svg) => {
+    if (svg.closest(".heart-btn")) return;                     // 이미 버튼인 화면은 건드리지 않는다
+    const card = svg.closest(".card, .route-card, .featured-card");
+    if (!card) return;
+    const list = card.parentElement;
+    const id = (list.id || list.className.split(" ")[0] || "row") + ":" + [...list.children].indexOf(card);
+    card.dataset.save = id;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "heart-btn";
+    svg.replaceWith(btn);
+    btn.appendChild(svg);
+    const on = saved.has(id);
+    card.classList.toggle("is-saved", on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    btn.setAttribute("aria-label", on ? "저장 해제" : "저장");
+  });
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".heart-btn"); if (!btn) return;
+    const card = btn.closest("[data-save]"); if (!card) return;
+    e.preventDefault(); e.stopPropagation();                   // 카드 링크로 이동하지 않게
+    const on = !card.classList.contains("is-saved");
+    card.classList.toggle("is-saved", on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    btn.setAttribute("aria-label", on ? "저장 해제" : "저장");
+    on ? saved.add(card.dataset.save) : saved.delete(card.dataset.save);
+    persist();
+  });
 })();
 </script>
 </body>
