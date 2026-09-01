@@ -909,7 +909,10 @@ mapEl.addEventListener("click", (e) => {
 });
 nextBtn.addEventListener("click", () => {
   // 고른 장소 이름을 조건 입력 화면으로 넘긴다 (그쪽 CTA 위에 다시 보여준다)
-  try { localStorage.setItem("scentrip_route_picks", JSON.stringify([...picked].map((i) => PLACES[+i].name))); } catch (e) {}
+  try {
+    localStorage.setItem("scentrip_route_picks", JSON.stringify([...picked].map((i) => PLACES[+i].name)));
+    localStorage.removeItem("scentrip_route_draft");   // 장소를 새로 골랐으니 지난 답은 버린다
+  } catch (e) {}
   location.href = "route-conditions.html?mode=picked";
 });
 searchEl.addEventListener("input", () => { nameQuery = searchEl.value.trim(); applyView(); });

@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scentrip — AI 맞춤 동선</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="../reference/tokens.css">
+<link rel="stylesheet" href="../reference/components.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="../reference/places.js"></script>
+<script src="../reference/map-adapter.js"></script>
+<style>
+/* ============================================================
+   Scentrip — AI 맞춤 동선 · 결과 화면 (PRD_동선추천결과.md)
+   [1단계 뼈대] 3분할 레이아웃 · 결과 헤더 · 일차 탭 · 요약 · 로딩 · 지도.
+   타임라인 노드(카드 액션·구간 이동시간·숙소)와 편집·저장은 다음 단계.
+   조건은 위저드가 localStorage("scentrip_route_cond")로 넘긴다.
+   웹 전용 · 최소 폭 1280px.
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-family); letter-spacing: var(--letter-spacing);
+  color: var(--color-content-default); background: var(--color-background);
+  -webkit-font-smoothing: antialiased; word-break: keep-all; overflow-wrap: break-word;
+  min-width: 1280px;
+}
+ul, ol { list-style: none; }
+button { font: inherit; letter-spacing: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+.page { display: flex; flex-direction: column; align-items: stretch; width: 100%; min-height: 100vh; }
+html .guest-only { display: none; }
+.is-guest .auth-only { display: none; }
+.is-guest .guest-only { display: flex; }
+
+.guest-gate { flex: 1 0 auto; display: flex; align-items: center; justify-content: center; padding: 80px var(--space-24); }
+.gate-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-16); max-width: 420px; }
+.gate-icon { display: flex; width: 56px; height: 56px; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--color-surface-01); color: var(--color-primary); }
+.gate-icon svg { width: 28px; height: 28px; }
+.gate-card h1 { font-size: var(--text-title-28); font-weight: 600; line-height: 1.3; }
+.gate-card p { font-size: var(--text-body-16); line-height: 1.7; color: var(--color-content-neutral-muted); }
+.btn-login { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 var(--space-24); border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-base-white); font-size: var(--text-body-16); font-weight: 600; text-decoration: none; }
+.btn-login:hover { background: var(--color-primary-hover); }
+.type-pill { display: flex; align-items: center; gap: var(--space-8); height: 38px; padding: 0 var(--space-6) 0 var(--space-12); border-radius: var(--radius-full); background: var(--color-surface-01); }
+.profile { position: relative; }
+.profile-pop { width: 280px; padding: var(--space-8); }
+
+/* ---------- 상단 바 ---------- */
+.rr-top { display: flex; align-items: center; gap: var(--space-12); height: 56px; padding: 0 28px; border-bottom: 1px solid var(--color-border-subtle); background: var(--color-surface-overlay); }
+.rr-back { display: flex; align-items: center; gap: var(--space-6); height: 36px; padding: 0 var(--space-10); border-radius: var(--radius-full); font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-neutral-muted); }
+.rr-back:hover { background: var(--color-neutral-subtle); color: var(--color-content-default); }
+.rr-back svg { width: 16px; height: 16px; }
+.rr-top h1 { font-size: var(--text-body-16); font-weight: 600; }
+
+/* ---------- 3분할 ---------- */
+.rr-wrap { flex: 1 0 auto; display: grid; grid-template-columns: 300px minmax(0, 1fr) 420px; align-items: start; }
+.rr-side { position: sticky; top: 0; height: calc(100vh - 56px); overflow-y: auto; padding: var(--space-24); border-right: 1px solid var(--color-border-subtle); background: var(--color-surface-overlay); }
+.rr-main { min-width: 0; padding: var(--space-32); }
+.rr-mapcol { position: sticky; top: 0; height: calc(100vh - 56px); border-left: 1px solid var(--color-border-subtle); }
+
+/* ---------- 조건 사이드바 ---------- */
+.rr-side h2 { font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-neutral-muted); }
+.cond-group { margin-top: var(--space-20); }
+.cond-group + .cond-group { padding-top: var(--space-20); border-top: 1px solid var(--color-border-subtle); }
+.cond-row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-12); padding: var(--space-8) 0; }
+.cond-row dt { flex: none; font-size: 13px; font-weight: 500; color: var(--color-content-subtle); }
+.cond-row dd { font-size: var(--text-body-14); font-weight: 600; text-align: right; }
+.cond-note { margin-top: var(--space-10); font-size: var(--text-caption-12); line-height: 1.6; color: var(--color-content-subtle); }
+.cond-regen { display: flex; align-items: center; justify-content: center; width: 100%; height: 44px; margin-top: var(--space-16); border-radius: var(--radius-full); border: 1px solid var(--color-neutral-border); font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-neutral); }
+.cond-regen:hover { background: var(--color-neutral-subtle); }
+
+/* ---------- 결과 헤더 ---------- */
+.rr-head { display: flex; align-items: flex-start; gap: var(--space-16); }
+.rr-head-tx { flex: 1 1 auto; min-width: 0; }
+.rr-title { display: flex; align-items: center; gap: var(--space-10); }
+.rr-title h2 { font-size: var(--text-title-28); font-weight: 600; line-height: 1.3; }
+.match-badge { display: inline-flex; align-items: center; gap: var(--space-4); height: 28px; padding: 0 var(--space-10); border-radius: var(--radius-full); background: var(--color-surface-01); color: var(--color-primary); font-size: 13px; font-weight: 600; }
+.match-badge svg { width: 14px; height: 14px; }
+.dirty-badge { display: inline-flex; align-items: center; height: 26px; padding: 0 var(--space-10); border-radius: var(--radius-full); background: var(--color-neutral-subtle); color: var(--color-content-neutral-muted); font-size: var(--text-caption-12); font-weight: 600; }
+.dirty-badge[hidden] { display: none; }
+.rr-basis { margin-top: var(--space-8); font-size: var(--text-body-14); line-height: 1.6; color: var(--color-content-neutral-muted); }
+
+/* 추천 이유 배너 */
+.reco { display: flex; align-items: center; gap: var(--space-12); margin-top: var(--space-20); padding: var(--space-16); border-radius: var(--radius-lg); background: var(--color-surface-01); }
+.reco[hidden] { display: none; }
+.reco-ic { display: flex; width: 32px; height: 32px; flex: none; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--color-base-white); color: var(--color-primary); }
+.reco-ic svg { width: 18px; height: 18px; }
+.reco-tx { flex: 1 1 auto; min-width: 0; font-size: var(--text-body-14); font-weight: 500; line-height: 1.6; color: var(--color-content-neutral); }
+.reco-again { flex: none; height: 36px; padding: 0 var(--space-14); border-radius: var(--radius-full); background: var(--color-base-white); font-size: 13px; font-weight: 600; color: var(--color-primary); }
+.reco-again:hover { background: var(--color-state-hover-brand); }
+
+/* ---------- 일차 탭 ---------- */
+.day-tabs { display: flex; gap: var(--space-8); margin-top: var(--space-24); border-bottom: 1px solid var(--color-border-subtle); }
+.day-tab { position: relative; display: flex; flex-direction: column; gap: 2px; padding: var(--space-12) var(--space-16); font-size: var(--text-body-16); font-weight: 500; color: var(--color-content-neutral-subtle); }
+.day-tab b { font-weight: inherit; }
+.day-tab small { font-size: var(--text-caption-11); font-weight: 500; color: var(--color-content-subtle); }
+.day-tab.is-on { font-weight: 600; color: var(--color-content-default); }
+.day-tab.is-on::after { content: ""; position: absolute; left: var(--space-12); right: var(--space-12); bottom: -1px; height: 2px; background: var(--color-primary); }
+
+/* ---------- 일차 요약 ---------- */
+.day-sum { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-16); margin-top: var(--space-20); }
+.day-sum h3 { font-size: var(--text-body-16); font-weight: 600; }
+.day-sum p { font-size: 13px; font-weight: 500; color: var(--color-content-neutral-muted); }
+.day-foot { margin-top: var(--space-6); font-size: var(--text-caption-11); color: var(--color-content-subtle); }
+
+/* ---------- 타임라인 ---------- */
+.tl-area { position: relative; min-height: 420px; margin-top: var(--space-20); }
+.tl-list { display: flex; flex-direction: column; }
+
+/* 시간대 구분선 */
+.tl-div { display: flex; align-items: center; gap: var(--space-10); margin: var(--space-20) 0 var(--space-12); }
+.tl-div:first-child { margin-top: 0; }
+.tl-div b { flex: none; font-size: var(--text-caption-12); font-weight: 600; color: var(--color-content-subtle); }
+.tl-div i { flex: none; font-style: normal; font-size: var(--text-caption-11); color: var(--color-content-subtle); }
+.tl-div::after { content: ""; flex: 1 1 auto; height: 1px; background: var(--color-border-subtle); }
+
+/* 장소 카드 */
+.tl-item { display: flex; gap: var(--space-16); padding: var(--space-12); border-radius: var(--radius-lg); transition: background .14s ease; }
+.tl-item.is-hot { background: var(--color-neutral-subtle); }
+.tl-no { display: flex; width: 28px; height: 28px; flex: none; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-base-white); font-size: 13px; font-weight: 600; }
+.tl-thumb { width: 72px; height: 72px; flex: none; border-radius: var(--radius-md); object-fit: cover; background: var(--color-neutral-subtle); }
+.tl-body { flex: 1 1 auto; min-width: 0; }
+.tl-name { display: flex; align-items: center; gap: var(--space-8); font-size: var(--text-body-16); font-weight: 600; }
+.tl-name a { color: inherit; text-decoration: none; }
+.tl-name a:hover { text-decoration: underline; }
+.tl-slot { font-size: var(--text-caption-11); font-weight: 600; color: var(--color-content-subtle); }
+.tl-packed { display: inline-flex; align-items: center; height: 20px; padding: 0 var(--space-6); border-radius: var(--radius-sm); background: var(--color-neutral-subtle); font-size: var(--text-caption-11); font-weight: 600; color: var(--color-content-subtle); }
+.tl-desc { margin-top: var(--space-4); font-size: var(--text-body-14); line-height: 1.6; color: var(--color-content-neutral-muted); }
+.tl-tags { display: flex; gap: var(--space-6); margin-top: var(--space-8); }
+.tl-tags span { display: inline-flex; align-items: center; height: 24px; padding: 0 var(--space-8); border-radius: var(--radius-full); background: var(--color-neutral-bg); font-size: var(--text-caption-11); font-weight: 500; color: var(--color-content-neutral-muted); }
+.tl-match { flex: none; font-size: 13px; font-weight: 600; color: var(--color-primary); }
+
+/* 이동 구간 */
+.tl-seg { display: flex; align-items: center; gap: var(--space-8); margin-left: var(--space-24); padding: var(--space-8) var(--space-12); border-left: 2px dotted var(--color-neutral-border); }
+.tl-seg svg { width: 15px; height: 15px; flex: none; color: var(--color-content-subtle); }
+.tl-seg .t { font-size: 13px; font-weight: 600; color: var(--color-content-neutral); }
+.tl-seg .alt { font-size: var(--text-caption-11); color: var(--color-content-subtle); }
+.tl-seg .warn { display: inline-flex; align-items: center; gap: var(--space-4); height: 22px; padding: 0 var(--space-8); border-radius: var(--radius-full); background: var(--color-warning-subtle); font-size: var(--text-caption-11); font-weight: 600; color: var(--color-content-neutral); white-space: nowrap; }
+.tl-seg .warn svg { width: 12px; height: 12px; color: var(--color-warning); }
+.tl-seg.is-far .t { color: var(--color-content-default); }
+.tl-seg .nav { margin-left: auto; font-size: var(--text-caption-11); font-weight: 600; color: var(--color-primary); text-decoration: none; }
+.tl-seg .nav:hover { text-decoration: underline; }
+.tl-seg.is-none { color: var(--color-content-subtle); }
+.tl-seg.is-none .t { font-weight: 500; color: var(--color-content-subtle); }
+
+/* 숙소 노드 */
+.tl-stay { display: flex; align-items: center; gap: var(--space-12); padding: var(--space-12); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); background: var(--color-neutral-bg); }
+.tl-stay .ic { display: flex; width: 28px; height: 28px; flex: none; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--color-base-white); color: var(--color-content-neutral-muted); }
+.tl-stay .ic svg { width: 16px; height: 16px; }
+.tl-stay .tx { flex: 1 1 auto; min-width: 0; }
+.tl-stay b { font-size: var(--text-body-14); font-weight: 600; }
+.tl-stay p { margin-top: 2px; font-size: 13px; color: var(--color-content-neutral-muted); }
+.tl-stay .undecided { font-size: var(--text-caption-11); font-weight: 600; color: var(--color-content-subtle); }
+.tl-empty { display: flex; flex-direction: column; align-items: center; gap: var(--space-8); padding: 80px var(--space-24); text-align: center; }
+.tl-empty b { font-size: var(--text-body-16); font-weight: 600; }
+.tl-empty p { font-size: var(--text-body-14); color: var(--color-content-neutral-muted); }
+.tl-empty[hidden] { display: none; }
+
+/* 다음 단계 안내 — 뼈대에서만 보인다 */
+.tl-todo { margin-top: var(--space-24); padding: var(--space-16); border: 1px dashed var(--color-neutral-border); border-radius: var(--radius-lg); font-size: 13px; line-height: 1.7; color: var(--color-content-subtle); }
+
+/* 생성 중 오버레이 — 타임라인 자리만 덮는다 (PRD 4.2 / 4.13) */
+.tl-load { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-12); background: var(--color-surface-overlay); }
+.tl-load[hidden] { display: none; }
+.tl-load b { font-size: var(--text-body-16); font-weight: 600; }
+.tl-load p { font-size: var(--text-body-14); color: var(--color-content-neutral-muted); }
+.spinner { width: 28px; height: 28px; border: 3px solid var(--color-neutral-border); border-top-color: var(--color-primary); border-radius: var(--radius-full); animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- 지도 ---------- */
+.rr-map { position: relative; width: 100%; height: 100%; background: var(--color-neutral-bg); }
+.rr-map-canvas { position: absolute; inset: 0; }
+.leaflet-container { background: var(--color-neutral-bg); font-family: var(--font-family); }
+.leaflet-tile { filter: saturate(.72) brightness(1.03); }   /* 원색을 눌러 핀이 먼저 읽히게 */
+.leaflet-div-icon { background: none; border: 0; }
+.leaflet-control-attribution { font-size: 10px; background: var(--alpha-white-70); }
+.leaflet-control-zoom a { color: var(--color-content-neutral); }
+.rr-map-note { position: absolute; z-index: 500; left: var(--space-12); bottom: var(--space-12); padding: var(--space-4) var(--space-10); border-radius: var(--radius-full); background: var(--alpha-white-70); backdrop-filter: blur(4px); font-size: var(--text-caption-11); font-weight: 500; color: var(--color-content-neutral-muted); }
+.rr-map-fail { position: absolute; inset: 0; z-index: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-8); padding: var(--space-24); text-align: center; background: var(--color-neutral-bg); }
+.rr-map-fail[hidden] { display: none; }
+.rr-map-fail b { font-size: var(--text-body-14); font-weight: 600; }
+.rr-map-fail p { font-size: 13px; line-height: 1.6; color: var(--color-content-neutral-muted); }
+
+/* 지도 핀 — 내 여행과 같은 모양 */
+.pin { position: relative; display: block; width: 26px; height: 34px; color: var(--color-primary); border: 0; background: none; padding: 0; }
+.pin svg { width: 100%; height: 100%; filter: drop-shadow(0 2px 4px rgba(27,35,29,.18)); transform-origin: 50% 100%; transition: transform .16s cubic-bezier(.22,.61,.36,1); }
+.pin .no { position: absolute; left: 0; right: 0; top: 5px; text-align: center; font-size: var(--text-caption-11); font-weight: 700; color: var(--color-base-white); }
+.pin:hover, .pin.is-on { color: var(--color-primary-active); }
+.pin:hover svg, .pin.is-on svg { transform: scale(1.18); }
+
+/* ---------- 저장 바 ---------- */
+.save-bar { position: sticky; bottom: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: var(--space-16); margin-top: var(--space-32); padding: var(--space-16) var(--space-20); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); background: var(--color-surface-overlay); box-shadow: var(--elevation-md); }
+.save-bar p { font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-neutral-muted); }
+.save-btn { height: 44px; padding: 0 var(--space-24); border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-base-white); font-size: var(--text-body-14); font-weight: 600; }
+.save-btn:hover { background: var(--scent-green-700); }
+</style>
+</head>
+<script>(function(){try{if((localStorage.getItem("scentrip_auth")||"in")==="out")document.documentElement.classList.add("is-guest");}catch(e){}})();</script>
+<body>
+<div class="page">
+
+  <!-- ============ Nav ============ -->
+  <nav class="nav">
+    <a class="brand" href="home.html" aria-label="Scentrip 홈">
+      <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="brand-name">Scentrip</span>
+    </a>
+    <div class="nav-center">
+      <div class="nav-list">
+        <a class="nav-link" href="#">소식</a>
+        <a class="nav-link" href="place-recommend.html">탐색</a>
+        <a class="nav-link" href="my-trip.html">내 여행</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <a class="btn-login guest-only" href="#" data-login role="button">로그인</a>
+      <div class="profile auth-only">
+        <button class="type-pill" id="profilePill" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="profilePop">
+          <span class="pill-name">이서연</span>
+          <span class="av av-28" aria-hidden="true"><span class="av-svg"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg></span></span>
+        </button>
+        <div class="popover profile-pop" id="profilePop" role="menu">
+          <div class="pop-profile" aria-hidden="true">
+            <span class="av av-48" aria-hidden="true"><span class="av-svg"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg></span></span>
+            <span class="pop-id">
+              <span class="pop-name">이서연</span>
+              <span class="pop-taste">WHAN · 시간을 수집하는 감성가</span>
+            </span>
+          </div>
+          <div class="pop-divider"></div>
+          <div class="pop-menu">
+            <a class="pop-item" href="mypage.html#account" data-view-link="account" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg> 계정 설정</a>
+            <a class="pop-item" href="mypage.html#reviews" data-view-link="reviews" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,0,0,36.18,176.88L24.83,210.93a16,16,0,0,0,20.24,20.24l34.05-11.35A104,104,0,1,0,128,24Zm0,192a87.87,87.87,0,0,1-44.06-11.81,8,8,0,0,0-6.54-.67L40,216,52.47,178.6a8,8,0,0,0-.66-6.54A88,88,0,1,1,128,216Zm12-88a12,12,0,1,1-12-12A12,12,0,0,1,140,128Zm44,0a12,12,0,1,1-12-12A12,12,0,0,1,184,128Zm-88,0a12,12,0,1,1-12-12A12,12,0,0,1,96,128Z"/></svg> 내 리뷰</a>
+            <a class="pop-item" href="mypage.html#support" data-view-link="support" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M140,180a12,12,0,1,1-12-12A12,12,0,0,1,140,180ZM128,72c-22.06,0-40,16.15-40,36v4a8,8,0,0,0,16,0v-4c0-11,10.77-20,24-20s24,9,24,20-10.77,20-24,20a8,8,0,0,0-8,8v8a8,8,0,0,0,16,0v-.72c18.24-3.35,32-17.9,32-35.28C168,88.15,150.06,72,128,72Zm104,56A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg> 고객센터</a>
+            <div class="pop-divider"></div>
+            <button class="pop-item" type="button" data-logout role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M124,216a12,12,0,0,1-12,12H48a12,12,0,0,1-12-12V40A12,12,0,0,1,48,28h64a12,12,0,0,1,0,24H60V204h52A12,12,0,0,1,124,216Zm108.49-96.49-40-40a12,12,0,0,0-17,17L195,116H112a12,12,0,0,0,0,24h83l-19.52,19.51a12,12,0,0,0,17,17l40-40A12,12,0,0,0,232.49,119.51Z"/></svg> 로그아웃</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ 로그인 게이트 (게스트 전용) ============ -->
+  <section class="guest-gate guest-only" aria-labelledby="gateTitle">
+    <div class="gate-card">
+      <span class="gate-icon" aria-hidden="true">
+        <svg viewBox="0 0 256 256" fill="currentColor"><path d="M178,32c-20.65,0-38.73,8.88-50,23.89C116.73,40.88,98.65,32,78,32A62.07,62.07,0,0,0,16,94c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,220.66,240,164,240,94A62.07,62.07,0,0,0,178,32Zm-50,174c-18.26-11.06-96-64.11-96-112A46.06,46.06,0,0,1,78,48c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0C142.22,58.36,158.55,48,178,48a46.06,46.06,0,0,1,46,46C224,141.87,146.24,194.93,128,206Z"/></svg>
+      </span>
+      <h1 id="gateTitle">로그인이 필요해요</h1>
+      <p>동선 만들기는 로그인 후 이용할 수 있어요.<br>취향에 맞는 여행 동선을 만들어 드려요.</p>
+      <button class="btn-login" type="button" data-login>로그인</button>
+    </div>
+  </section>
+
+  <div class="rr-top auth-only">
+    <button class="rr-back" id="back" type="button">
+      <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/></svg>
+      뒤로
+    </button>
+    <h1>AI 맞춤 동선</h1>
+  </div>
+
+  <div class="rr-wrap auth-only">
+
+    <!-- ============ 조건 사이드바 ============ -->
+    <aside class="rr-side">
+      <h2>여행 조건</h2>
+      <div class="cond-group">
+        <dl id="condLive"></dl>
+        <p class="cond-note">바꾸면 동선을 다시 구성합니다.</p>
+      </div>
+      <div class="cond-group">
+        <dl id="condFixed"></dl>
+        <button class="cond-regen" id="regen" type="button">이 조건으로 다시 만들기</button>
+      </div>
+    </aside>
+
+    <!-- ============ 타임라인 ============ -->
+    <main class="rr-main">
+      <div class="rr-head">
+        <div class="rr-head-tx">
+          <div class="rr-title">
+            <h2 id="rrTitle">AI 맞춤 동선</h2>
+            <span class="match-badge" id="matchBadge">
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg>
+              <span id="matchAvg">–</span>
+            </span>
+            <span class="dirty-badge" id="dirtyBadge" hidden>저장 안 된 변경</span>
+          </div>
+          <p class="rr-basis" id="rrBasis"></p>
+        </div>
+      </div>
+
+      <div class="reco" id="reco" hidden>
+        <span class="reco-ic" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M128,16a88.1,88.1,0,0,0-88,88c0,75.3,80,132.17,83.41,134.55a8,8,0,0,0,9.18,0C136,236.17,216,179.3,216,104A88.1,88.1,0,0,0,128,16Zm0,56a32,32,0,1,1-32,32A32,32,0,0,1,128,72Z"/></svg></span>
+        <p class="reco-tx" id="recoTx"></p>
+        <button class="reco-again" id="recoAgain" type="button">다른 지역으로 다시 추천</button>
+      </div>
+
+      <nav class="day-tabs" id="dayTabs" aria-label="일차 선택"></nav>
+
+      <div class="day-sum">
+        <h3 id="daySumTitle">1일차 동선 요약</h3>
+        <p id="daySumMeta"></p>
+      </div>
+      <p class="day-foot" id="dayFoot"></p>
+
+      <div class="tl-area">
+        <div class="tl-list" id="timeline"></div>
+        <div class="tl-empty" id="tlEmpty" hidden>
+          <b>이 날은 비어 있어요</b>
+          <p>일정 밀도나 여행 기간을 조정해 보세요.</p>
+        </div>
+        <div class="tl-load" id="tlLoad" hidden>
+          <div class="spinner" aria-hidden="true"></div>
+          <b id="loadTitle">AI가 향의 흐름을 그리는 중입니다</b>
+          <p id="loadSub">향 매칭 → 이동 부담 → 운영시간 순으로 정렬하고 있어요</p>
+        </div>
+      </div>
+
+      <p class="tl-todo">
+        <b>다음 단계에서 붙일 것</b> — 장소 카드 액션(순서·시간대·일차 이동·장소 변경·삭제), 구간별 이동 수단과 소요 시간,
+        먼 구간 경고, 시간대 구분선, 숙소 노드, 빈자리 추가, 저장·이탈 가드.
+      </p>
+
+      <div class="save-bar">
+        <p id="saveMsg">아직 저장하지 않은 동선이에요</p>
+        <button class="save-btn" id="saveBtn" type="button">내 여행에 저장</button>
+      </div>
+    </main>
+
+    <!-- ============ 지도 ============ -->
+    <div class="rr-mapcol">
+      <div class="rr-map">
+        <div class="rr-map-canvas" id="map"></div>
+        <p class="rr-map-note">위치 확인용 · 실제 길안내는 구간별 링크로 연결됩니다</p>
+        <div class="rr-map-fail" id="mapFail" hidden>
+          <b>지도를 불러오지 못했어요</b>
+          <p>네트워크를 확인해 주세요. 동선 편집과 저장은 그대로 이용할 수 있어요.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></svg>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+/* ============================================================
+   결과 화면 — 1단계 뼈대
+   조건 읽기 → 지역 확정 → 로딩 → 코스 생성 → 일차 탭·요약·타임라인·지도
+   ============================================================ */
+const COND_KEY = "scentrip_route_cond";
+const DEFAULT_COND = { mode: "ai", nights: "1박 2일", transport: "자동차", pace: "넉넉하게",
+                       distance: "적당히", region: null, company: null, origin: null, originPlace: null, stay: [] };
+
+/* 위저드를 거치지 않고 주소로 바로 열면 기본 조건으로 보여준다 */
+function readCond() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(COND_KEY) || "null");
+    return raw ? Object.assign({}, DEFAULT_COND, raw) : Object.assign({}, DEFAULT_COND);
+  } catch (e) { return Object.assign({}, DEFAULT_COND); }
+}
+const cond = readCond();
+
+const FLOW_NAME = { ai: "AI에게 여행지 추천 받기", region: "원하는 지역의 동선 추천 받기", picked: "찜한 장소로 동선 추천 받기" };
+
+/* ---------- 지역 확정 ---------- */
+const REGION_ORDER = ["gangneung", "gyeongju", "andong", "damyang", "jeju"];
+let regionAt = 0;          // '다른 지역으로 다시 추천' 순환 위치
+let fallbackFrom = null;   // 향 데이터가 없어 대체한 경우 원래 고른 시·도
+
+function resolveRegion() {
+  if (cond.mode === "region" && cond.region) {
+    const key = SIDO_TO_REGION[cond.region] || REGION_ORDER[0];
+    fallbackFrom = REGION_WITH_DATA.has(cond.region) ? null : cond.region;
+    return key;
+  }
+  return REGION_ORDER[regionAt % REGION_ORDER.length];
+}
+let regionKey = resolveRegion();
+
+/* ---------- 기간·슬롯 ---------- */
+function dayCount() {
+  if (!cond.nights || cond.nights === "당일치기") return 1;
+  return (parseInt(cond.nights, 10) || 0) + 1;
+}
+/* 기간별 골격. 도착일은 오후부터, 마지막 날은 저녁을 비운다 */
+function slotsFor(day, total) {
+  if (total === 1) return ["오전", "오후", "저녁"];
+  if (day === 1) return ["오후", "저녁"];
+  if (day === total) return ["오전", "오후"];
+  return ["오전", "오후", "저녁"];
+}
+function dayLabel(day, total) {
+  if (total === 1) return "하루 코스";
+  if (day === 1) return "도착일";
+  if (day === total) return "마지막 날";
+  return "온전한 하루";
+}
+const SLOT_ORDER = { "오전": 0, "오후": 1, "저녁": 2 };
+
+/* ---------- 코스 생성 ----------
+   뼈대 단계라 '향 매칭 높은 순'으로만 채운다.
+   PRD 4.2 의 최근접 체인·이동부담계수는 다음 단계에서 넣는다. */
+let days = [];
+function build() {
+  const total = dayCount();
+  const pool = placesOf(regionKey).slice().sort((a, b) => b.match - a.match);
+  let at = 0;
+  days = [];
+  for (let d = 1; d <= total; d++) {
+    const items = [];
+    slotsFor(d, total).forEach((slot) => {
+      if (at < pool.length) items.push(Object.assign({ slot, tier: "core" }, pool[at++]));
+    });
+    if (cond.pace === "빽빽하게" && at < pool.length) {
+      items.push(Object.assign({ slot: "오후", tier: "packed" }, pool[at++]));
+    }
+    items.sort((a, b) => SLOT_ORDER[a.slot] - SLOT_ORDER[b.slot]);
+    days.push(items);
+  }
+}
+
+/* 넉넉한 일정에서는 packed 항목을 감춘다 (PRD 4.6) */
+function shown(day) {
+  const list = days[day];   // 코스가 만들어지기 전(지도 초기화 시점)에도 안전하게
+  if (!list) return [];
+  return list.filter((it) => cond.pace === "빽빽하게" || it.tier === "core");
+}
+
+/* ---------- 이동 시간 (PRD 4.5) ----------
+   좌표 기반 추정치다. 실서비스는 경로 API 로 대체하되 표시 규칙
+   (빠른 수단 선택 · 5분 단위 · 먼 구간 경고)은 그대로 유지한다. */
+const ROAD_DETOUR = 1.3, WALK_DETOUR = 1.15;
+const SPD = { car: 40, transit: 18, walk: 4.3 };   // km/h
+const TRANSIT_OVERHEAD = 14;                       // 대기 + 정류장 접근
+const WALK_MAX = 75;                               // 이보다 오래 걸리면 도보는 후보에서 뺀다
+const FAR_LIMIT = { "가깝게": 35, "적당히": 70 };   // 멀어도 괜찮아요 는 경고 없음
+
+function km(a, b) {
+  const R = 6371, rad = (d) => d * Math.PI / 180;
+  const dLat = rad(b[0] - a[0]), dLng = rad(b[1] - a[1]);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a[0])) * Math.cos(rad(b[0])) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+const round5 = (m) => Math.max(5, Math.ceil(m / 5) * 5);
+
+/* 이동 수단 설정에 따라 기준값과 보조 표기를 정한다.
+   자동차면 자동차만, 도보·대중교통이면 그 둘 중 빠른 쪽이 기준이다(자동차와 섞지 않는다). */
+function leg(a, b) {
+  if (!a || !b) return null;
+  const d = km(a, b);
+  if (cond.transport === "자동차") {
+    return { main: { mode: "car", label: "자동차", min: round5(d * ROAD_DETOUR / SPD.car * 60) }, alt: null };
+  }
+  const transit = { mode: "transit", label: "대중교통", min: round5(d * ROAD_DETOUR / SPD.transit * 60 + TRANSIT_OVERHEAD) };
+  const walkRaw = d * WALK_DETOUR / SPD.walk * 60;
+  const walk = walkRaw > WALK_MAX ? null : { mode: "walk", label: "도보", min: round5(walkRaw) };
+  if (!walk) return { main: transit, alt: null };
+  const [main, alt] = walk.min <= transit.min ? [walk, transit] : [transit, walk];
+  return { main, alt };
+}
+function minText(m) { return m >= 60 ? `${Math.floor(m / 60)}시간${m % 60 ? " " + (m % 60) + "분" : ""}` : `${m}분`; }
+
+/* ---------- 숙소 ----------
+   위저드가 받은 것은 주소 문자열이라 좌표가 없다. 지오코딩 연동 전까지는
+   지역 중심을 대신 쓰고, 그 사실을 화면에 적어 오해를 막는다(PRD 4.9). */
+function stayOf(night) {
+  const row = (cond.stay || [])[night - 1];
+  const decided = row && row.pick === "정해졌어요" && (row.addr || "").trim();
+  return { night, decided: !!decided, addr: decided ? row.addr.trim() : "",
+           pos: decided ? REGION_META[regionKey].center : null };
+}
+function stayApprox() {
+  return (cond.stay || []).some((r) => r && r.pick === "정해졌어요" && (r.addr || "").trim());
+}
+
+/* ---------- 타임라인 노드 (PRD 4.5) ---------- */
+function nodesFor(d) {
+  const total = days.length, day = d + 1, out = [];
+  if (total > 1 && day > 1) out.push({ type: "stay", stay: stayOf(day - 1), role: "출발" });
+  shown(d).forEach((p, i) => out.push({ type: "place", p, i }));
+  if (total > 1 && day < total) out.push({ type: "stay", stay: stayOf(day), role: "복귀" });
+  return out;
+}
+const posOf = (n) => n.type === "place" ? [n.p.lat, n.p.lng] : n.stay.pos;
+
+/* ---------- 그리기 ---------- */
+let at = 0;   // 활성 일차 인덱스
+const $ = (id) => document.getElementById(id);
+
+function renderHead() {
+  const meta = REGION_META[regionKey];
+  $("rrTitle").textContent = `${meta.label} ${cond.nights === "당일치기" ? "당일치기" : cond.nights} 향기 동선`;
+  const all = days.flatMap((_, i) => shown(i));
+  const avg = all.length ? Math.round(all.reduce((s, p) => s + p.match, 0) / all.length) : 0;
+  $("matchAvg").textContent = `${avg}%`;
+  $("rrBasis").textContent = `${meta.scentProfile[0]} 기준 · ${meta.label} 일대 · ${meta.tagline}`;
+
+  // 추천 이유 배너는 지역까지 AI 가 고른 경우에만 (PRD 4.3)
+  const showReco = cond.mode === "ai";
+  $("reco").hidden = !showReco;
+  if (showReco) {
+    const bits = [`${meta.scentProfile[0]} 취향 · ${meta.label}`];
+    if (cond.origin && cond.originPlace) bits.push(`${cond.originPlace}에서 ${cond.origin}`);
+    $("recoTx").textContent = bits.join(" · ");
+  }
+  if (fallbackFrom) {
+    $("rrBasis").textContent += ` (${fallbackFrom}은 향 데이터가 없어 ${meta.label}로 대체했어요)`;
+  }
+}
+
+function renderTabs() {
+  const total = days.length;
+  $("dayTabs").innerHTML = days.map((_, i) =>
+    `<button class="day-tab ${i === at ? "is-on" : ""}" type="button" data-day="${i}">
+       <b>${i + 1}일차</b><small>${dayLabel(i + 1, total)}</small>
+     </button>`).join("");
+}
+
+const ICON = {
+  car: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M240,112H229.2L201.42,49.5A16,16,0,0,0,186.8,40H69.2a16,16,0,0,0-14.62,9.5L26.8,112H16a8,8,0,0,0,0,16h8v80a16,16,0,0,0,16,16H64a16,16,0,0,0,16-16V192h96v16a16,16,0,0,0,16,16h24a16,16,0,0,0,16-16V128h8a8,8,0,0,0,0-16ZM69.2,56H186.8l24.89,56H44.31ZM64,208H40V192H64Zm128,0V192h24v16Zm24-32H40V128H216ZM56,152a8,8,0,0,1,8-8H80a8,8,0,0,1,0,16H64A8,8,0,0,1,56,152Zm112,0a8,8,0,0,1,8-8h16a8,8,0,0,1,0,16H176A8,8,0,0,1,168,152Z"/></svg>',
+  transit: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M184,24H72A32,32,0,0,0,40,56V184a32,32,0,0,0,32,32h.9L59.4,229.5a8,8,0,0,0,11.2,11.4L89.4,222h77.2l18.8,18.9a8,8,0,0,0,11.2-11.4L183.1,216H184a32,32,0,0,0,32-32V56A32,32,0,0,0,184,24ZM72,40H184a16,16,0,0,1,16,16v48H56V56A16,16,0,0,1,72,40ZM184,200H72a16,16,0,0,1-16-16V120H200v64A16,16,0,0,1,184,200ZM96,160a12,12,0,1,1-12-12A12,12,0,0,1,96,160Zm88,0a12,12,0,1,1-12-12A12,12,0,0,1,184,160Z"/></svg>',
+  walk: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M152,44a20,20,0,1,1,20,20A20,20,0,0,1,152,44ZM199.6,94.8l-24-13.9a39.9,39.9,0,0,0-46.1,4.2L104.7,106a8,8,0,0,0-2.5,3.7L86.6,158.3l-30.9,42a8,8,0,1,0,12.9,9.5l32-43.5a8.1,8.1,0,0,0,1.2-2.3l7.9-24.6,22.6,21.3-14.9,63.5a8,8,0,0,0,6,9.6,7.5,7.5,0,0,0,1.8.2,8,8,0,0,0,7.8-6.2l16-68a8,8,0,0,0-2.3-7.7l-25.8-24.3,15.5-13a23.9,23.9,0,0,1,27.7-2.6l24,13.9a8,8,0,0,0,8-13.9Z"/></svg>',
+  bed: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M232,96H208V72a16,16,0,0,0-16-16H64A16,16,0,0,0,48,72V96H24a8,8,0,0,0-8,8v88a8,8,0,0,0,16,0V176H224v16a8,8,0,0,0,16,0V104A8,8,0,0,0,232,96ZM64,72H192V96H176a24,24,0,0,0-24-24H104A24,24,0,0,0,80,96H64ZM160,96H96a8,8,0,0,1,8-8h48A8,8,0,0,1,160,96ZM32,160V112H224v48Z"/></svg>',
+  warn: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM120,104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm8,88a12,12,0,1,1,12-12A12,12,0,0,1,128,192Z"/></svg>',
+};
+
+/* 구간 하나를 그린다. 숙소가 미정이면 시간 대신 안내 문구를 둔다(PRD 4.5). */
+function segHtml(a, b) {
+  const pa = posOf(a), pb = posOf(b);
+  if (!pa || !pb) {
+    return `<div class="tl-seg is-none"><span class="t">숙소를 입력하면 이 구간의 이동 시간을 계산해 드려요</span></div>`;
+  }
+  const L = leg(pa, pb);
+  const limit = FAR_LIMIT[cond.distance];
+  const far = limit && L.main.min > limit;
+  const to = b.type === "place" ? b.p : null;
+  const nav = to ? `<a class="nav" href="https://map.kakao.com/link/to/${encodeURIComponent(to.name)},${to.lat},${to.lng}" target="_blank" rel="noopener">길찾기</a>` : "";
+  return `<div class="tl-seg ${far ? "is-far" : ""}">
+    ${ICON[L.main.mode]}
+    <span class="t">${L.main.label} 약 ${minText(L.main.min)}</span>
+    ${L.alt ? `<span class="alt">· ${L.alt.label} 약 ${minText(L.alt.min)}</span>` : ""}
+    ${far ? `<span class="warn">${ICON.warn}이동 부담 설정보다 멀어요</span>` : ""}
+    ${nav}
+  </div>`;
+}
+
+function placeHtml(n) {
+  const p = n.p;
+  return `<article class="tl-item" data-i="${n.i}">
+    <span class="tl-no">${n.i + 1}</span>
+    <img class="tl-thumb" src="${p.img}" alt="" loading="lazy">
+    <div class="tl-body">
+      <p class="tl-name"><a href="place-detail.html">${p.name}</a><span class="tl-slot">${p.slot}</span>${n.p.tier === "packed" ? '<span class="tl-packed">빽빽</span>' : ""}</p>
+      <p class="tl-desc">${p.oneline}</p>
+      <div class="tl-tags">${p.scents.map((t) => `<span>${t}</span>`).join("")}</div>
+    </div>
+    <span class="tl-match">${p.match}%</span>
+  </article>`;
+}
+
+function stayHtml(n) {
+  const st = n.stay;
+  return `<div class="tl-stay">
+    <span class="ic" aria-hidden="true">${ICON.bed}</span>
+    <span class="tx">
+      <b>${st.night}박 · ${n.role}</b>
+      <p>${st.decided ? st.addr : "숙소가 아직 정해지지 않았어요"}</p>
+    </span>
+    ${st.decided ? "" : '<span class="undecided">미정</span>'}
+  </div>`;
+}
+
+function renderDay() {
+  const list = shown(at);
+  const nodes = nodesFor(at);
+
+  // 구간 합계 — 미계산 구간이 있으면 개수를 따로 센다
+  let total = 0, unknown = 0;
+  for (let i = 0; i < nodes.length - 1; i++) {
+    const pa = posOf(nodes[i]), pb = posOf(nodes[i + 1]);
+    if (!pa || !pb) { unknown++; continue; }
+    total += leg(pa, pb).main.min;
+  }
+
+  $("daySumTitle").textContent = `${at + 1}일차 동선 요약`;
+  $("daySumMeta").textContent = unknown
+    ? `장소 ${list.length}곳 · 숙소 입력 시 ${unknown}개 구간 추가 계산`
+    : `장소 ${list.length}곳 · 총 이동 약 ${minText(total)}`;
+  const basis = cond.transport === "자동차" ? "자동차 기준" : "도보·대중교통 중 빠른 쪽 기준";
+  $("dayFoot").textContent = `${basis} · 장소 사이 거리 ‘${cond.distance}’ 설정 · 이동 시간은 좌표 기반 추정치예요`
+    + (stayApprox() ? " (숙소는 좌표 변환 전이라 지역 중심으로 계산합니다)" : "");
+
+  // 시간대가 바뀌는 지점에 구분선을 넣는다
+  const SLOT_TIME = { "오전": "09–12", "오후": "12–18", "저녁": "18–21" };
+  let html = "", lastSlot = null;
+  nodes.forEach((n, idx) => {
+    if (n.type === "place" && n.p.slot !== lastSlot) {
+      lastSlot = n.p.slot;
+      html += `<div class="tl-div"><b>${lastSlot}</b><i>${SLOT_TIME[lastSlot]}</i></div>`;
+    }
+    html += n.type === "place" ? placeHtml(n) : stayHtml(n);
+    if (idx < nodes.length - 1) html += segHtml(n, nodes[idx + 1]);
+  });
+
+  const hiddenCount = days[at].length - list.length;
+  if (hiddenCount > 0) html += `<p class="tl-todo">넉넉한 일정에서 ${hiddenCount}곳이 가려졌어요 · 모두 보기</p>`;
+
+  $("timeline").innerHTML = list.length ? html : "";
+  $("tlEmpty").hidden = list.length > 0;
+  renderMap();
+}
+
+function renderCond() {
+  const stayTx = !cond.stay || !cond.stay.length ? "미정"
+    : cond.stay.map((s, i) => `${i + 1}박 ${s && s.pick === "정해졌어요" ? (s.addr || "입력") : "미정"}`).join(" · ");
+  $("condLive").innerHTML = [
+    ["여행 기간", cond.nights],
+    ["장소 사이 거리", cond.distance],
+    ["동행", cond.company || "선택 안 함"],
+    ["숙소", dayCount() > 1 ? stayTx : "당일치기"],
+    ["일정 밀도", cond.pace],
+    ["현지 이동", cond.transport],
+  ].map(([k, v]) => `<div class="cond-row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+  $("condFixed").innerHTML = [
+    ["생성 방식", FLOW_NAME[cond.mode] || FLOW_NAME.ai],
+    ["여행 지역", REGION_META[regionKey].label],
+    ["출발지", cond.originPlace || "선택 안 함"],
+    ["이동 가능 시간", cond.origin || "상관 없어요"],
+  ].map(([k, v]) => `<div class="cond-row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+}
+
+/* ---------- 지도 ---------- */
+const pinShape = '<svg viewBox="0 0 26 34" fill="none" aria-hidden="true"><path d="M13 0C5.82 0 0 5.82 0 13c0 9.1 11.1 20.02 11.57 20.48a2 2 0 0 0 2.86 0C14.9 33.02 26 22.1 26 13 26 5.82 20.18 0 13 0Z" fill="currentColor"/></svg>';
+let mapReady = false;
+
+function initMap() {
+  const ok = ScentMap.create($("map"), REGION_META[regionKey].center, 11);
+  $("mapFail").hidden = ok;
+  mapReady = ok;
+  if (ok) renderMap();
+}
+
+function renderMap() {
+  if (!mapReady) return;
+  const list = shown(at);
+  ScentMap.clearMarkers();
+  list.forEach((p, i) => {
+    const html = `<button class="pin" type="button" data-i="${i}" aria-label="${p.name}">${pinShape}<span class="no">${i + 1}</span></button>`;
+    ScentMap.addMarker(i, [p.lat, p.lng], html);
+  });
+  const pts = list.map((p) => [p.lat, p.lng]);
+  ScentMap.drawRoute(pts);
+  ScentMap.fitAll(pts, 13);
+}
+
+/* 타임라인 ↔ 지도 양방향 강조 (PRD 4.10) */
+function link(i, on) {
+  const item = $("timeline").querySelector(`.tl-item[data-i="${i}"]`);
+  if (item) item.classList.toggle("is-hot", on);
+  ScentMap.highlight(i, on);
+  if (on) { const p = shown(at)[i]; if (p) ScentMap.edgeFlip(i, [p.lat, p.lng]); }
+}
+$("timeline").addEventListener("mouseover", (e) => { const it = e.target.closest(".tl-item"); if (it) link(+it.dataset.i, true); });
+$("timeline").addEventListener("mouseout", (e) => { const it = e.target.closest(".tl-item"); if (it) link(+it.dataset.i, false); });
+$("map").addEventListener("mouseover", (e) => { const b = e.target.closest(".pin"); if (b) link(+b.dataset.i, true); });
+$("map").addEventListener("mouseout", (e) => { const b = e.target.closest(".pin"); if (b) link(+b.dataset.i, false); });
+$("map").addEventListener("click", (e) => {
+  const b = e.target.closest(".pin"); if (!b) return;
+  const item = $("timeline").querySelector(`.tl-item[data-i="${b.dataset.i}"]`);
+  if (item) item.scrollIntoView({ block: "center", behavior: "smooth" });
+});
+
+/* ---------- 변경 감지 ---------- */
+let dirty = false;
+function setDirty(on) {
+  dirty = on;
+  $("dirtyBadge").hidden = !on;
+  $("saveMsg").textContent = on ? "저장하지 않은 변경사항이 있어요" : "아직 저장하지 않은 동선이에요";
+}
+
+/* ---------- 토스트 ---------- */
+let toastT;
+function say(msg) {
+  $("toastMsg").textContent = msg;
+  $("toast").classList.add("is-open");
+  clearTimeout(toastT);
+  toastT = setTimeout(() => $("toast").classList.remove("is-open"), 2400);
+}
+
+/* ---------- 생성 흐름 ---------- */
+function generate(first) {
+  $("tlLoad").hidden = false;
+  $("loadTitle").textContent = cond.mode === "ai" && first
+    ? "AI가 어울리는 지역을 고르는 중입니다" : "AI가 향의 흐름을 그리는 중입니다";
+  $("loadSub").textContent = cond.mode === "picked"
+    ? "고른 장소 사이를 향과 거리로 채우는 중이에요"
+    : "향 매칭 → 이동 부담 → 운영시간 순으로 정렬하고 있어요";
+  setTimeout(() => {
+    build();
+    at = 0;
+    renderHead(); renderTabs(); renderCond(); renderDay();
+    $("tlLoad").hidden = true;
+  }, 850);
+}
+
+$("dayTabs").addEventListener("click", (e) => {
+  const t = e.target.closest(".day-tab"); if (!t) return;
+  at = +t.dataset.day;
+  renderTabs(); renderDay();
+  document.querySelector(".rr-main").scrollTo({ top: 0 });
+});
+$("recoAgain").addEventListener("click", () => {
+  regionAt += 1;
+  const wrapped = regionAt % REGION_ORDER.length === 0;
+  regionKey = REGION_ORDER[regionAt % REGION_ORDER.length];
+  generate(false);
+  setDirty(true);
+  if (wrapped) say("추천할 지역을 한 바퀴 돌았어요");
+});
+$("back").addEventListener("click", () => {
+  if (dirty && !confirm("저장하지 않은 변경사항이 있어요. 나가시겠어요?")) return;
+  location.href = "route-conditions.html?mode=" + (cond.mode || "ai");
+});
+$("regen").addEventListener("click", () => { generate(false); setDirty(true); });
+$("saveBtn").addEventListener("click", () => say("저장은 다음 단계에서 붙습니다"));
+
+initMap();
+generate(true);
+</script>
+<script>
+/* 프로필 팝오버 */
+const pill = document.getElementById("profilePill");
+const pop = document.getElementById("profilePop");
+pill.addEventListener("click", (e) => {
+  e.stopPropagation();
+  const open = pop.classList.toggle("is-open");
+  pill.setAttribute("aria-expanded", open ? "true" : "false");
+});
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".profile")) { pop.classList.remove("is-open"); pill.setAttribute("aria-expanded", "false"); }
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") { pop.classList.remove("is-open"); pill.setAttribute("aria-expanded", "false"); } });
+</script>
+<script>
+document.addEventListener('click',function(e){
+  var lo=e.target.closest('[data-logout]'), li=e.target.closest('[data-login]');
+  if(lo){e.preventDefault();try{localStorage.setItem('scentrip_auth','out');}catch(x){}location.href='home.html';}
+  if(li){e.preventDefault();try{localStorage.setItem('scentrip_auth','in');}catch(x){}location.reload();}
+});
+</script>
+
+<script>
+/* 저장된 프로필 사진을 모든 아바타에 반영 (마이페이지에서 변경) */
+(function () {
+  try {
+    const src = localStorage.getItem("scentrip_avatar");
+    if (!src) return;
+    document.querySelectorAll(".av").forEach((el) => {
+      el.classList.add("has-photo");
+      el.style.backgroundImage = 'url("' + src + '")';
+    });
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

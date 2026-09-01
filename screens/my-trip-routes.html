@@ -887,6 +887,7 @@ document.addEventListener('click',function(e){
     if (e.target.closest(".rm-next")) {
       const on = scrim.querySelector(".rm-opt.is-on");
       const mode = on ? on.dataset.mode : "ai";
+      try { localStorage.removeItem("scentrip_route_draft"); } catch (x) {}   // 새로 시작하는 것이니 지난 답은 버린다
       // 찜한 장소 방식만 장소를 먼저 고르고, 나머지는 바로 조건 입력으로 간다
       location.href = mode === "saved" ? "route-create.html" : "route-conditions.html?mode=" + mode;
       return;

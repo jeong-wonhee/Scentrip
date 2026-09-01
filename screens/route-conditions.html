@@ -224,7 +224,7 @@ const SIDO = ["서울", "부산", "대구", "인천", "광주", "대전", "울�
 const Q = {
   region: { q: "여행하실 지역은 어디인가요?", type: "select", placeholder: "여행지 선택", options: SIDO },
   nights: { q: "며칠동안 여행하실 계획인가요?", type: "picks",
-            options: ["당일치기", "1박 2일", "2박 3일", "3박 4일", "4박 5일", "5박 이상"] },
+            options: ["당일치기", "1박 2일", "2박 3일", "3박 4일", "4박 5일"] },
   transport: { q: "주로 어떻게 이동하실 계획인가요?", type: "picks", options: ["자동차", "도보/대중교통"] },
   pace: { q: "일정은 어느 정도로 채우고 싶으신가요?", type: "picks", options: ["넉넉하게", "빽빽하게"] },
   distance: { q: "여행지 안에서, 여행 장소 사이 거리는 어느 정도까지 괜찮으신가요?", type: "picks",
@@ -264,6 +264,21 @@ if (flow === FLOWS.picked) {
 const answers = {};      // key -> 값 (picks: 문자열, select: 문자열, stay: 배열)
 let at = 0;              // 현재 단계 인덱스
 
+/* 답과 현재 단계를 임시 저장한다 — 결과 화면에서 뒤로 왔을 때 처음부터 다시
+   묻지 않기 위해서다(PRD 1). 모달에서 새로 시작하면 진입 쪽에서 지운다. */
+const DRAFT_KEY = "scentrip_route_draft";
+const modeKey = FLOWS[mode] ? mode : "ai";
+function saveDraft() {
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ mode: modeKey, answers, at })); } catch (e) {}
+}
+try {
+  const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null");
+  if (d && d.mode === modeKey && d.answers) {
+    Object.assign(answers, d.answers);
+    at = Math.min(Math.max(d.at || 0, 0), liveSteps().length - 1);   // 기간이 바뀌어 단계가 줄었을 수 있다
+  }
+} catch (e) {}
+
 const dots = document.getElementById("dots");
 const qwrap = document.getElementById("qwrap");
 const nextBtn = document.getElementById("next");
@@ -275,7 +290,7 @@ const cardBody = document.getElementById("cardBody");
 function nightCount() {
   const v = answers.nights;
   if (!v || v === "당일치기") return 0;
-  return v === "5박 이상" ? 5 : parseInt(v, 10) || 0;
+  return parseInt(v, 10) || 0;
 }
 /* 숙박 단계는 '당일치기'를 고른 경우에만 빠진다.
    아직 안 고른 상태에서 미리 빼버리면 진행 표시 개수가 줄었다 늘어난다. */
@@ -351,6 +366,7 @@ function render() {
   nextBtn.textContent = last ? "AI 맞춤 동선 추천 받기" : "다음";
   skipBtn.hidden = !def.optional;
   syncNext();
+  saveDraft();
 }
 
 /* 다음 버튼은 이 단계에 필요한 답이 다 있을 때만 열린다 */
@@ -370,7 +386,7 @@ function ready() {
   if (def.sub && !answers[key + ":sub"]) return false;
   return true;
 }
-function syncNext() { nextBtn.disabled = !ready(); }
+function syncNext() { nextBtn.disabled = !ready(); saveDraft(); }
 
 /* ---------- 입력 ---------- */
 qwrap.addEventListener("click", (e) => {
@@ -449,15 +465,27 @@ skipBtn.addEventListener("click", () => {
 });
 backBtn.addEventListener("click", () => go(at - 1));
 
-/* 결과 화면은 아직 디자인 전이라, 받은 조건만 확인시키고 멈춘다 */
+/* 받은 조건을 결과 화면으로 넘긴다. 로딩은 결과 화면 타임라인 자리에서 보여준다(PRD 4.2) */
 const toast = document.getElementById("toast");
 const toastMsg = document.getElementById("toastMsg");
 let toastT;
-function finish() {
-  toastMsg.textContent = "조건을 모두 받았어요 — 추천 결과 화면은 준비 중이에요";
+function say(msg) {
+  toastMsg.textContent = msg;
   toast.classList.add("is-open");
   clearTimeout(toastT);
   toastT = setTimeout(() => toast.classList.remove("is-open"), 2600);
+}
+function finish() {
+  const cond = { mode, nights: answers.nights, transport: answers.transport, pace: answers.pace,
+                 distance: answers.distance, region: answers.region, company: answers.company,
+                 origin: answers.origin, originPlace: answers["origin:sub"], stay: answers.stay || [] };
+  try {
+    localStorage.setItem("scentrip_route_cond", JSON.stringify(cond));
+  } catch (e) {
+    say("조건을 저장하지 못했어요 — 브라우저 설정을 확인해 주세요");
+    return;
+  }
+  location.href = "route-result.html";
 }
 
 render();
