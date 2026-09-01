@@ -868,7 +868,11 @@ pinsWrap.addEventListener("click", (e) => {
   picked.has(i) ? picked.delete(i) : picked.add(i);   // 핀으로도 바로 선택
   syncPick();
 });
-nextBtn.addEventListener("click", () => { /* 다음 단계(동선 편집) 화면은 아직 없음 */ });
+nextBtn.addEventListener("click", () => {
+  // 고른 장소 이름을 조건 입력 화면으로 넘긴다 (그쪽 CTA 위에 다시 보여준다)
+  try { localStorage.setItem("scentrip_route_picks", JSON.stringify([...picked].map((i) => PLACES[+i].name))); } catch (e) {}
+  location.href = "route-conditions.html?mode=picked";
+});
 searchEl.addEventListener("input", () => { nameQuery = searchEl.value.trim(); applyView(); });
 
 /* 카드 ↔ 핀 상호 하이라이트 */

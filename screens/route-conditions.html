@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scentrip — 동선 만들기 · 조건 입력</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="../reference/tokens.css">
+<link rel="stylesheet" href="../reference/components.css">
+<style>
+/* ============================================================
+   Scentrip — 동선 만들기 · 조건 입력 (Figma section 725:6831 이식)
+   모달에서 고른 방식에 따라 질문 묶음이 달라지는 위저드.
+     ?mode=ai      AI에게 여행지 추천 받기      (7단계)
+     ?mode=region  원하는 지역의 동선 추천 받기 (7단계, 지역 선택으로 시작)
+     ?mode=picked  찜한 장소로 동선 추천 받기   (6단계, 출발지 단계 없음)
+   카드 규격은 Figma 그대로: 720x848, 헤더 61 / 본문 / 푸터 100(선택 단계 148).
+   헤더·팝오버·칩·토스트는 components.css 공용 컴포넌트를 쓴다.
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-family); letter-spacing: var(--letter-spacing);
+  color: var(--color-content-default); background: var(--color-background);
+  -webkit-font-smoothing: antialiased; word-break: keep-all; overflow-wrap: break-word;
+}
+ul, ol { list-style: none; }
+button { font: inherit; letter-spacing: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+input { font: inherit; letter-spacing: inherit; color: inherit; }
+.page { display: flex; flex-direction: column; align-items: stretch; width: 100%; min-height: 100vh; }
+html .guest-only { display: none; }
+.is-guest .auth-only { display: none; }
+.is-guest .guest-only { display: flex; }
+
+/* 로그인 게이트 — 다른 화면과 같은 규격 */
+.guest-gate { flex: 1 0 auto; display: flex; align-items: center; justify-content: center; padding: 80px var(--space-24); }
+.gate-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-16); max-width: 420px; }
+.gate-icon { display: flex; width: 56px; height: 56px; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--color-surface-01); color: var(--color-primary); }
+.gate-icon svg { width: 28px; height: 28px; }
+.gate-card h1 { font-size: var(--text-title-28); font-weight: 600; line-height: 1.3; }
+.gate-card p { font-size: var(--text-body-16); line-height: 1.7; color: var(--color-content-neutral-muted); }
+.btn-login { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 var(--space-24); border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-base-white); font-size: var(--text-body-16); font-weight: 600; text-decoration: none; }
+.btn-login:hover { background: var(--color-primary-hover); }
+.type-pill { display: flex; align-items: center; gap: var(--space-8); height: 38px; padding: 0 var(--space-6) 0 var(--space-12); border-radius: var(--radius-full); background: var(--color-surface-01); }
+.profile { position: relative; }
+.profile-pop { width: 280px; padding: var(--space-8); }
+
+/* ---------- 위저드 무대 ---------- */
+/* 카드가 화면 한가운데 뜨는 집중 화면이라 푸터를 두지 않는다 (Figma 동일) */
+.rc-stage { flex: 1 0 auto; display: flex; align-items: center; justify-content: center; padding: 60px var(--space-24); background: var(--color-neutral-bg); }
+.rc-card {
+  display: flex; flex-direction: column;
+  width: 720px; max-width: 100%; height: 848px; max-height: calc(100vh - 176px);
+  background: var(--color-surface-overlay);
+  border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl);
+  box-shadow: var(--elevation-sm); overflow: hidden;
+}
+
+/* 카드 헤더 — 뒤로가기 + breadcrumb */
+.rc-head { flex: none; display: flex; align-items: center; gap: var(--space-12); height: 61px; padding: 0 var(--space-12); border-bottom: 1px solid var(--color-border-subtle); }
+.rc-back { display: flex; width: 36px; height: 36px; align-items: center; justify-content: center; border-radius: var(--radius-full); color: var(--color-content-neutral-muted); transition: background .14s ease, color .14s ease; }
+.rc-back:hover { background: var(--color-neutral-subtle); color: var(--color-content-default); }
+.rc-back svg { width: 20px; height: 20px; }
+.rc-crumb { display: flex; align-items: center; gap: var(--space-8); font-size: var(--text-body-14); line-height: 1.5; color: var(--color-content-neutral-muted); }
+.rc-crumb b { font-weight: 600; color: var(--color-content-default); }
+.rc-crumb .sep { color: var(--color-content-subtle); }
+
+/* 본문 — 진행 표시 + 질문 */
+.rc-body { flex: 1 1 auto; overflow-y: auto; padding: 31px var(--space-32) var(--space-32); }
+.rc-dots { display: flex; align-items: center; gap: 6px; }
+.rc-dots i { display: block; width: 8px; height: 8px; border-radius: var(--radius-full); background: var(--color-neutral-border); transition: width .22s ease, background .22s ease; }
+.rc-dots i.is-on { width: 28px; background: var(--color-primary); }
+
+.rc-q { margin-top: var(--space-32); }
+.rc-q + .rc-q { margin-top: var(--space-24); }
+.rc-q h2 { display: flex; align-items: baseline; gap: var(--space-8); font-size: var(--text-body-16); font-weight: 600; line-height: 1.5; }
+.rc-q h2 .opt { font-size: var(--text-caption-12); font-weight: 500; color: var(--color-content-subtle); }
+.rc-picks { display: flex; flex-wrap: wrap; gap: var(--space-8); margin-top: var(--space-20); }
+
+/* 드롭다운(지역·출발지) — 필터 칩 + 메뉴 공용 컴포넌트 재사용 */
+.rc-select { position: relative; margin-top: var(--space-20); }
+.rc-select .menu { max-height: 280px; overflow-y: auto; }
+
+/* 주소 입력 */
+.rc-search { display: flex; align-items: center; gap: var(--space-8); height: 44px; margin-top: var(--space-12); padding: 0 var(--space-16); border-radius: var(--radius-lg); background: var(--color-neutral-bg); }
+.rc-search svg { width: 18px; height: 18px; flex: none; color: var(--color-content-subtle); }
+.rc-search input { flex: 1 1 auto; border: 0; background: none; font-size: var(--text-body-14); outline: none; }
+.rc-search input::placeholder { color: var(--color-content-subtle); }
+.rc-search:focus-within { box-shadow: inset 0 0 0 1px var(--color-border-focus); }
+
+/* 숙박 — 박수만큼 반복되는 행 */
+.rc-q + .rc-night { margin-top: var(--space-32); }
+.rc-night + .rc-night { margin-top: var(--space-24); padding-top: var(--space-24); border-top: 1px solid var(--color-border-subtle); }
+.rc-night h3 { font-size: var(--text-body-14); font-weight: 500; line-height: 1.7; color: var(--color-content-neutral-muted); }
+.rc-night .rc-picks { margin-top: var(--space-12); }
+
+/* 선택한 장소 — '찜한 장소로' 플로우에서만 CTA 위에 붙는다 (Figma 672x66) */
+.rc-picked { display: flex; align-items: center; gap: var(--space-12); min-height: 66px; margin-bottom: var(--space-8); padding: var(--space-16); background: var(--color-neutral-bg); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); }
+.rc-picked[hidden] { display: none; }
+.rc-picked > b { flex: none; font-size: 13px; font-weight: 500; line-height: 1.5; color: var(--color-content-neutral-muted); }
+.rc-picked-list { flex: 1 1 auto; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-8); }
+.rc-picked-list span { display: inline-flex; align-items: center; height: 32px; padding: 0 var(--space-12); border: 1px solid var(--color-neutral-border); border-radius: var(--radius-full); background: var(--color-surface-overlay); font-size: 13px; font-weight: 500; line-height: 1.5; color: var(--color-content-default); white-space: nowrap; }
+.rc-picked-list .more { color: var(--color-content-neutral-muted); }
+
+/* 카드 푸터 — 선택 단계에서만 건너뛰기가 붙어 148px 이 된다 */
+.rc-foot { flex: none; display: flex; flex-direction: column; gap: var(--space-12); padding: var(--space-24); border-top: 1px solid var(--color-border-subtle); background: var(--color-surface-overlay); }
+.rc-next { display: flex; align-items: center; justify-content: center; height: 52px; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-base-white); font-size: var(--text-body-16); font-weight: 600; transition: background .16s ease; }
+.rc-next:hover:not(:disabled) { background: var(--scent-green-700); }
+.rc-next:disabled { background: var(--color-neutral-border); color: var(--color-content-on-fill); cursor: not-allowed; }
+.rc-skip { height: 36px; font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-neutral-muted); }
+.rc-skip:hover { color: var(--color-content-default); text-decoration: underline; }
+.rc-skip[hidden] { display: none; }
+
+@media (max-width: 820px) {
+  .nav { padding: 0 20px; }
+  .rc-stage { padding: var(--space-24) var(--space-16); }
+  .rc-card { height: auto; max-height: none; min-height: 560px; }
+}
+@media (max-width: 560px) {
+  .nav-center { display: none; }
+  .rc-body { padding: var(--space-24) var(--space-20); }
+  .rc-foot { padding: var(--space-20); }
+}
+</style>
+</head>
+<script>(function(){try{if((localStorage.getItem("scentrip_auth")||"in")==="out")document.documentElement.classList.add("is-guest");}catch(e){}})();</script>
+<body>
+<div class="page">
+
+  <!-- ============ Nav ============ -->
+  <nav class="nav">
+    <a class="brand" href="home.html" aria-label="Scentrip 홈">
+      <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="brand-name">Scentrip</span>
+    </a>
+    <div class="nav-center">
+      <div class="nav-list">
+        <a class="nav-link" href="#">소식</a>
+        <a class="nav-link" href="place-recommend.html">탐색</a>
+        <a class="nav-link" href="my-trip.html">내 여행</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <a class="btn-login guest-only" href="#" data-login role="button">로그인</a>
+      <div class="profile auth-only">
+        <button class="type-pill" id="profilePill" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="profilePop">
+          <span class="pill-name">이서연</span>
+          <span class="av av-28" aria-hidden="true"><span class="av-svg"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg></span></span>
+        </button>
+        <div class="popover profile-pop" id="profilePop" role="menu">
+          <div class="pop-profile" aria-hidden="true">
+            <span class="av av-48" aria-hidden="true"><span class="av-svg"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg></span></span>
+            <span class="pop-id">
+              <span class="pop-name">이서연</span>
+              <span class="pop-taste">WHAN · 시간을 수집하는 감성가</span>
+            </span>
+          </div>
+          <div class="pop-divider"></div>
+          <div class="pop-menu">
+            <a class="pop-item" href="mypage.html#account" data-view-link="account" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg> 계정 설정</a>
+            <a class="pop-item" href="mypage.html#reviews" data-view-link="reviews" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,0,0,36.18,176.88L24.83,210.93a16,16,0,0,0,20.24,20.24l34.05-11.35A104,104,0,1,0,128,24Zm0,192a87.87,87.87,0,0,1-44.06-11.81,8,8,0,0,0-6.54-.67L40,216,52.47,178.6a8,8,0,0,0-.66-6.54A88,88,0,1,1,128,216Zm12-88a12,12,0,1,1-12-12A12,12,0,0,1,140,128Zm44,0a12,12,0,1,1-12-12A12,12,0,0,1,184,128Zm-88,0a12,12,0,1,1-12-12A12,12,0,0,1,96,128Z"/></svg> 내 리뷰</a>
+            <a class="pop-item" href="mypage.html#support" data-view-link="support" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M140,180a12,12,0,1,1-12-12A12,12,0,0,1,140,180ZM128,72c-22.06,0-40,16.15-40,36v4a8,8,0,0,0,16,0v-4c0-11,10.77-20,24-20s24,9,24,20-10.77,20-24,20a8,8,0,0,0-8,8v8a8,8,0,0,0,16,0v-.72c18.24-3.35,32-17.9,32-35.28C168,88.15,150.06,72,128,72Zm104,56A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg> 고객센터</a>
+            <div class="pop-divider"></div>
+            <button class="pop-item" type="button" data-logout role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M124,216a12,12,0,0,1-12,12H48a12,12,0,0,1-12-12V40A12,12,0,0,1,48,28h64a12,12,0,0,1,0,24H60V204h52A12,12,0,0,1,124,216Zm108.49-96.49-40-40a12,12,0,0,0-17,17L195,116H112a12,12,0,0,0,0,24h83l-19.52,19.51a12,12,0,0,0,17,17l40-40A12,12,0,0,0,232.49,119.51Z"/></svg> 로그아웃</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ 로그인 게이트 (게스트 전용) ============ -->
+  <section class="guest-gate guest-only" aria-labelledby="gateTitle">
+    <div class="gate-card">
+      <span class="gate-icon" aria-hidden="true">
+        <svg viewBox="0 0 256 256" fill="currentColor"><path d="M178,32c-20.65,0-38.73,8.88-50,23.89C116.73,40.88,98.65,32,78,32A62.07,62.07,0,0,0,16,94c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,220.66,240,164,240,94A62.07,62.07,0,0,0,178,32Zm-50,174c-18.26-11.06-96-64.11-96-112A46.06,46.06,0,0,1,78,48c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0C142.22,58.36,158.55,48,178,48a46.06,46.06,0,0,1,46,46C224,141.87,146.24,194.93,128,206Z"/></svg>
+      </span>
+      <h1 id="gateTitle">로그인이 필요해요</h1>
+      <p>동선 만들기는 로그인 후 이용할 수 있어요.<br>몇 가지 조건만 고르면 취향에 맞는 동선을 만들어 드려요.</p>
+      <button class="btn-login" type="button" data-login>로그인</button>
+    </div>
+  </section>
+
+  <!-- ============ 조건 입력 위저드 ============ -->
+  <main class="rc-stage auth-only">
+    <section class="rc-card">
+      <header class="rc-head">
+        <button class="rc-back" id="back" type="button" aria-label="이전 단계로">
+          <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/></svg>
+        </button>
+        <p class="rc-crumb"><b>동선 만들기</b><span class="sep" aria-hidden="true">·</span><span id="flowName">AI에게 여행지 추천 받기</span></p>
+      </header>
+
+      <div class="rc-body" id="cardBody">
+        <div class="rc-dots" id="dots" role="progressbar" aria-valuemin="1" aria-valuenow="1" aria-valuemax="7" aria-label="진행 단계"></div>
+        <div id="qwrap"></div>
+      </div>
+
+      <footer class="rc-foot">
+        <div class="rc-picked" id="pickedBar" hidden>
+          <b>선택한 장소</b>
+          <div class="rc-picked-list" id="pickedList"></div>
+        </div>
+        <button class="rc-next" id="next" type="button" disabled>다음</button>
+        <button class="rc-skip" id="skip" type="button" hidden>건너뛰기</button>
+      </footer>
+    </section>
+  </main>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></svg>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+/* ============================================================
+   조건 입력 위저드
+   질문은 세 플로우가 대부분 공유한다 — 차이는 시작 질문(지역)과
+   출발지 단계의 유무뿐이라, 질문을 한 벌로 두고 순서만 갈라 쓴다.
+   ============================================================ */
+const SIDO = ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
+              "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"];
+
+const Q = {
+  region: { q: "여행하실 지역은 어디인가요?", type: "select", placeholder: "여행지 선택", options: SIDO },
+  nights: { q: "며칠동안 여행하실 계획인가요?", type: "picks",
+            options: ["당일치기", "1박 2일", "2박 3일", "3박 4일", "4박 5일", "5박 이상"] },
+  transport: { q: "주로 어떻게 이동하실 계획인가요?", type: "picks", options: ["자동차", "도보/대중교통"] },
+  pace: { q: "일정은 어느 정도로 채우고 싶으신가요?", type: "picks", options: ["넉넉하게", "빽빽하게"] },
+  distance: { q: "여행지 안에서, 여행 장소 사이 거리는 어느 정도까지 괜찮으신가요?", type: "picks",
+              options: ["가깝게", "적당히", "멀어도 괜찮아요"] },
+  origin: { q: "출발지에서 첫 목적지까지 얼마나 이동하실 수 있나요?", type: "picks",
+            options: ["1시간 이내", "2시간 이내", "3시간 이내", "상관 없어요"],
+            sub: { q: "출발지를 입력해주세요", type: "select", placeholder: "출발지 선택", options: SIDO } },
+  company: { q: "누구와 함께 여행하시나요?", optional: true, type: "picks",
+             options: ["혼자", "연인과", "친구와", "가족과"] },
+  stay: { q: "어디에 숙박할지 정해지셨나요?", optional: true, type: "stay" },
+};
+
+const FLOWS = {
+  ai:     { name: "AI에게 여행지 추천 받기",      steps: ["nights", "transport", "pace", "distance", "origin", "company", "stay"] },
+  region: { name: "원하는 지역의 동선 추천 받기", steps: ["region", "nights", "transport", "pace", "distance", "company", "stay"] },
+  picked: { name: "찜한 장소로 동선 추천 받기",   steps: ["nights", "transport", "pace", "distance", "company", "stay"] },
+};
+
+const mode = new URLSearchParams(location.search).get("mode");
+const flow = FLOWS[mode] || FLOWS.ai;
+document.getElementById("flowName").textContent = flow.name;
+
+/* 장소 선택 화면에서 넘어온 목록을 CTA 위에 다시 보여준다 — 무엇을 담아왔는지 잊지 않게.
+   주소창으로 바로 열었을 때는 비어 있어서, 프로토타입 확인용 예시를 대신 쓴다. */
+if (flow === FLOWS.picked) {
+  let picks = [];
+  try { picks = JSON.parse(localStorage.getItem("scentrip_route_picks") || "[]"); } catch (e) {}
+  if (!picks.length) picks = ["강릉 안목해변", "강릉 경포호 솔숲"];
+  const bar = document.getElementById("pickedBar");
+  const list = document.getElementById("pickedList");
+  const SHOW = 3;   // 많이 골랐을 때 칩이 푸터를 밀어내지 않게 3개까지만 보여준다
+  list.innerHTML = picks.slice(0, SHOW).map((n) => `<span>${n}</span>`).join("")
+    + (picks.length > SHOW ? `<span class="more">+${picks.length - SHOW}개</span>` : "");
+  bar.hidden = false;
+}
+
+const answers = {};      // key -> 값 (picks: 문자열, select: 문자열, stay: 배열)
+let at = 0;              // 현재 단계 인덱스
+
+const dots = document.getElementById("dots");
+const qwrap = document.getElementById("qwrap");
+const nextBtn = document.getElementById("next");
+const skipBtn = document.getElementById("skip");
+const backBtn = document.getElementById("back");
+const cardBody = document.getElementById("cardBody");
+
+/* 숙박 단계는 앞에서 고른 박수만큼 행이 생긴다. 당일치기면 물을 것이 없어 단계 자체를 건너뛴다 */
+function nightCount() {
+  const v = answers.nights;
+  if (!v || v === "당일치기") return 0;
+  return v === "5박 이상" ? 5 : parseInt(v, 10) || 0;
+}
+/* 숙박 단계는 '당일치기'를 고른 경우에만 빠진다.
+   아직 안 고른 상태에서 미리 빼버리면 진행 표시 개수가 줄었다 늘어난다. */
+function liveSteps() {
+  return flow.steps.filter((k) => (k === "stay" ? answers.nights !== "당일치기" : true));
+}
+
+/* ---------- 그리기 ---------- */
+function renderDots() {
+  const steps = liveSteps();
+  dots.innerHTML = steps.map((_, i) => `<i class="${i === at ? "is-on" : ""}"></i>`).join("");
+  dots.setAttribute("aria-valuenow", at + 1);
+  dots.setAttribute("aria-valuemax", steps.length);
+}
+
+function pickRow(key, options, current) {
+  return `<div class="rc-picks" data-picks="${key}">` + options.map((o) =>
+    `<button class="chip-pick" type="button" role="radio" data-v="${o}" aria-pressed="${o === current}">${o}</button>`
+  ).join("") + `</div>`;
+}
+
+function selectRow(key, def, current) {
+  return `<div class="rc-select" data-select="${key}">
+    <button class="chip-btn ${current ? "is-active" : ""}" type="button" aria-haspopup="true" aria-expanded="false">
+      <span class="lb">${current || def.placeholder}</span>
+      <span class="caret" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></svg></span>
+    </button>
+    <div class="menu" role="menu">
+      ${def.options.map((o) => `<button class="menu-item ${o === current ? "is-selected" : ""}" type="button" role="menuitemradio" data-v="${o}" aria-checked="${o === current}">
+        <span>${o}</span>
+        <span class="check" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg></span>
+      </button>`).join("")}
+    </div>
+  </div>`;
+}
+
+function searchRow(i, value) {
+  return `<label class="rc-search" data-addr="${i}">
+    <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/></svg>
+    <input type="text" placeholder="숙소 주소를 입력해주세요" value="${value || ""}">
+  </label>`;
+}
+
+function render() {
+  const steps = liveSteps();
+  const key = steps[at];
+  const def = Q[key];
+  renderDots();
+
+  let html = `<section class="rc-q"><h2>${def.q}${def.optional ? '<span class="opt">선택사항</span>' : ""}</h2>`;
+  if (def.type === "picks") html += pickRow(key, def.options, answers[key]);
+  if (def.type === "select") html += selectRow(key, def, answers[key]);
+  if (def.type === "stay") {
+    html += "</section>";
+    const rows = answers.stay || [];
+    for (let i = 0; i < nightCount(); i++) {
+      const r = rows[i] || {};
+      html += `<section class="rc-night" data-night="${i}">
+        <h3>${i + 1}박째</h3>
+        ${pickRow("stay:" + i, ["숙소 미정", "정해졌어요"], r.pick)}
+        ${r.pick === "정해졌어요" ? searchRow(i, r.addr) : ""}
+      </section>`;
+    }
+  } else if (def.sub) {
+    html += `</section><section class="rc-q"><h2>${def.sub.q}</h2>${selectRow(key + ":sub", def.sub, answers[key + ":sub"])}</section>`;
+  } else {
+    html += "</section>";
+  }
+  qwrap.innerHTML = html;
+  cardBody.scrollTop = 0;
+
+  const last = at === steps.length - 1;
+  nextBtn.textContent = last ? "AI 맞춤 동선 추천 받기" : "다음";
+  skipBtn.hidden = !def.optional;
+  syncNext();
+}
+
+/* 다음 버튼은 이 단계에 필요한 답이 다 있을 때만 열린다 */
+function ready() {
+  const key = liveSteps()[at];
+  const def = Q[key];
+  if (def.type === "stay") {
+    const rows = answers.stay || [];
+    for (let i = 0; i < nightCount(); i++) {
+      const r = rows[i];
+      if (!r || !r.pick) return false;
+      if (r.pick === "정해졌어요" && !(r.addr || "").trim()) return false;
+    }
+    return true;
+  }
+  if (!answers[key]) return false;
+  if (def.sub && !answers[key + ":sub"]) return false;
+  return true;
+}
+function syncNext() { nextBtn.disabled = !ready(); }
+
+/* ---------- 입력 ---------- */
+qwrap.addEventListener("click", (e) => {
+  const chip = e.target.closest(".chip-pick");
+  if (chip) {
+    const wrap = chip.closest("[data-picks]");
+    const key = wrap.dataset.picks;
+    const v = chip.dataset.v;
+    if (key.startsWith("stay:")) {
+      const i = +key.split(":")[1];
+      const rows = answers.stay || (answers.stay = []);
+      rows[i] = Object.assign({}, rows[i], { pick: v });
+      render();                       // 주소 입력칸이 붙고 빠지므로 다시 그린다
+      return;
+    }
+    answers[key] = answers[key] === v ? undefined : v;   // 같은 칩을 다시 누르면 해제
+    wrap.querySelectorAll(".chip-pick").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === answers[key])));
+    if (key === "nights") {
+      delete answers.stay;   // 박수가 바뀌면 숙박 답은 무효
+      renderDots();          // 당일치기면 숙박 단계가 빠져 점 개수가 줄어든다
+    }
+    syncNext();
+    return;
+  }
+
+  const trigger = e.target.closest(".rc-select .chip-btn");
+  if (trigger) {
+    const menu = trigger.nextElementSibling;
+    const open = !menu.classList.contains("is-open");
+    closeMenus();
+    menu.classList.toggle("is-open", open);
+    trigger.setAttribute("aria-expanded", open ? "true" : "false");
+    e.stopPropagation();
+    return;
+  }
+
+  const item = e.target.closest(".menu-item");
+  if (item) {
+    const box = item.closest("[data-select]");
+    answers[box.dataset.select] = item.dataset.v;
+    render();
+    return;
+  }
+});
+
+qwrap.addEventListener("input", (e) => {
+  const box = e.target.closest("[data-addr]");
+  if (!box) return;
+  const i = +box.dataset.addr;
+  const rows = answers.stay || (answers.stay = []);
+  rows[i] = Object.assign({}, rows[i], { addr: e.target.value });
+  syncNext();
+});
+
+function closeMenus() {
+  qwrap.querySelectorAll(".rc-select .menu").forEach((m) => m.classList.remove("is-open"));
+  qwrap.querySelectorAll(".rc-select .chip-btn").forEach((b) => b.setAttribute("aria-expanded", "false"));
+}
+document.addEventListener("click", closeMenus);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenus(); });
+
+/* ---------- 이동 ---------- */
+function go(n) {
+  const steps = liveSteps();
+  if (n < 0) { history.length > 1 ? history.back() : (location.href = "my-trip-routes.html"); return; }
+  if (n >= steps.length) { finish(); return; }
+  at = n;
+  render();
+}
+nextBtn.addEventListener("click", () => { if (ready()) go(at + 1); });
+skipBtn.addEventListener("click", () => {
+  const key = liveSteps()[at];
+  delete answers[key];
+  if (key === "stay") delete answers.stay;
+  go(at + 1);
+});
+backBtn.addEventListener("click", () => go(at - 1));
+
+/* 결과 화면은 아직 디자인 전이라, 받은 조건만 확인시키고 멈춘다 */
+const toast = document.getElementById("toast");
+const toastMsg = document.getElementById("toastMsg");
+let toastT;
+function finish() {
+  toastMsg.textContent = "조건을 모두 받았어요 — 추천 결과 화면은 준비 중이에요";
+  toast.classList.add("is-open");
+  clearTimeout(toastT);
+  toastT = setTimeout(() => toast.classList.remove("is-open"), 2600);
+}
+
+render();
+</script>
+<script>
+/* 프로필 팝오버 */
+const pill = document.getElementById("profilePill");
+const pop = document.getElementById("profilePop");
+pill.addEventListener("click", (e) => {
+  e.stopPropagation();
+  const open = pop.classList.toggle("is-open");
+  pill.setAttribute("aria-expanded", open ? "true" : "false");
+});
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".profile")) { pop.classList.remove("is-open"); pill.setAttribute("aria-expanded", "false"); }
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") { pop.classList.remove("is-open"); pill.setAttribute("aria-expanded", "false"); } });
+</script>
+<script>
+document.addEventListener('click',function(e){
+  var lo=e.target.closest('[data-logout]'), li=e.target.closest('[data-login]');
+  if(lo){e.preventDefault();try{localStorage.setItem('scentrip_auth','out');}catch(x){}location.href='home.html';}
+  if(li){e.preventDefault();try{localStorage.setItem('scentrip_auth','in');}catch(x){}location.reload();}
+});
+</script>
+
+<script>
+/* 저장된 프로필 사진을 모든 아바타에 반영 (마이페이지에서 변경) */
+(function () {
+  try {
+    const src = localStorage.getItem("scentrip_avatar");
+    if (!src) return;
+    document.querySelectorAll(".av").forEach((el) => {
+      el.classList.add("has-photo");
+      el.style.backgroundImage = 'url("' + src + '")';
+    });
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

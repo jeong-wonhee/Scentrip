@@ -601,7 +601,7 @@ document.addEventListener('click',function(e){
 </div>
 <script>
 /* 동선 만들기 진입 — 배너·버튼 어디서 눌러도 같은 모달이 뜬다.
-   [다음] 이후의 제작 플로우 화면은 아직 없어서 지금은 모달만 닫힌다. */
+   [다음]을 누르면 고른 방식에 맞는 조건 입력 화면으로 넘어간다. */
 (function () {
   const scrim = document.getElementById("makeModal");
   const opts = [...scrim.querySelectorAll(".rm-opt")];
@@ -623,8 +623,10 @@ document.addEventListener('click',function(e){
     if (scrim.hidden) return;
     if (e.target.closest(".rm-next")) {
       const on = scrim.querySelector(".rm-opt.is-on");
-      if (on && on.dataset.mode === "saved") { location.href = "route-create.html"; return; }
-      close(); return;   // AI·지역 방식의 다음 화면은 아직 없음
+      const mode = on ? on.dataset.mode : "ai";
+      // 찜한 장소 방식만 장소를 먼저 고르고, 나머지는 바로 조건 입력으로 간다
+      location.href = mode === "saved" ? "route-create.html" : "route-conditions.html?mode=" + mode;
+      return;
     }
     if (e.target === scrim || e.target.closest(".modal-close")) { close(); return; }
     const opt = e.target.closest(".rm-opt");

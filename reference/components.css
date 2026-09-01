@@ -135,6 +135,28 @@ label:hover > .ck-radio { border-color: var(--color-border-strong); }
 .chip-btn[aria-expanded="true"] .caret { transform: rotate(180deg); }
 
 /* ============================================================
+   선택 칩 — .chip-pick
+   필터 칩(.chip-btn)과 같은 규격(44px 높이·pill·16px)이지만 역할이 다르다.
+   .chip-btn 은 팝오버를 여는 트리거, 이쪽은 답을 고르는 칩이라
+   선택되면 브랜드 그린으로 채운다. 나란히 놓여도 높이가 맞는다.
+   ============================================================ */
+.chip-pick {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 44px; padding: 0 var(--space-16);
+  border: 1px solid var(--color-neutral-border); border-radius: var(--radius-full);
+  background: var(--color-surface-overlay);
+  font-size: var(--text-body-16); font-weight: 500; line-height: 1.5;
+  color: var(--color-content-default); white-space: nowrap; cursor: pointer;
+  transition: background .16s ease, border-color .16s ease, color .16s ease;
+}
+.chip-pick:hover { background: var(--color-state-hover-brand); }
+.chip-pick[aria-pressed="true"] {
+  background: var(--color-primary); border-color: var(--color-primary);
+  color: var(--color-base-white); font-weight: 600;
+}
+.chip-pick:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
+
+/* ============================================================
    팝오버 메뉴 — .menu > .menu-item
    여는 방법: .is-open. 선택 표시는 오른쪽 체크(.check) 하나로 통일한다.
    ============================================================ */
