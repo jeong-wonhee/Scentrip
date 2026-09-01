@@ -503,7 +503,7 @@ const FILTERS = [
   { key: "period", label: "기간", opts: ["당일치기", "1박 2일", "2박 3일", "3박 4일 이상"] },
   { key: "pace",   label: "여유도", opts: ["여유로운 코스", "보통", "부지런한 코스"] },
   { key: "theme",  label: "테마", opts: ["자연·힐링", "맛집·카페", "액티비티", "역사·문화", "야경"] },
-  { key: "taste",  label: "취향", opts: ["감성가 타입", "큐레이터 타입", "개척자 타입", "사색가 타입", "낭만가 타입", "미학가 타입", "방랑자 타입", "노마드 타입"], preset: ["감성가 타입"] },
+  { key: "taste",  label: "취향", opts: ["감성가 타입", "큐레이터 타입", "개척자 타입", "사색가 타입", "낭만가 타입", "미학가 타입", "방랑자 타입", "노마드 타입"] },
 ];
 const applied = {};
 FILTERS.forEach((f) => { applied[f.key] = f.preset ? [...f.preset] : []; });
