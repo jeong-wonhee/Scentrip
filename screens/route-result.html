@@ -143,6 +143,47 @@ html .guest-only { display: none; }
 .tl-seg.is-none { color: var(--color-content-subtle); }
 .tl-seg.is-none .t { font-weight: 500; color: var(--color-content-subtle); }
 
+/* 카드 액션 (PRD 4.6) */
+.tl-acts { display: flex; align-items: center; gap: var(--space-4); margin-top: var(--space-10); }
+.tl-act { display: inline-flex; align-items: center; gap: var(--space-4); height: 28px; padding: 0 var(--space-8); border-radius: var(--radius-full); font-size: var(--text-caption-11); font-weight: 600; color: var(--color-content-neutral-muted); }
+.tl-act:hover { background: var(--color-neutral-subtle); color: var(--color-content-default); }
+.tl-act:disabled { opacity: .4; cursor: not-allowed; }
+.tl-act:disabled:hover { background: none; color: var(--color-content-neutral-muted); }
+.tl-act svg { width: 14px; height: 14px; }
+.tl-act.danger:hover { color: var(--color-error); }
+.tl-actwrap { position: relative; }
+.tl-actwrap .menu { top: calc(100% + 6px); min-width: 148px; }
+
+/* 교체·추가 패널 (PRD 4.7 / 4.8) */
+.cand { margin: var(--space-8) 0 var(--space-8) var(--space-24); padding: var(--space-16); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); background: var(--color-neutral-bg); }
+.cand-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-12); }
+.cand-head b { font-size: var(--text-body-14); font-weight: 600; }
+.cand-head .close { font-size: var(--text-caption-11); font-weight: 600; color: var(--color-content-neutral-muted); }
+.cand-head .close:hover { color: var(--color-content-default); text-decoration: underline; }
+.cand-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-12); margin-top: var(--space-12); }
+.cand-card { display: flex; flex-direction: column; padding: var(--space-10); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md); background: var(--color-surface-overlay); text-align: left; }
+.cand-card img { width: 100%; height: 76px; border-radius: var(--radius-sm); object-fit: cover; background: var(--color-neutral-subtle); }
+.cand-card .nm { margin-top: var(--space-8); font-size: 13px; font-weight: 600; line-height: 1.4; }
+.cand-card .sc { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-top: var(--space-6); }
+.cand-card .sc span { display: inline-flex; align-items: center; height: 20px; padding: 0 var(--space-6); border-radius: var(--radius-full); background: var(--color-neutral-bg); font-size: var(--text-caption-11); color: var(--color-content-neutral-muted); }
+.cand-card .mt { margin-top: var(--space-6); font-size: var(--text-caption-11); font-weight: 600; color: var(--color-primary); }
+.cand-card .dt { margin-top: 2px; font-size: var(--text-caption-11); color: var(--color-content-subtle); }
+.cand-card .far { margin-top: var(--space-6); font-size: var(--text-caption-11); font-weight: 600; line-height: 1.4; color: var(--color-content-neutral); }
+.cand-pick { margin-top: var(--space-10); height: 32px; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-base-white); font-size: var(--text-caption-12); font-weight: 600; }
+.cand-pick:hover { background: var(--scent-green-700); }
+.cand-foot { display: flex; justify-content: center; margin-top: var(--space-12); }
+.cand-more { height: 32px; padding: 0 var(--space-14); border-radius: var(--radius-full); border: 1px solid var(--color-neutral-border); background: var(--color-surface-overlay); font-size: var(--text-caption-12); font-weight: 600; color: var(--color-content-neutral); }
+.cand-more:hover { background: var(--color-neutral-subtle); }
+.cand-none { margin-top: var(--space-12); font-size: 13px; line-height: 1.6; color: var(--color-content-neutral-muted); }
+
+/* 빈자리 (PRD 4.8) */
+.tl-gap { display: flex; align-items: center; gap: var(--space-12); padding: var(--space-14); border: 1px dashed var(--color-neutral-border); border-radius: var(--radius-lg); }
+.tl-gap .tx { flex: 1 1 auto; font-size: 13px; color: var(--color-content-neutral-muted); }
+.tl-gap .add { height: 32px; padding: 0 var(--space-12); border-radius: var(--radius-full); border: 1px solid var(--color-primary); font-size: var(--text-caption-12); font-weight: 600; color: var(--color-primary); }
+.tl-gap .add:hover { background: var(--color-state-hover-brand); }
+.tl-gap .dismiss { font-size: var(--text-caption-11); font-weight: 600; color: var(--color-content-subtle); }
+.tl-gap .dismiss:hover { color: var(--color-content-default); text-decoration: underline; }
+
 /* 숙소 노드 */
 .tl-stay { display: flex; align-items: center; gap: var(--space-12); padding: var(--space-12); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); background: var(--color-neutral-bg); }
 .tl-stay .ic { display: flex; width: 28px; height: 28px; flex: none; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--color-base-white); color: var(--color-content-neutral-muted); }
@@ -187,6 +228,16 @@ html .guest-only { display: none; }
 .pin .no { position: absolute; left: 0; right: 0; top: 5px; text-align: center; font-size: var(--text-caption-11); font-weight: 700; color: var(--color-base-white); }
 .pin:hover, .pin.is-on { color: var(--color-primary-active); }
 .pin:hover svg, .pin.is-on svg { transform: scale(1.18); }
+
+/* 삭제 확인 모달 — 모달 껍데기는 components.css, 버튼만 여기서 */
+.modal-body { margin-top: var(--space-12); font-size: var(--text-body-14); font-weight: 400; line-height: 1.7; color: var(--color-content-neutral-muted); }
+.modal-body b { font-weight: 600; color: var(--color-content-default); }
+.modal-foot { margin-top: var(--space-24); }
+.modal-foot button { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 var(--space-20); border-radius: var(--radius-full); font-size: var(--text-body-14); font-weight: 600; }
+.btn-ghost { background: none; color: var(--color-content-neutral-muted); }
+.btn-ghost:hover { background: var(--color-neutral-subtle); color: var(--color-content-neutral); }
+.btn-danger { background: var(--color-error); color: var(--color-base-white); }
+.btn-danger:hover { background: var(--color-error-hover); }
 
 /* ---------- 저장 바 ---------- */
 .save-bar { position: sticky; bottom: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: var(--space-16); margin-top: var(--space-32); padding: var(--space-16) var(--space-20); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); background: var(--color-surface-overlay); box-shadow: var(--elevation-md); }
@@ -345,6 +396,21 @@ html .guest-only { display: none; }
 
 </div>
 
+<!-- ============ 삭제 확인 ============ -->
+<div class="modal-scrim" id="delModal" hidden>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="delTitle">
+    <div class="modal-head">
+      <h2 id="delTitle">이 장소를 뺄까요?</h2>
+      <button class="modal-close" type="button" data-del-cancel aria-label="닫기"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
+    </div>
+    <p class="modal-body"><b id="delName"></b>을 일정에서 뺍니다. 뺀 장소는 다시 추천되지 않아요.</p>
+    <div class="modal-foot">
+      <button class="btn-ghost" type="button" data-del-cancel>그대로 둘게요</button>
+      <button class="btn-danger" type="button" data-del-ok>빼기</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite">
   <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></svg>
   <span id="toastMsg"></span>
@@ -409,23 +475,33 @@ const SLOT_ORDER = { "오전": 0, "오후": 1, "저녁": 2 };
    뼈대 단계라 '향 매칭 높은 순'으로만 채운다.
    PRD 4.2 의 최근접 체인·이동부담계수는 다음 단계에서 넣는다. */
 let days = [];
+let quota = [];            // 일차별 기준선 — 이보다 줄면 빈자리가 생긴다 (PRD 4.8)
+const removed = new Set(); // 삭제한 장소 id — 시드에서도 빼서 재생성에도 되살아나지 않는다
 function build() {
   const total = dayCount();
-  const pool = placesOf(regionKey).slice().sort((a, b) => b.match - a.match);
-  let at = 0;
+  const pool = placesOf(regionKey).filter((p) => !removed.has(p.id)).sort((a, b) => b.match - a.match);
+  let n = 0;
   days = [];
   for (let d = 1; d <= total; d++) {
     const items = [];
     slotsFor(d, total).forEach((slot) => {
-      if (at < pool.length) items.push(Object.assign({ slot, tier: "core" }, pool[at++]));
+      if (n < pool.length) items.push(Object.assign({ slot, tier: "core" }, pool[n++]));
     });
-    if (cond.pace === "빽빽하게" && at < pool.length) {
-      items.push(Object.assign({ slot: "오후", tier: "packed" }, pool[at++]));
+    if (cond.pace === "빽빽하게" && n < pool.length) {
+      items.push(Object.assign({ slot: "오후", tier: "packed" }, pool[n++]));
     }
     items.sort((a, b) => SLOT_ORDER[a.slot] - SLOT_ORDER[b.slot]);
     days.push(items);
   }
+  quota = days.map((_, d) => shown(d).length);
 }
+
+/* 노출 중인 항목 기준으로 편집한다 — 넉넉한 일정에서 가려진 항목은 세지 않는다 (PRD 4.6) */
+function realIndex(d, shownIdx) {
+  const item = shown(d)[shownIdx];
+  return days[d].indexOf(item);
+}
+const inCourse = () => new Set(days.flat().map((it) => it.id));
 
 /* 넉넉한 일정에서는 packed 항목을 감춘다 (PRD 4.6) */
 function shown(day) {
@@ -491,6 +567,84 @@ function nodesFor(d) {
 }
 const posOf = (n) => n.type === "place" ? [n.p.lat, n.p.lng] : n.stay.pos;
 
+/* ---------- 교체·추가 후보 (PRD 4.7 / 4.8) ---------- */
+const SLOT_WINDOW = { "오전": [9, 12], "오후": [12, 18], "저녁": [18, 21] };
+
+/* 운영시간 정보가 없으면 통과시킨다 */
+function openAt(p, slot) {
+  const m = (p.hours || "").match(/(\d{1,2}):(\d{2})\s*[-~]\s*(\d{1,2}):(\d{2})/);
+  if (!m) return true;
+  const o = +m[1] + +m[2] / 60, c = +m[3] + +m[4] / 60;
+  const [a, b] = SLOT_WINDOW[slot] || [9, 21];
+  return o < b && c > a;
+}
+/* 역할·테마는 loc 의 '· 뒤' 분류와 향 태그로 본다 */
+const rolesOf = (p) => ((p.loc || "").split("·")[1] || "").trim().split("/").map((x) => x.trim()).filter(Boolean);
+function roleScore(a, b) {
+  const A = new Set(rolesOf(a)), B = rolesOf(b);
+  if (!A.size || !B.length) return .5;
+  const hit = B.filter((r) => A.has(r)).length;
+  return hit ? Math.min(1, hit / Math.min(A.size, B.length)) : .2;
+}
+function scentScore(a, b) {
+  const A = new Set(a.scents || []), B = b.scents || [];
+  if (!A.size || !B.length) return .5;
+  return B.filter((x) => A.has(x)).length / B.length;
+}
+function pathMin(pos, prevPos, nextPos) {
+  let t = 0;
+  if (prevPos && pos) { const L = leg(prevPos, pos); if (L) t += L.main.min; }
+  if (nextPos && pos) { const L = leg(pos, nextPos); if (L) t += L.main.min; }
+  return t;
+}
+
+/* 교체는 그 자리의 앞뒤, 추가는 그날 마지막 장소와 숙소 사이를 기준점으로 삼는다 */
+function anchorsFor(d, shownIdx, kind) {
+  const nodes = nodesFor(d);
+  if (kind === "replace") {
+    const k = nodes.findIndex((n) => n.type === "place" && n.i === shownIdx);
+    return [k > 0 ? posOf(nodes[k - 1]) : null, k < nodes.length - 1 ? posOf(nodes[k + 1]) : null];
+  }
+  const places = nodes.filter((n) => n.type === "place");
+  const stay = nodes.filter((n) => n.type === "stay").pop();
+  return [places.length ? posOf(places[places.length - 1]) : REGION_META[regionKey].center,
+          stay ? posOf(stay) : null];
+}
+
+/* 후보는 '교체 후 앞뒤 구간이 먼 구간 경고 기준을 넘지 않을 것'으로 거른다.
+   초안의 '추가 이동 시간' 기준은 경고 기준보다 느슨해서, 추천받은 후보가
+   그 자리에서 바로 경고를 받는 조합이 나왔다(PRD 4.7 각주). */
+function candidatesFor(d, shownIdx, kind) {
+  const cur = kind === "replace" ? shown(d)[shownIdx] : null;
+  const [prevPos, nextPos] = anchorsFor(d, shownIdx, kind);
+  const used = inCourse();
+  const slot = cur ? cur.slot : ((shown(d).slice(-1)[0] || {}).slot || "오후");
+  const limit = FAR_LIMIT[cond.distance] || 130;
+
+  const base = placesOf(regionKey).filter((p) => !used.has(p.id) && !removed.has(p.id) && openAt(p, slot));
+  const segOk = (p, mult) => [prevPos, nextPos].every((q) => {
+    if (!q) return true;
+    const L = leg(q, [p.lat, p.lng]);
+    return !L || L.main.min <= limit * mult;
+  });
+
+  let list = base.filter((p) => segOk(p, 1)).map((p) => ({ p, relaxed: false }));
+  if (list.length < 3) list = list.concat(base.filter((p) => !segOk(p, 1) && segOk(p, 1.6)).map((p) => ({ p, relaxed: true })));
+  if (list.length < 3) list = list.concat(base.filter((p) => !segOk(p, 1.6)).map((p) => ({ p, relaxed: true })));
+
+  const baseMin = cur ? pathMin([cur.lat, cur.lng], prevPos, nextPos)
+                      : (prevPos && nextPos ? (leg(prevPos, nextPos) || { main: { min: 0 } }).main.min : 0);
+  list.forEach((o) => {
+    o.delta = pathMin([o.p.lat, o.p.lng], prevPos, nextPos) - baseMin;
+    const detour = Math.max(0, Math.min(1, 1 - o.delta / 120));
+    // 가중치: 타입·테마 40 / 이동·연결성 30 / 시간대 20 / 인기 10 (평점 데이터가 없어 매칭률로 대신한다)
+    o.score = (cur ? roleScore(cur, o.p) : .6) * .2 + (cur ? scentScore(cur, o.p) : .6) * .2
+            + detour * .3 + (openAt(o.p, slot) ? 1 : 0) * .2 + (o.p.match / 100) * .1;
+  });
+  list.sort((a, b) => b.score - a.score);
+  return list;
+}
+
 /* ---------- 그리기 ---------- */
 let at = 0;   // 활성 일차 인덱스
 const $ = (id) => document.getElementById(id);
@@ -552,18 +706,79 @@ function segHtml(a, b) {
   </div>`;
 }
 
+const ACT_ICON = {
+  up: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z"/></svg>',
+  down: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,149.66l-72,72a8,8,0,0,1-11.32,0l-72-72a8,8,0,0,1,11.32-11.32L120,196.69V40a8,8,0,0,1,16,0V196.69l58.34-58.35a8,8,0,0,1,11.32,11.32Z"/></svg>',
+  swap: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M224,128a8,8,0,0,1-8,8H61.31l34.35,34.34a8,8,0,0,1-11.32,11.32l-48-48a8,8,0,0,1,0-11.32l48-48A8,8,0,0,1,95.66,85.66L61.31,120H216A8,8,0,0,1,224,128Z"/><path d="M32,72a8,8,0,0,1,8-8H194.69L160.34,29.66a8,8,0,0,1,11.32-11.32l48,48a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32-11.32L194.69,80H40A8,8,0,0,1,32,72Z" opacity=".45"/></svg>',
+  del: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"/></svg>',
+  caret: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></svg>',
+  check: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg>',
+};
+
+function menuHtml(kind, i, items, current) {
+  return `<span class="tl-actwrap">
+    <button class="tl-act" type="button" data-act="${kind}" data-i="${i}" aria-haspopup="true" aria-expanded="false">${items.label}<span class="caret">${ACT_ICON.caret}</span></button>
+    <div class="menu" role="menu">
+      ${items.opts.map((o) => `<button class="menu-item ${o === current ? "is-selected" : ""}" type="button" role="menuitemradio" aria-checked="${o === current}" data-pick="${kind}" data-i="${i}" data-v="${o}">
+        <span>${o}</span><span class="check" aria-hidden="true">${ACT_ICON.check}</span></button>`).join("")}
+    </div>
+  </span>`;
+}
+
 function placeHtml(n) {
-  const p = n.p;
-  return `<article class="tl-item" data-i="${n.i}">
-    <span class="tl-no">${n.i + 1}</span>
+  const p = n.p, i = n.i, last = shown(at).length - 1;
+  const dayOpts = days.map((_, d) => `${d + 1}일차`).filter((_, d) => d !== at);
+  return `<article class="tl-item" data-i="${i}">
+    <span class="tl-no">${i + 1}</span>
     <img class="tl-thumb" src="${p.img}" alt="" loading="lazy">
     <div class="tl-body">
-      <p class="tl-name"><a href="place-detail.html">${p.name}</a><span class="tl-slot">${p.slot}</span>${n.p.tier === "packed" ? '<span class="tl-packed">빽빽</span>' : ""}</p>
+      <p class="tl-name"><a href="place-detail.html">${p.name}</a><span class="tl-slot">${p.slot}</span>${p.tier === "packed" ? '<span class="tl-packed">빽빽</span>' : ""}</p>
       <p class="tl-desc">${p.oneline}</p>
       <div class="tl-tags">${p.scents.map((t) => `<span>${t}</span>`).join("")}</div>
+      <div class="tl-acts">
+        <button class="tl-act" type="button" data-act="up" data-i="${i}" ${i === 0 ? "disabled" : ""}>${ACT_ICON.up}위로</button>
+        <button class="tl-act" type="button" data-act="down" data-i="${i}" ${i === last ? "disabled" : ""}>${ACT_ICON.down}아래로</button>
+        ${menuHtml("slot", i, { label: "시간대", opts: ["오전", "오후", "저녁"] }, p.slot)}
+        ${days.length > 1 ? menuHtml("day", i, { label: "일차 이동", opts: dayOpts }, null) : ""}
+        <button class="tl-act" type="button" data-act="swap" data-i="${i}">${ACT_ICON.swap}장소 변경</button>
+        <button class="tl-act danger" type="button" data-act="del" data-i="${i}">${ACT_ICON.del}삭제</button>
+      </div>
     </div>
     <span class="tl-match">${p.match}%</span>
   </article>`;
+}
+
+/* 교체·추가 패널 — 동시에 하나만 열린다 (PRD 4.6) */
+let panel = null;   // { kind, day, idx, page }
+function panelHtml() {
+  const kind = panel.kind;
+  const list = candidatesFor(panel.day, panel.idx, kind);
+  const per = 3, pages = Math.max(1, Math.ceil(list.length / per));
+  const page = panel.page % pages;
+  const show = list.slice(page * per, page * per + per);
+  // PRD 4.8 은 "3개 미만이어도 순환해 3장을 채운다"고 했지만, 같은 장소가 한 화면에
+  // 두 번 뜨면 고장으로 읽힌다. 페이지 순환만 남기고 중복 채우기는 하지 않는다.
+
+  const head = kind === "replace" ? "이 자리에 어울리는 다른 장소" : "이 일차에 장소 추가";
+  if (!list.length) {
+    return `<div class="cand"><div class="cand-head"><b>${head}</b><button class="close" type="button" data-close>닫기</button></div>
+      <p class="cand-none">이 지역의 추천 장소가 이미 모두 일정에 포함되어 있어요.</p></div>`;
+  }
+  return `<div class="cand">
+    <div class="cand-head"><b>${head}</b><button class="close" type="button" data-close>닫기</button></div>
+    <div class="cand-list">
+      ${show.map((o) => `<div class="cand-card">
+        <img src="${o.p.img}" alt="" loading="lazy">
+        <p class="nm">${o.p.name}</p>
+        <p class="sc">${o.p.scents.slice(0, 2).map((t) => `<span>${t}</span>`).join("")}</p>
+        <p class="mt">매칭 ${o.p.match}%</p>
+        <p class="dt">${o.delta > 0 ? `추가 이동 +${o.delta}분` : o.delta < 0 ? `이동 −${-o.delta}분` : "추가 이동 없음"}</p>
+        ${o.relaxed ? '<p class="far">이 자리에 넣으면 설정보다 먼 구간이 생겨요</p>' : ""}
+        <button class="cand-pick" type="button" data-pick-place="${o.p.id}">${kind === "replace" ? "변경하기" : "추가하기"}</button>
+      </div>`).join("")}
+    </div>
+    ${pages > 1 ? '<div class="cand-foot"><button class="cand-more" type="button" data-more>다른 추천 보기</button></div>' : ""}
+  </div>`;
 }
 
 function stayHtml(n) {
@@ -601,12 +816,27 @@ function renderDay() {
   // 시간대가 바뀌는 지점에 구분선을 넣는다
   const SLOT_TIME = { "오전": "09–12", "오후": "12–18", "저녁": "18–21" };
   let html = "", lastSlot = null;
+  const lastPlaceIdx = nodes.map((n) => n.type).lastIndexOf("place");
   nodes.forEach((n, idx) => {
     if (n.type === "place" && n.p.slot !== lastSlot) {
       lastSlot = n.p.slot;
       html += `<div class="tl-div"><b>${lastSlot}</b><i>${SLOT_TIME[lastSlot]}</i></div>`;
     }
     html += n.type === "place" ? placeHtml(n) : stayHtml(n);
+    if (panel && panel.kind === "replace" && panel.day === at && n.type === "place" && n.i === panel.idx) html += panelHtml();
+
+    // 빈자리는 그날 마지막 장소 뒤에 온다 (PRD 4.8)
+    if (idx === lastPlaceIdx) {
+      const gap = Math.max(0, (quota[at] || 0) - list.length);
+      if (gap > 0) {
+        html += `<div class="tl-gap">
+          <span class="tx">이 일차에 ${gap}곳을 더 넣을 수 있어요</span>
+          <button class="add" type="button" data-act="add">장소 추가</button>
+          <button class="dismiss" type="button" data-act="gap-dismiss">이대로 둘게요</button>
+        </div>`;
+        if (panel && panel.kind === "add" && panel.day === at) html += panelHtml();
+      }
+    }
     if (idx < nodes.length - 1) html += segHtml(n, nodes[idx + 1]);
   });
 
@@ -660,6 +890,123 @@ function renderMap() {
   ScentMap.drawRoute(pts);
   ScentMap.fitAll(pts, 13);
 }
+
+/* ---------- 편집 (PRD 4.6 / 4.7 / 4.8) ---------- */
+function closeMenus() {
+  $("timeline").querySelectorAll(".menu.is-open").forEach((m) => m.classList.remove("is-open"));
+  $("timeline").querySelectorAll('.tl-act[aria-expanded="true"]').forEach((b) => b.setAttribute("aria-expanded", "false"));
+}
+function after(msg) { setDirty(true); renderDay(); say(msg); }
+
+/* 위·아래 이동은 인접 항목과 순서와 시간대를 함께 바꾼다 (PRD 4.6) */
+function move(i, dir) {
+  const j = i + dir, list = shown(at);
+  if (j < 0 || j >= list.length) return;
+  const a = realIndex(at, i), b = realIndex(at, j);
+  const A = days[at][a], B = days[at][b];
+  const tmp = A.slot; A.slot = B.slot; B.slot = tmp;
+  days[at][a] = B; days[at][b] = A;
+  days[at].sort((x, y) => SLOT_ORDER[x.slot] - SLOT_ORDER[y.slot]);
+  panel = null;
+  after(`${A.name} 순서를 옮기고 이동 시간을 다시 계산했어요`);
+}
+function setSlot(i, slot) {
+  const it = days[at][realIndex(at, i)];
+  it.slot = slot;
+  days[at].sort((x, y) => SLOT_ORDER[x.slot] - SLOT_ORDER[y.slot]);
+  panel = null;
+  after(`${it.name}을 ${slot}으로 옮기고 다시 계산했어요`);
+}
+/* 일차를 옮기면 원래 일차에는 빈자리가 남는다 (quota 는 그대로 둔다) */
+function moveDay(i, label) {
+  const to = parseInt(label, 10) - 1;
+  const it = days[at].splice(realIndex(at, i), 1)[0];
+  days[to].push(it);
+  days[to].sort((x, y) => SLOT_ORDER[x.slot] - SLOT_ORDER[y.slot]);
+  panel = null;
+  after(`${it.name}을 ${label}로 옮겼어요`);
+}
+function removeAt(i) {
+  const it = days[at].splice(realIndex(at, i), 1)[0];
+  removed.add(it.id);   // 시드에서도 빼서 재생성에도 되살아나지 않는다
+  panel = null;
+  after(`${it.name}을 일정에서 뺐어요`);
+}
+function replaceAt(i, id) {
+  const src = placesOf(regionKey).find((p) => p.id === id);
+  const k = realIndex(at, i), old = days[at][k];
+  days[at][k] = Object.assign({ slot: old.slot, tier: old.tier }, src);
+  panel = null;
+  after(`${old.name}을 ${src.name}으로 바꾸고 이동 시간을 다시 계산했어요`);
+}
+/* 추가는 마지막 장소와 같은 시간대에 넣고 시간대 순으로 다시 정렬한다 (PRD 4.8) */
+function addPlace(id) {
+  const src = placesOf(regionKey).find((p) => p.id === id);
+  const lastItem = shown(at).slice(-1)[0];
+  days[at].push(Object.assign({ slot: lastItem ? lastItem.slot : "오후", tier: "core" }, src));
+  days[at].sort((x, y) => SLOT_ORDER[x.slot] - SLOT_ORDER[y.slot]);
+  panel = null;
+  after(`${src.name}을 일정에 넣었어요`);
+}
+
+$("timeline").addEventListener("click", (e) => {
+  const pick = e.target.closest("[data-pick]");
+  if (pick) {
+    closeMenus();
+    const i = +pick.dataset.i;
+    if (pick.dataset.pick === "slot") setSlot(i, pick.dataset.v); else moveDay(i, pick.dataset.v);
+    return;
+  }
+  const cand = e.target.closest("[data-pick-place]");
+  if (cand) { panel.kind === "replace" ? replaceAt(panel.idx, cand.dataset.pickPlace) : addPlace(cand.dataset.pickPlace); return; }
+  if (e.target.closest("[data-more]")) { panel.page += 1; renderDay(); return; }
+  if (e.target.closest("[data-close]")) { panel = null; renderDay(); return; }
+
+  const act = e.target.closest(".tl-act, .tl-gap [data-act]");
+  if (!act) { closeMenus(); return; }
+  const i = +act.dataset.i;
+  switch (act.dataset.act) {
+    case "up": move(i, -1); break;
+    case "down": move(i, 1); break;
+    case "swap": panel = (panel && panel.kind === "replace" && panel.idx === i) ? null : { kind: "replace", day: at, idx: i, page: 0 }; renderDay(); break;
+    case "del": askDelete(i); break;
+    case "add": panel = panel && panel.kind === "add" ? null : { kind: "add", day: at, idx: null, page: 0 }; renderDay(); break;
+    case "gap-dismiss":
+      // 사용자가 일부러 줄인 것으로 보고 기준선을 지금 개수로 낮춘다 (PRD 4.8 · D5)
+      quota[at] = shown(at).length; panel = null; renderDay(); say("이 일차의 빈자리를 없앴어요"); break;
+    case "slot": case "day": {
+      const menu = act.nextElementSibling, open = !menu.classList.contains("is-open");
+      closeMenus();
+      menu.classList.toggle("is-open", open);
+      act.setAttribute("aria-expanded", open ? "true" : "false");
+      e.stopPropagation();
+      break;
+    }
+  }
+});
+document.addEventListener("click", (e) => { if (!e.target.closest(".tl-actwrap")) closeMenus(); });
+
+/* 삭제는 되돌릴 수 없으니 한 번 묻는다 (PRD 4.6) */
+let pendingDelete = null;
+function askDelete(i) {
+  pendingDelete = i;
+  const it = shown(at)[i];
+  $("delName").textContent = it.name;
+  const scrim = $("delModal");
+  scrim.hidden = false;
+  void scrim.offsetWidth;
+  scrim.classList.add("is-open");
+}
+function closeDelete() {
+  const scrim = $("delModal");
+  scrim.classList.remove("is-open");
+  setTimeout(() => { scrim.hidden = true; }, 160);
+}
+$("delModal").addEventListener("click", (e) => {
+  if (e.target === $("delModal") || e.target.closest("[data-del-cancel]")) { closeDelete(); return; }
+  if (e.target.closest("[data-del-ok]")) { closeDelete(); removeAt(pendingDelete); }
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("delModal").hidden) closeDelete(); });
 
 /* 타임라인 ↔ 지도 양방향 강조 (PRD 4.10) */
 function link(i, on) {
