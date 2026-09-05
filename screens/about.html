@@ -6,6 +6,7 @@
 <title>Scentrip — 센트립 소개</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="../reference/tokens.css">
+<link rel="stylesheet" href="../reference/components.css">
 <script>(function(){try{if((localStorage.getItem("scentrip_auth")||"in")==="out")document.documentElement.classList.add("is-guest");}catch(e){}})();</script>
 <style>
 /* ============================================================
@@ -97,8 +98,9 @@ html .guest-only { display: none; }
 .abt-why { background: var(--scent-green-50); }
 .why-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-24); }
 .why-card { background: var(--color-surface-overlay); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); overflow: hidden; }
-.why-card-top { height: 200px; padding: var(--space-20); }
-.why-card-top .num { font-size: var(--text-body-14); font-weight: 700; color: var(--color-content-neutral-subtle); }
+.why-card-top { position: relative; height: 200px; padding: var(--space-16); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.why-card-top .num { position: absolute; top: var(--space-16); left: var(--space-16); z-index: 1; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--color-base-white); box-shadow: var(--elevation-xs); font-size: var(--text-caption-12); font-weight: 700; letter-spacing: 0; color: var(--color-content-muted); }
+.why-ill { width: 100%; max-width: 232px; height: auto; }
 .why-card:nth-child(1) .why-card-top { background: #f4ece1; }
 .why-card:nth-child(2) .why-card-top { background: #efe9df; }
 .why-card:nth-child(3) .why-card-top { background: #e9eef2; }
@@ -252,8 +254,8 @@ html .guest-only { display: none; }
           <div class="pop-divider"></div>
           <div class="pop-menu">
             <a class="pop-item" href="mypage.html#account" data-view-link="account" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg> 계정 설정</a>
-            <a class="pop-item" href="mypage.html#reviews" data-view-link="reviews" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M88,96a8,8,0,0,1,8-8h64a8,8,0,0,1,0,16H96A8,8,0,0,1,88,96Zm8,40h64a8,8,0,0,0,0-16H96a8,8,0,0,0,0,16ZM232,64V152a8,8,0,0,1-2.34,5.66l-64,64A8,8,0,0,1,160,224H56a16,16,0,0,1-16-16V64A16,16,0,0,1,56,48H216A16,16,0,0,1,232,64ZM56,208h96V160a8,8,0,0,1,8-8h48V64H56Zm120-40v28.7L204.69,168Z"/></svg> 내 리뷰</a>
-            <a class="pop-item" href="mypage.html#support" data-view-link="support" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M201.89,54.66A104.06,104.06,0,0,0,24,128v56a24,24,0,0,0,24,24H64a24,24,0,0,0,24-24V152a24,24,0,0,0-24-24H40.35A88,88,0,0,1,190.51,69.34,87.42,87.42,0,0,1,215.65,128H192a24,24,0,0,0-24,24v32a24,24,0,0,0,24,24h16a24,24,0,0,0,1.94-.08A24,24,0,0,1,186,214.31l-.06,0A24.06,24.06,0,0,1,168,232H128a8,8,0,0,0,0,16h40a40.07,40.07,0,0,0,36.35-23.32A40,40,0,0,0,232,186V128A103.41,103.41,0,0,0,201.89,54.66Z"/></svg> 고객센터</a>
+            <a class="pop-item" href="mypage.html#reviews" data-view-link="reviews" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,0,0,36.18,176.88L24.83,210.93a16,16,0,0,0,20.24,20.24l34.05-11.35A104,104,0,1,0,128,24Zm0,192a87.87,87.87,0,0,1-44.06-11.81,8,8,0,0,0-6.54-.67L40,216,52.47,178.6a8,8,0,0,0-.66-6.54A88,88,0,1,1,128,216Zm12-88a12,12,0,1,1-12-12A12,12,0,0,1,140,128Zm44,0a12,12,0,1,1-12-12A12,12,0,0,1,184,128Zm-88,0a12,12,0,1,1-12-12A12,12,0,0,1,96,128Z"/></svg> 내 리뷰</a>
+            <a class="pop-item" href="mypage.html#support" data-view-link="support" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M140,180a12,12,0,1,1-12-12A12,12,0,0,1,140,180ZM128,72c-22.06,0-40,16.15-40,36v4a8,8,0,0,0,16,0v-4c0-11,10.77-20,24-20s24,9,24,20-10.77,20-24,20a8,8,0,0,0-8,8v8a8,8,0,0,0,16,0v-.72c18.24-3.35,32-17.9,32-35.28C168,88.15,150.06,72,128,72Zm104,56A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg> 고객센터</a>
             <div class="pop-divider"></div>
             <button class="pop-item" type="button" data-logout role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M124,216a12,12,0,0,1-12,12H48a12,12,0,0,1-12-12V40A12,12,0,0,1,48,28h64a12,12,0,0,1,0,24H60V204h52A12,12,0,0,1,124,216Zm108.49-96.49-40-40a12,12,0,0,0-17,17L195,116H112a12,12,0,0,0,0,24h83l-19.52,19.51a12,12,0,0,0,17,17l40-40A12,12,0,0,0,232.49,119.51Z"/></svg> 로그아웃</button>
           </div>
@@ -281,21 +283,65 @@ html .guest-only { display: none; }
 
         <div class="why-cards">
           <article class="why-card">
-            <div class="why-card-top"><span class="num">01</span></div>
+            <div class="why-card-top">
+              <span class="num">01</span>
+              <svg class="why-ill" viewBox="0 0 240 150" fill="none" aria-hidden="true">
+              <g transform="rotate(-7 66 78)">
+                <rect x="24" y="26" width="84" height="104" rx="12" fill="#fff" stroke="var(--scent-green-200)"/>
+                <path d="M32 104c14-20 24-20 32-8s16 14 28 2v24a4 4 0 0 1-4 4H36a4 4 0 0 1-4-4Z" fill="var(--scent-green-200)"/>
+                <circle cx="52" cy="52" r="9" fill="var(--scent-green-100)"/>
+              </g>
+              <g transform="rotate(5 176 76)">
+                <rect x="132" y="22" width="88" height="108" rx="12" fill="#fff" stroke="var(--color-primary)" stroke-width="2"/>
+                <path d="M140 96c12 0 12-10 24-10s12 10 24 10 12-10 24-10v34a4 4 0 0 1-4 4h-64a4 4 0 0 1-4-4Z" fill="var(--scent-teal-200)"/>
+                <circle cx="196" cy="50" r="11" fill="var(--scent-green-300)"/>
+                <circle cx="176" cy="126" r="15" fill="var(--color-primary)"/>
+                <path d="m169.5 126 4.5 4.5 9-9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+              </g>
+            </svg>
+            </div>
             <div class="why-card-body">
               <h3>향 취향 테스트</h3>
               <p>향을 잘 몰라도 괜찮아요. 익숙한 장면 중 더 마음이 가는 쪽을 골라보세요.</p>
             </div>
           </article>
           <article class="why-card">
-            <div class="why-card-top"><span class="num">02</span></div>
+            <div class="why-card-top">
+              <span class="num">02</span>
+              <svg class="why-ill" viewBox="0 0 240 150" fill="none" aria-hidden="true">
+              <g opacity=".85">
+                <circle cx="100" cy="56" r="36" fill="var(--scent-green-300)" fill-opacity=".55"/>
+                <circle cx="140" cy="56" r="36" fill="var(--scent-teal-300)" fill-opacity=".55"/>
+                <circle cx="100" cy="94" r="36" fill="var(--scent-green-400)" fill-opacity=".45"/>
+                <circle cx="140" cy="94" r="36" fill="var(--scent-teal-400)" fill-opacity=".45"/>
+              </g>
+              <circle cx="120" cy="75" r="21" fill="#fff"/>
+              <path d="M120 62c5.6 7.5 9 12.2 9 16.8a9 9 0 0 1-18 0c0-4.6 3.4-9.3 9-16.8Z" fill="var(--color-primary)"/>
+            </svg>
+            </div>
             <div class="why-card-body">
               <h3>나의 향 타입 확인</h3>
               <p>네 가지 감각의 조합으로 나만의 향 타입과 여행 성향을 발견합니다.</p>
             </div>
           </article>
           <article class="why-card">
-            <div class="why-card-top"><span class="num">03</span></div>
+            <div class="why-card-top">
+              <span class="num">03</span>
+              <svg class="why-ill" viewBox="0 0 240 150" fill="none" aria-hidden="true">
+              <rect x="26" y="22" width="188" height="106" rx="14" fill="#fff" stroke="var(--scent-green-200)"/>
+              <path d="M26 92c24-6 38 4 58 0s32-18 54-16 38 14 62 8" stroke="var(--scent-green-100)" stroke-width="8" stroke-linecap="round"/>
+              <path d="m74 104 38-24 64-18" stroke="var(--scent-green-400)" stroke-width="2" stroke-dasharray="5 6" stroke-linecap="round" stroke-linejoin="round"/>
+              <g fill="var(--color-primary)">
+                <path d="M74 73c-6.6 0-12 5.4-12 12 0 8.5 10.7 18.6 11.2 19a1.2 1.2 0 0 0 1.6 0c.5-.4 11.2-10.5 11.2-19 0-6.6-5.4-12-12-12Z"/>
+                <path d="M112 49c-6.6 0-12 5.4-12 12 0 8.5 10.7 18.6 11.2 19a1.2 1.2 0 0 0 1.6 0c.5-.4 11.2-10.5 11.2-19 0-6.6-5.4-12-12-12Z" opacity=".5"/>
+                <path d="M176 31c-6.6 0-12 5.4-12 12 0 8.5 10.7 18.6 11.2 19a1.2 1.2 0 0 0 1.6 0c.5-.4 11.2-10.5 11.2-19 0-6.6-5.4-12-12-12Z" opacity=".28"/>
+              </g>
+              <circle cx="74" cy="85" r="4" fill="#fff"/>
+              <rect x="116" y="96" width="86" height="24" rx="12" fill="#fff" stroke="var(--scent-green-200)"/>
+              <path d="M130 108a1.4 1.4 0 0 1-.9 1.3l-4.6 1.7-1.7 4.6a1.4 1.4 0 0 1-2.6 0l-1.7-4.6-4.6-1.7a1.4 1.4 0 0 1 0-2.6l4.6-1.7 1.7-4.6a1.4 1.4 0 0 1 2.6 0l1.7 4.6 4.6 1.7a1.4 1.4 0 0 1 .9 1.3Z" fill="var(--color-primary)"/>
+              <rect x="136" y="105" width="52" height="6" rx="3" fill="var(--scent-green-200)"/>
+            </svg>
+            </div>
             <div class="why-card-body">
               <h3>여행지 추천</h3>
               <p>내 향의 분위기와 닮은 장소, 계절, 동선을 취향 일치도와 함께 만나보세요.</p>
@@ -346,14 +392,16 @@ html .guest-only { display: none; }
       <div class="abt-inner">
         <div class="place-row">
           <div class="place-arch">
-            <img src="../assets/route/g3.jpg" alt="가을빛 호숫가 숲 산책 풍경">
+            <!-- Unsplash (무료 라이선스) · photo-1609204757465-0b3656a993d8 -->
+            <img src="../assets/about/forest-trail.jpg" alt="빛이 스며드는 숲길과 젖은 흙 산책로">
           </div>
           <div class="place-info">
             <p class="abt-eyebrow">SCENT TO PLACE</p>
             <h2 class="abt-title">좋아하는 향은<br>머물고 싶은 장면을 말해줍니다.</h2>
             <p class="abt-lead">비 내린 숲의 향을 좋아한다면, 나무와 흙의 감각을 충분히 느낄 수 있는 고요한 산책 여행을 추천해요.</p>
             <div class="place-card">
-              <img class="thumb" src="../assets/route/big.jpg" alt="담양 메타세쿼이아길">
+              <!-- Unsplash (무료 라이선스) · photo-1611657291636-c141ee8cf7ab -->
+              <img class="thumb" src="../assets/about/tree-avenue.jpg" alt="담양 메타세쿼이아길">
               <div class="pc-body">
                 <span class="pc-badge"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg>AI 매칭 88%</span>
                 <p class="pc-name">담양 메타세쿼이아길</p>
@@ -483,6 +531,19 @@ document.addEventListener('click',function(e){
   if(lo){e.preventDefault();try{localStorage.setItem('scentrip_auth','out');}catch(x){}location.href='home.html';}
   if(li){e.preventDefault();try{localStorage.setItem('scentrip_auth','in');}catch(x){}location.reload();}
 });
+</script>
+<script>
+/* 저장된 프로필 사진을 모든 아바타에 반영 (마이페이지에서 변경) */
+(function () {
+  try {
+    const src = localStorage.getItem("scentrip_avatar");
+    if (!src) return;
+    document.querySelectorAll(".av").forEach((el) => {
+      el.classList.add("has-photo");
+      el.style.backgroundImage = 'url("' + src + '")';
+    });
+  } catch (e) {}
+})();
 </script>
 </body>
 </html>

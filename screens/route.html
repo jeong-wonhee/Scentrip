@@ -229,8 +229,6 @@ html .guest-only { display: none; }
 .badge { display: inline-flex; align-items: center; gap: var(--space-6); padding: var(--space-4) var(--space-10); border-radius: var(--radius-full); background: var(--color-surface-overlay); border: 1px solid var(--color-border-default); }
 .badge svg { width: 14px; height: 14px; color: var(--color-content-subtle); }
 .badge span { font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; color: var(--color-content-subtle); white-space: nowrap; }
-.heart { width: 28px; height: 28px; color: var(--color-surface-overlay); filter: drop-shadow(0 1px 2px rgba(0,0,0,.04)) drop-shadow(0 2px 4px rgba(0,0,0,.08)); flex: none; }
-.heart.heart-dark { color: var(--color-content-neutral-subtle); filter: none; }
 
 /* ---------- 더보기 ---------- */
 .more-wrap { display: flex; justify-content: center; padding-top: var(--space-8); }
@@ -319,8 +317,8 @@ html .guest-only { display: none; }
           <div class="pop-divider"></div>
           <div class="pop-menu">
             <a class="pop-item" href="mypage.html#account" data-view-link="account" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg> 계정 설정</a>
-            <a class="pop-item" href="mypage.html#reviews" data-view-link="reviews" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M88,96a8,8,0,0,1,8-8h64a8,8,0,0,1,0,16H96A8,8,0,0,1,88,96Zm8,40h64a8,8,0,0,0,0-16H96a8,8,0,0,0,0,16ZM232,64V152a8,8,0,0,1-2.34,5.66l-64,64A8,8,0,0,1,160,224H56a16,16,0,0,1-16-16V64A16,16,0,0,1,56,48H216A16,16,0,0,1,232,64ZM56,208h96V160a8,8,0,0,1,8-8h48V64H56Zm120-40v28.7L204.69,168Z"/></svg> 내 리뷰</a>
-            <a class="pop-item" href="mypage.html#support" data-view-link="support" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M201.89,54.66A104.06,104.06,0,0,0,24,128v56a24,24,0,0,0,24,24H64a24,24,0,0,0,24-24V152a24,24,0,0,0-24-24H40.35A88,88,0,0,1,190.51,69.34,87.42,87.42,0,0,1,215.65,128H192a24,24,0,0,0-24,24v32a24,24,0,0,0,24,24h16a24,24,0,0,0,1.94-.08A24,24,0,0,1,186,214.31l-.06,0A24.06,24.06,0,0,1,168,232H128a8,8,0,0,0,0,16h40a40.07,40.07,0,0,0,36.35-23.32A40,40,0,0,0,232,186V128A103.41,103.41,0,0,0,201.89,54.66Z"/></svg> 고객센터</a>
+            <a class="pop-item" href="mypage.html#reviews" data-view-link="reviews" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,0,0,36.18,176.88L24.83,210.93a16,16,0,0,0,20.24,20.24l34.05-11.35A104,104,0,1,0,128,24Zm0,192a87.87,87.87,0,0,1-44.06-11.81,8,8,0,0,0-6.54-.67L40,216,52.47,178.6a8,8,0,0,0-.66-6.54A88,88,0,1,1,128,216Zm12-88a12,12,0,1,1-12-12A12,12,0,0,1,140,128Zm44,0a12,12,0,1,1-12-12A12,12,0,0,1,184,128Zm-88,0a12,12,0,1,1-12-12A12,12,0,0,1,96,128Z"/></svg> 내 리뷰</a>
+            <a class="pop-item" href="mypage.html#support" data-view-link="support" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M140,180a12,12,0,1,1-12-12A12,12,0,0,1,140,180ZM128,72c-22.06,0-40,16.15-40,36v4a8,8,0,0,0,16,0v-4c0-11,10.77-20,24-20s24,9,24,20-10.77,20-24,20a8,8,0,0,0-8,8v8a8,8,0,0,0,16,0v-.72c18.24-3.35,32-17.9,32-35.28C168,88.15,150.06,72,128,72Zm104,56A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg> 고객센터</a>
             <div class="pop-divider"></div>
             <button class="pop-item" type="button" data-logout role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M124,216a12,12,0,0,1-12,12H48a12,12,0,0,1-12-12V40A12,12,0,0,1,48,28h64a12,12,0,0,1,0,24H60V204h52A12,12,0,0,1,124,216Zm108.49-96.49-40-40a12,12,0,0,0-17,17L195,116H112a12,12,0,0,0,0,24h83l-19.52,19.51a12,12,0,0,0,17,17l40-40A12,12,0,0,0,232.49,119.51Z"/></svg> 로그아웃</button>
           </div>
@@ -417,8 +415,8 @@ html .guest-only { display: none; }
 
 <script>
 const starFour = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg>';
-const heart = '<svg class="heart" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M178,32c-20.65,0-38.73,8.88-50,23.89C116.73,40.88,98.65,32,78,32A62.07,62.07,0,0,0,16,94c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,220.66,240,164,240,94A62.07,62.07,0,0,0,178,32Zm-50,174c-18.26-11.06-96-64.11-96-112A46.06,46.06,0,0,1,78,48c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0C142.22,58.36,158.55,48,178,48a46.06,46.06,0,0,1,46,46C224,141.87,146.24,194.93,128,206Z"/></svg>';
-const heartDark = heart.replace('class="heart"', 'class="heart heart-dark"');
+const heart = '<svg class="heart heart-on-media" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path class="h-line" d="M178,32c-20.65,0-38.73,8.88-50,23.89C116.73,40.88,98.65,32,78,32A62.07,62.07,0,0,0,16,94c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,220.66,240,164,240,94A62.07,62.07,0,0,0,178,32Zm-50,174c-18.26-11.06-96-64.11-96-112A46.06,46.06,0,0,1,78,48c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0C142.22,58.36,158.55,48,178,48a46.06,46.06,0,0,1,46,46C224,141.87,146.24,194.93,128,206Z"/><path class="h-fill" d="M240,94c0,70-103.79,126.66-108.21,129a8,8,0,0,1-7.58,0C119.79,220.66,16,164,16,94A62.07,62.07,0,0,1,78,32c20.65,0,38.73,8.88,50,23.89C139.27,40.88,157.35,32,178,32A62.07,62.07,0,0,1,240,94Z"/></svg>';
+const heartDark = heart.replace(' heart-on-media', '');   // 밝은 카드 위에서는 대비 보정이 필요 없다
 const caret = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></svg>';
 const xCircle = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm37.66,130.34a8,8,0,0,1-11.32,11.32L128,139.31l-26.34,26.35a8,8,0,0,1-11.32-11.32L116.69,128,90.34,101.66a8,8,0,0,1,11.32-11.32L128,116.69l26.34-26.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>';
 
@@ -921,6 +919,60 @@ document.addEventListener('click',function(e){
     if (opt) opts.forEach((o) => { const on = o === opt; o.classList.toggle("is-on", on); o.setAttribute("aria-checked", on ? "true" : "false"); });
   });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !scrim.hidden) close(); });
+})();
+</script>
+<script>
+/* 하트 = 저장 토글 (탐색·홈)
+   카드가 다 그려진 뒤 하트를 버튼으로 감싸고, 저장 상태를 localStorage 에서 복원한다.
+   내 여행과 반대로 여기서는 기본이 '저장 전'(빈 하트)이다. */
+(function () {
+  const KEY = "scentrip_saved_cards";
+  let saved;
+  try { saved = new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); } catch (e) { saved = new Set(); }
+  const persist = () => { try { localStorage.setItem(KEY, JSON.stringify([...saved])); } catch (e) {} };
+
+  document.querySelectorAll(".heart").forEach((svg) => {
+    if (svg.closest(".heart-btn")) return;                     // 이미 버튼인 화면은 건드리지 않는다
+    const card = svg.closest(".card, .route-card, .featured-card");
+    if (!card) return;
+    const list = card.parentElement;
+    const id = (list.id || list.className.split(" ")[0] || "row") + ":" + [...list.children].indexOf(card);
+    card.dataset.save = id;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "heart-btn";
+    svg.replaceWith(btn);
+    btn.appendChild(svg);
+    const on = saved.has(id);
+    card.classList.toggle("is-saved", on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    btn.setAttribute("aria-label", on ? "저장 해제" : "저장");
+  });
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".heart-btn"); if (!btn) return;
+    const card = btn.closest("[data-save]"); if (!card) return;
+    e.preventDefault(); e.stopPropagation();                   // 카드 링크로 이동하지 않게
+    const on = !card.classList.contains("is-saved");
+    card.classList.toggle("is-saved", on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    btn.setAttribute("aria-label", on ? "저장 해제" : "저장");
+    on ? saved.add(card.dataset.save) : saved.delete(card.dataset.save);
+    persist();
+  });
+})();
+</script>
+<script>
+/* 저장된 프로필 사진을 모든 아바타에 반영 (마이페이지에서 변경) */
+(function () {
+  try {
+    const src = localStorage.getItem("scentrip_avatar");
+    if (!src) return;
+    document.querySelectorAll(".av").forEach((el) => {
+      el.classList.add("has-photo");
+      el.style.backgroundImage = 'url("' + src + '")';
+    });
+  } catch (e) {}
 })();
 </script>
 </body>
