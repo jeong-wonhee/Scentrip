@@ -78,11 +78,11 @@ html .guest-only { display: none; }
 .rr-conceptrow .reco-again { border: 1px solid var(--color-neutral-border); }
 
 /* '다른 지역으로 다시 추천' 버튼 (AI 모드에서 컨셉 박스 옆) */
-.reco-again { flex: none; height: 40px; padding: 0 var(--space-14); border-radius: var(--radius-full); background: var(--color-surface-overlay); font-size: 13px; font-weight: 600; color: var(--color-primary); }
+.reco-again { flex: none; height: 40px; padding: 0 var(--space-16); border-radius: var(--radius-full); background: var(--color-surface-overlay); font-size: 13px; font-weight: 600; color: var(--color-primary); }
 .reco-again:hover { background: var(--color-state-hover-brand); }
 
-/* ---------- 일차 탭 ---------- */
-.day-tabs { display: flex; gap: var(--space-8); margin-top: var(--space-24); border-bottom: 1px solid var(--color-border-subtle); }
+/* ---------- 일차 탭 (스크롤 시 상단 고정) ---------- */
+.day-tabs { position: sticky; top: 56px; z-index: 10; display: flex; gap: var(--space-8); margin-top: var(--space-24); background: var(--color-background); border-bottom: 1px solid var(--color-border-subtle); }
 .day-tab { position: relative; display: flex; flex-direction: column; gap: 2px; padding: var(--space-12) var(--space-16); font-size: var(--text-body-16); font-weight: 500; color: var(--color-content-neutral-subtle); }
 .day-tab b { font-weight: inherit; }
 .day-tab small { font-size: var(--text-caption-11); font-weight: 500; color: var(--color-content-subtle); }
@@ -105,17 +105,30 @@ html .guest-only { display: none; }
 .tl-div b { flex: none; font-size: var(--text-caption-12); font-weight: 600; color: var(--color-content-subtle); }
 .tl-div i { flex: none; font-style: normal; font-size: var(--text-caption-11); color: var(--color-content-subtle); }
 .tl-div::after { content: ""; flex: 1 1 auto; height: 1px; background: var(--color-border-subtle); }
+/* 빈 시간대 드롭 존 */
+.tl-slot-empty { padding: var(--space-16); border: 1px dashed var(--color-neutral-border); border-radius: var(--radius-lg); font-size: 13px; color: var(--color-content-subtle); text-align: center; }
+/* 드래그 중 드롭 대상 강조 */
+.tl-div.tl-drop { border-radius: var(--radius-sm); padding: var(--space-4) var(--space-6); margin-left: calc(-1 * var(--space-6)); }
+.tl-div.is-over, .tl-slot-empty.is-over { background: var(--color-state-hover-brand); box-shadow: inset 0 0 0 1px var(--color-primary); }
 
 /* 장소 카드 */
-.tl-item { display: flex; gap: var(--space-16); padding: var(--space-12); border-radius: var(--radius-lg); transition: background .14s ease; }
+.tl-item { position: relative; display: flex; gap: var(--space-16); padding: var(--space-12); border-radius: var(--radius-lg); transition: background .14s ease, opacity .14s ease; }
 .tl-item.is-hot { background: var(--color-neutral-subtle); }
-.tl-no { display: flex; width: 28px; height: 28px; flex: none; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-base-white); font-size: 13px; font-weight: 600; }
+/* 번호 동그라미를 잇는 점선 레일 (이동 구간의 점선과 같은 축) */
+.tl-item::before { content: ""; position: absolute; left: 25px; top: 0; bottom: 0; border-left: 2px dotted var(--color-neutral-border); z-index: 0; }
+/* 드래그 핸들 — 카드 바깥 왼쪽에 두어 번호 동그라미·점선 정렬을 방해하지 않는다 */
+.tl-grip { position: absolute; left: -22px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; width: 18px; height: 40px; color: var(--color-content-subtle); cursor: grab; opacity: 0; transition: opacity .14s ease; }
+.tl-grip svg { width: 18px; height: 18px; }
+.tl-item:hover .tl-grip { opacity: 1; }
+.tl-item:active .tl-grip { cursor: grabbing; }
+.tl-item.is-dragging { opacity: .5; }
+.tl-item.is-over { background: var(--color-state-hover-brand); box-shadow: inset 0 2px 0 var(--color-primary); }
+.tl-no { position: relative; z-index: 1; display: flex; width: 28px; height: 28px; flex: none; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-base-white); font-size: 13px; font-weight: 600; }
 .tl-thumb { width: 72px; height: 72px; flex: none; border-radius: var(--radius-md); object-fit: cover; background: var(--color-neutral-subtle); }
 .tl-body { flex: 1 1 auto; min-width: 0; }
 .tl-name { display: flex; align-items: center; gap: var(--space-8); font-size: var(--text-body-16); font-weight: 600; }
 .tl-name a { color: inherit; text-decoration: none; }
 .tl-name a:hover { text-decoration: underline; }
-.tl-slot { font-size: var(--text-caption-11); font-weight: 600; color: var(--color-content-subtle); }
 .tl-packed { display: inline-flex; align-items: center; height: 20px; padding: 0 var(--space-6); border-radius: var(--radius-sm); background: var(--color-neutral-subtle); font-size: var(--text-caption-11); font-weight: 600; color: var(--color-content-subtle); }
 .tl-desc { margin-top: var(--space-4); font-size: var(--text-body-14); line-height: 1.6; color: var(--color-content-neutral-muted); }
 .tl-tags { display: flex; gap: var(--space-6); margin-top: var(--space-8); }
@@ -123,10 +136,15 @@ html .guest-only { display: none; }
 .tl-match { flex: none; font-size: 13px; font-weight: 600; color: var(--color-primary); }
 
 /* 이동 구간 */
-.tl-seg { display: flex; align-items: center; gap: var(--space-8); margin-left: var(--space-24); padding: var(--space-8) var(--space-12); border-left: 2px dotted var(--color-neutral-border); }
-.tl-seg svg { width: 15px; height: 15px; flex: none; color: var(--color-content-subtle); }
-.tl-seg .t { font-size: 13px; font-weight: 600; color: var(--color-content-neutral); }
-.tl-seg .alt { font-size: var(--text-caption-11); color: var(--color-content-subtle); }
+/* 이동 구간 — 아이콘을 동그라미에 넣고 번호 동그라미와 같은 축의 점선으로 잇는다 */
+.tl-seg { position: relative; display: flex; align-items: center; gap: var(--space-16); padding: var(--space-8) var(--space-12); }
+.tl-seg::before { content: ""; position: absolute; left: 25px; top: 0; bottom: 0; border-left: 2px dotted var(--color-neutral-border); z-index: 0; }
+.tl-seg-ic { position: relative; z-index: 1; flex: none; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: var(--radius-full); background: var(--color-neutral-bg); color: var(--color-content-neutral); }
+.tl-seg-ic svg { width: 16px; height: 16px; color: var(--color-content-neutral-muted); }
+.tl-seg.is-none .tl-seg-ic { background: none; border: 1.5px dashed var(--color-neutral-border); }
+.tl-seg-tx { display: flex; align-items: center; gap: var(--space-8); flex: 1 1 auto; min-width: 0; }
+.tl-seg .t { flex: none; font-size: 13px; font-weight: 600; color: var(--color-content-neutral); white-space: nowrap; }
+.tl-seg .alt { flex: none; font-size: var(--text-caption-11); color: var(--color-content-subtle); white-space: nowrap; }
 .tl-seg .warn { display: inline-flex; align-items: center; gap: var(--space-4); height: 22px; padding: 0 var(--space-8); border-radius: var(--radius-full); background: var(--color-warning-subtle); font-size: var(--text-caption-11); font-weight: 600; color: var(--color-content-neutral); white-space: nowrap; }
 .tl-seg .warn svg { width: 12px; height: 12px; color: var(--color-warning); }
 .tl-seg.is-far .t { color: var(--color-content-default); }
@@ -188,6 +206,15 @@ html .guest-only { display: none; }
 /* 출발지 노드 — 숙소와 같은 골격, 점선 테두리로 '아직 채워지지 않은 지점' 느낌 */
 .tl-origin { border-style: dashed; background: var(--color-surface-overlay); margin-bottom: var(--space-4); }
 .tl-origin .ic { background: var(--color-surface-01); color: var(--color-primary); }
+/* 출발지 한 줄 요약 */
+.tl-origin .origin-line { flex: 1 1 auto; min-width: 0; font-size: var(--text-body-14); color: var(--color-content-neutral); }
+.tl-origin .origin-line b { font-weight: 600; color: var(--color-content-default); }
+/* 출발 설정 모달 필드 */
+.origin-fields { display: flex; flex-direction: column; gap: var(--space-16); }
+.origin-field { display: flex; flex-direction: column; gap: var(--space-6); }
+.origin-field > span { font-size: var(--text-caption-12); font-weight: 600; color: var(--color-content-subtle); }
+.origin-field input { height: 44px; padding: 0 var(--space-12); border: 1px solid var(--color-neutral-border); border-radius: var(--radius-md); background: var(--color-surface-overlay); font: inherit; letter-spacing: inherit; font-size: var(--text-body-14); color: var(--color-content-default); }
+.origin-field input:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 1px; }
 
 /* 인라인 편집 (출발지·숙소 공용) */
 .tl-stay-edit { flex: none; height: 32px; padding: 0 var(--space-12); border-radius: var(--radius-full); border: 1px solid var(--color-neutral-border); background: var(--color-surface-overlay); font-size: var(--text-caption-12); font-weight: 600; color: var(--color-content-neutral); }
@@ -262,18 +289,15 @@ html .guest-only { display: none; }
 .cond-btn svg { width: 16px; height: 16px; }
 .cond-modal-body { display: flex; flex-direction: column; }
 .cond-sub { margin-bottom: var(--space-4); font-size: var(--text-caption-12); font-weight: 600; color: var(--color-content-subtle); }
-.cond-select {
-  height: 36px; padding: 0 var(--space-32) 0 var(--space-12);
-  border-radius: var(--radius-md); border: 1px solid var(--color-neutral-border);
-  background-color: var(--color-surface-overlay);
-  font: inherit; letter-spacing: inherit; font-size: var(--text-body-14); font-weight: 600;
-  color: var(--color-content-default); cursor: pointer;
-  -webkit-appearance: none; appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' fill='%236b7a72'%3E%3Cpath d='M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right var(--space-10) center; background-size: 16px;
-}
-.cond-select:hover { border-color: var(--color-content-subtle); }
-.cond-select:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 1px; }
+/* 조건 모달은 드롭다운 팝오버가 박스 밖으로 나올 수 있게 (overflow 로 잘리던 문제) */
+#condModal .modal-box { overflow: visible; }
+.cond-modal-body { overflow: visible; }
+/* 여행 조건 드롭다운 — 디자인 시스템 chip-btn + menu 사용 */
+.cond-drop { position: relative; display: inline-block; }
+.cond-drop .chip-btn { height: 40px; font-size: var(--text-body-14); }
+.cond-drop .chip-btn.is-active { border-width: 1px; border-color: var(--color-neutral-border); }
+.cond-drop .chip-btn.is-active svg { width: 16px; height: 16px; }
+.cond-drop .menu { right: 0; left: auto; min-width: 100%; max-height: 260px; overflow-y: auto; }
 .cond-foot { display: block; margin-top: 0; }
 .cond-foot .cond-cta { width: 100%; height: 48px; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-base-white); font-size: var(--text-body-16); font-weight: 600; }
 .cond-foot .cond-cta:hover { background: var(--scent-green-700); }
@@ -447,6 +471,30 @@ html .guest-only { display: none; }
   </div>
 </div>
 
+<!-- ============ 출발 설정 (출발지 + 출발 시각) ============ -->
+<div class="modal-scrim" id="originModal" hidden>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="originTitle">
+    <div class="modal-head">
+      <h2 id="originTitle">출발 설정</h2>
+      <button class="modal-close" type="button" data-origin-cancel aria-label="닫기"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
+    </div>
+    <div class="origin-fields">
+      <label class="origin-field">
+        <span>출발지</span>
+        <input type="text" id="originPlaceInput" placeholder="주소나 장소명 (예: 서울역)">
+      </label>
+      <label class="origin-field">
+        <span>출발 시각</span>
+        <input type="time" id="originTimeInput">
+      </label>
+      <p class="cond-note">출발 시각과 출발지까지의 이동 시간으로 첫날 시작 시간대를 정해요.</p>
+    </div>
+    <div class="modal-foot cond-foot">
+      <button class="cond-cta" type="button" data-origin-save>저장</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite">
   <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></svg>
   <span id="toastMsg"></span>
@@ -459,7 +507,8 @@ html .guest-only { display: none; }
    ============================================================ */
 const COND_KEY = "scentrip_route_cond";
 const DEFAULT_COND = { mode: "ai", nights: "1박 2일", transport: "자동차", pace: "넉넉하게",
-                       distance: "적당히", region: null, company: null, origin: null, originPlace: null, stay: [] };
+                       distance: "적당히", region: null, company: null, origin: null, originPlace: null,
+                       departAt: "", stay: [] };   // 출발 시각 "HH:MM" — 도착일 시작 슬롯 계산에 쓰임
 
 /* 위저드를 거치지 않고 주소로 바로 열면 기본 조건으로 보여준다 */
 function readCond() {
@@ -492,17 +541,25 @@ function dayCount() {
   return (parseInt(cond.nights, 10) || 0) + 1;
 }
 /* 기간별 골격. 도착일은 오후부터, 마지막 날은 저녁을 비운다 */
+/* 출발 시각(+이동시간)으로 도착일의 첫 시작 슬롯을 정한다.
+   출발지 좌표가 있으면(카카오 키) '출발 + 지역까지 이동시간 = 도착'으로 실제 계산,
+   없으면 출발 시각만으로 대략 나눈다. 미입력이면 기존처럼 오후로 본다. */
+function firstSlotDay1() {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(cond.departAt || "");
+  if (!m) return "오후";
+  let arrive = +m[1] * 60 + +m[2];
+  if (Array.isArray(cond.originCoord)) {
+    const L = leg(cond.originCoord, REGION_META[regionKey].center);
+    if (L) arrive += L.main.min;
+  }
+  const h = arrive / 60;
+  return h < 12 ? "오전" : h < 18 ? "오후" : "저녁";
+}
 function slotsFor(day, total) {
   if (total === 1) return ["오전", "오후", "저녁"];
-  if (day === 1) return ["오후", "저녁"];
+  if (day === 1) return ["오전", "오후", "저녁"].slice(SLOT_ORDER[firstSlotDay1()]);   // 도착 슬롯부터
   if (day === total) return ["오전", "오후"];
   return ["오전", "오후", "저녁"];
-}
-function dayLabel(day, total) {
-  if (total === 1) return "하루 코스";
-  if (day === 1) return "도착일";
-  if (day === total) return "마지막 날";
-  return "온전한 하루";
 }
 const SLOT_ORDER = { "오전": 0, "오후": 1, "저녁": 2 };
 
@@ -553,6 +610,12 @@ const SPD = { car: 40, transit: 18, walk: 4.3 };   // km/h
 const TRANSIT_OVERHEAD = 14;                       // 대기 + 정류장 접근
 const WALK_MAX = 75;                               // 이보다 오래 걸리면 도보는 후보에서 뺀다
 const FAR_LIMIT = { "가깝게": 35, "적당히": 70 };   // 멀어도 괜찮아요 는 경고 없음
+/* '장소 사이 거리' 설정을 실제 이동 시간으로 풀어 쓴 서브텍스트 (FAR_LIMIT 기준) */
+const DISTANCE_HINT = {
+  "가깝게": "장소 간 이동 약 35분 이내",
+  "적당히": "장소 간 이동 약 35~70분",
+  "멀어도 괜찮아요": "약 70분 이상도 괜찮아요",
+};
 
 function km(a, b) {
   const R = 6371, rad = (d) => d * Math.PI / 180;
@@ -684,7 +747,6 @@ function candidatesFor(d, shownIdx, kind) {
 
 /* ---------- 그리기 ---------- */
 let at = 0;   // 활성 일차 인덱스
-let editOrigin = false;   // 출발지 인라인 편집 중
 let editStay = null;      // 인라인 편집 중인 숙박(박) 번호
 const $ = (id) => document.getElementById(id);
 const escAttr = (s) => String(s == null ? "" : s).replace(/"/g, "&quot;");
@@ -709,10 +771,9 @@ function renderHead() {
 }
 
 function renderTabs() {
-  const total = days.length;
   $("dayTabs").innerHTML = days.map((_, i) =>
     `<button class="day-tab ${i === at ? "is-on" : ""}" type="button" data-day="${i}">
-       <b>${i + 1}일차</b><small>${dayLabel(i + 1, total)}</small>
+       <b>${i + 1}일차</b>
      </button>`).join("");
 }
 
@@ -730,7 +791,10 @@ function segHtml(a, b) {
   const pa = posOf(a), pb = posOf(b);
   if (!pa || !pb) {
     if (a.type === "origin" || b.type === "origin") return "";   // 출발지가 비면 구간을 그리지 않는다
-    return `<div class="tl-seg is-none"><span class="t">숙소를 입력하면 이 구간의 이동 시간을 계산해 드려요</span></div>`;
+    return `<div class="tl-seg is-none">
+      <span class="tl-seg-ic" aria-hidden="true"></span>
+      <div class="tl-seg-tx"><span class="t">숙소를 입력하면 이 구간의 이동 시간을 계산해 드려요</span></div>
+    </div>`;
   }
   const L = leg(pa, pb);
   const limit = FAR_LIMIT[cond.distance];
@@ -738,17 +802,18 @@ function segHtml(a, b) {
   const to = b.type === "place" ? b.p : null;
   const nav = to ? `<a class="nav" href="https://map.kakao.com/link/to/${encodeURIComponent(to.name)},${to.lat},${to.lng}" target="_blank" rel="noopener">길찾기</a>` : "";
   return `<div class="tl-seg ${far ? "is-far" : ""}">
-    ${ICON[L.main.mode]}
-    <span class="t">${L.main.label} 약 ${minText(L.main.min)}</span>
-    ${L.alt ? `<span class="alt">· ${L.alt.label} 약 ${minText(L.alt.min)}</span>` : ""}
-    ${far ? `<span class="warn">${ICON.warn}이동 부담 설정보다 멀어요</span>` : ""}
-    ${nav}
+    <span class="tl-seg-ic" aria-hidden="true">${ICON[L.main.mode]}</span>
+    <div class="tl-seg-tx">
+      <span class="t">${L.main.label} 약 ${minText(L.main.min)}</span>
+      ${L.alt ? `<span class="alt">· ${L.alt.label} 약 ${minText(L.alt.min)}</span>` : ""}
+      ${far ? `<span class="warn">${ICON.warn}이동 부담 설정보다 멀어요</span>` : ""}
+      ${nav}
+    </div>
   </div>`;
 }
 
 const ACT_ICON = {
-  up: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z"/></svg>',
-  down: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,149.66l-72,72a8,8,0,0,1-11.32,0l-72-72a8,8,0,0,1,11.32-11.32L120,196.69V40a8,8,0,0,1,16,0V196.69l58.34-58.35a8,8,0,0,1,11.32,11.32Z"/></svg>',
+  grip: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M104,60A12,12,0,1,1,92,48,12,12,0,0,1,104,60Zm60,12a12,12,0,1,0-12-12A12,12,0,0,0,164,72ZM92,116a12,12,0,1,0,12,12A12,12,0,0,0,92,116Zm72,0a12,12,0,1,0,12,12A12,12,0,0,0,164,116ZM92,184a12,12,0,1,0,12,12A12,12,0,0,0,92,184Zm72,0a12,12,0,1,0,12,12A12,12,0,0,0,164,184Z"/></svg>',
   swap: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M224,128a8,8,0,0,1-8,8H61.31l34.35,34.34a8,8,0,0,1-11.32,11.32l-48-48a8,8,0,0,1,0-11.32l48-48A8,8,0,0,1,95.66,85.66L61.31,120H216A8,8,0,0,1,224,128Z"/><path d="M32,72a8,8,0,0,1,8-8H194.69L160.34,29.66a8,8,0,0,1,11.32-11.32l48,48a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32-11.32L194.69,80H40A8,8,0,0,1,32,72Z" opacity=".45"/></svg>',
   del: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"/></svg>',
   caret: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></svg>',
@@ -766,19 +831,18 @@ function menuHtml(kind, i, items, current) {
 }
 
 function placeHtml(n) {
-  const p = n.p, i = n.i, last = shown(at).length - 1;
+  const p = n.p, i = n.i;
   const dayOpts = days.map((_, d) => `${d + 1}일차`).filter((_, d) => d !== at);
-  return `<article class="tl-item" data-i="${i}">
+  return `<article class="tl-item" data-i="${i}" draggable="true">
+    <span class="tl-grip" aria-hidden="true" title="끌어서 순서 변경">${ACT_ICON.grip}</span>
     <span class="tl-no">${i + 1}</span>
     <img class="tl-thumb" src="${p.img}" alt="" loading="lazy">
     <div class="tl-body">
-      <p class="tl-name"><a href="place-detail.html">${p.name}</a><span class="tl-slot">${p.slot}</span>${p.tier === "packed" ? '<span class="tl-packed">빽빽</span>' : ""}</p>
+      <p class="tl-name"><a href="place-detail.html">${p.name}</a>${p.tier === "packed" ? '<span class="tl-packed">빽빽한 일정</span>' : ""}</p>
       <p class="tl-desc">${p.oneline}</p>
       <div class="tl-tags">${p.scents.map((t) => `<span>${t}</span>`).join("")}</div>
       <div class="tl-acts">
-        <button class="tl-act" type="button" data-act="up" data-i="${i}" ${i === 0 ? "disabled" : ""}>${ACT_ICON.up}위로</button>
-        <button class="tl-act" type="button" data-act="down" data-i="${i}" ${i === last ? "disabled" : ""}>${ACT_ICON.down}아래로</button>
-        ${menuHtml("slot", i, { label: "시간대", opts: ["오전", "오후", "저녁"] }, p.slot)}
+        ${menuHtml("slot", i, { label: "시간대", opts: slotsFor(at + 1, days.length) }, p.slot)}
         ${days.length > 1 ? menuHtml("day", i, { label: "일차 이동", opts: dayOpts }, null) : ""}
         <button class="tl-act" type="button" data-act="swap" data-i="${i}">${ACT_ICON.swap}장소 변경</button>
         <button class="tl-act danger" type="button" data-act="del" data-i="${i}">${ACT_ICON.del}삭제</button>
@@ -821,29 +885,16 @@ function panelHtml() {
   </div>`;
 }
 
-/* 출발지 — 1일차 맨 위. 모든 모드에서 비어 있어도 채워 넣을 수 있다 (좌표 연동 전이라 표시용) */
+/* 출발지 — 1일차 맨 위. 한 줄로 요약하고, 수정은 모달에서 (출발지·출발 시각 함께) */
 function originHtml() {
   const val = cond.originPlace || "";
-  if (editOrigin) {
-    return `<div class="tl-stay tl-origin is-edit">
-      <span class="ic" aria-hidden="true">${ICON.flag}</span>
-      <div class="tx">
-        <b>출발지</b>
-        <input class="stay-input" type="text" value="${escAttr(val)}" placeholder="출발지 주소나 장소명 (예: 서울역)" data-origin-input>
-      </div>
-      <div class="stay-actions">
-        <button class="stay-save" type="button" data-origin-save>저장</button>
-        <button class="stay-cancel" type="button" data-origin-cancel>취소</button>
-      </div>
-    </div>`;
-  }
+  const line = val
+    ? `<b>${val}</b>에서 ${cond.departAt ? `<b>${cond.departAt}</b>에 ` : ""}출발`
+    : "출발지·출발 시각을 설정해 주세요";
   return `<div class="tl-stay tl-origin">
     <span class="ic" aria-hidden="true">${ICON.flag}</span>
-    <span class="tx">
-      <b>출발지</b>
-      <p>${val ? `${val}에서 출발` : "출발지를 정하면 여행 시작점을 표시해 드려요"}</p>
-    </span>
-    <button class="tl-stay-edit" type="button" data-origin-edit>${val ? "수정" : "＋ 출발지 추가"}</button>
+    <p class="origin-line">${line}</p>
+    <button class="tl-stay-edit" type="button" data-origin-edit>${val ? "수정" : "＋ 출발 설정"}</button>
   </div>`;
 }
 
@@ -889,47 +940,65 @@ function renderDay() {
     ? `장소 ${list.length}곳 · 숙소 입력 시 ${unknown}개 구간 추가 계산`
     : `장소 ${list.length}곳 · 총 이동 약 ${minText(total)}`;
   const basis = cond.transport === "자동차" ? "자동차 기준" : "도보·대중교통 중 빠른 쪽 기준";
-  $("dayFoot").textContent = `${basis} · 장소 사이 거리 ‘${cond.distance}’ 설정 · 이동 시간은 좌표 기반 추정치예요`
+  const distHint = DISTANCE_HINT[cond.distance] ? ` (${DISTANCE_HINT[cond.distance]})` : "";
+  $("dayFoot").textContent = `${basis} · 장소 사이 거리 ‘${cond.distance}’${distHint} · 이동 시간은 좌표 기반 추정치예요`
     + (stayApprox() ? " (숙소는 좌표 변환 전이라 지역 중심으로 계산합니다)" : "");
 
-  // 시간대가 바뀌는 지점에 구분선을 넣는다
+  // 그 날에 유효한 시간대만 (비어 있어도) 보여주고 각 시간대를 드롭 존으로 쓴다 → 드래그로 시간대 이동
+  // 도착일 오후 출발이면 오전이 없다. 혹시 유효 범위 밖 시간대에 장소가 있으면 그 슬롯도 함께 보인다.
   const SLOT_TIME = { "오전": "09–12", "오후": "12–18", "저녁": "18–21" };
-  let html = "", lastSlot = null;
-  const lastPlaceIdx = nodes.map((n) => n.type).lastIndexOf("place");
-  nodes.forEach((n, idx) => {
-    if (n.type === "place" && n.p.slot !== lastSlot) {
-      lastSlot = n.p.slot;
-      html += `<div class="tl-div"><b>${lastSlot}</b><i>${SLOT_TIME[lastSlot]}</i></div>`;
-    }
-    html += n.type === "place" ? placeHtml(n) : stayHtml(n);
-    if (panel && panel.kind === "replace" && panel.day === at && n.type === "place" && n.i === panel.idx) html += panelHtml();
+  const daySlots = slotsFor(at + 1, days.length);
+  const stayOut = nodes.find((n) => n.type === "stay" && n.role === "출발");     // 전날 숙소에서 출발
+  const stayReturn = nodes.find((n) => n.type === "stay" && n.role === "복귀");  // 그날 숙소로 복귀
+  const placeNodes = nodes.filter((n) => n.type === "place");                    // shown 순서 = 시간대 순
+  const present = placeNodes.map((n) => n.p.slot);                               // 실제 장소가 있는 시간대
+  const displaySlots = ["오전", "오후", "저녁"].filter((s) => daySlots.includes(s) || present.includes(s));
+  const lead = at === 0 ? { type: "origin", pos: Array.isArray(cond.originCoord) ? cond.originCoord : null, name: cond.originPlace } : stayOut;
 
-    // 빈자리는 그날 마지막 장소 뒤에 온다 (PRD 4.8)
-    if (idx === lastPlaceIdx) {
-      const gap = Math.max(0, (quota[at] || 0) - list.length);
-      if (gap > 0) {
-        html += `<div class="tl-gap">
-          <span class="tx">이 일차에 ${gap}곳을 더 넣을 수 있어요</span>
-          <button class="add" type="button" data-act="add">장소 추가</button>
-          <button class="dismiss" type="button" data-act="gap-dismiss">이대로 둘게요</button>
-        </div>`;
-        if (panel && panel.kind === "add" && panel.day === at) html += panelHtml();
-      }
+  let html = "";
+  // 리딩: 출발지(1일차) 또는 출발 숙소(2일차+) + 첫 장소까지의 이동
+  if (at === 0) html += originHtml();
+  else if (stayOut) html += stayHtml(stayOut);
+  if (lead && placeNodes[0]) html += segHtml(lead, placeNodes[0]);
+
+  // 시간대별 그룹 (헤더·빈 존 모두 드롭 대상)
+  displaySlots.forEach((slot) => {
+    html += `<div class="tl-div tl-drop" data-slot="${slot}"><b>${slot}</b><i>${SLOT_TIME[slot]}</i></div>`;
+    const inSlot = placeNodes.filter((n) => n.p.slot === slot);
+    if (!inSlot.length) {
+      html += `<div class="tl-slot-empty tl-drop" data-slot="${slot}">이 시간대로 카드를 끌어다 놓으세요</div>`;
+      return;
     }
-    if (idx < nodes.length - 1) html += segHtml(n, nodes[idx + 1]);
+    inSlot.forEach((n) => {
+      html += placeHtml(n);
+      if (panel && panel.kind === "replace" && panel.day === at && n.i === panel.idx) html += panelHtml();
+      const gi = placeNodes.indexOf(n);
+      if (gi < placeNodes.length - 1) html += segHtml(n, placeNodes[gi + 1]);   // 다음 장소까지 이동
+    });
   });
+
+  // 빈자리 (PRD 4.8)
+  const gap = Math.max(0, (quota[at] || 0) - list.length);
+  if (gap > 0) {
+    html += `<div class="tl-gap">
+      <span class="tx">이 일차에 ${gap}곳을 더 넣을 수 있어요</span>
+      <button class="add" type="button" data-act="add">장소 추가</button>
+      <button class="dismiss" type="button" data-act="gap-dismiss">이대로 둘게요</button>
+    </div>`;
+    if (panel && panel.kind === "add" && panel.day === at) html += panelHtml();
+  }
+
+  // 복귀 숙소 (마지막 장소 → 숙소 이동 후)
+  if (stayReturn) {
+    if (placeNodes.length) html += segHtml(placeNodes[placeNodes.length - 1], stayReturn);
+    html += stayHtml(stayReturn);
+  }
 
   const hiddenCount = days[at].length - list.length;
   if (hiddenCount > 0) html += `<p class="tl-todo">넉넉한 일정에서 ${hiddenCount}곳이 가려졌어요 · 모두 보기</p>`;
 
-  let originPart = at === 0 ? originHtml() : "";   // 출발지는 1일차 맨 위에만
-  // 출발지 좌표가 있으면 첫 장소까지의 이동 구간을 붙인다
-  if (at === 0 && Array.isArray(cond.originCoord)) {
-    const first = nodesFor(at).find((n) => posOf(n));
-    if (first) originPart += segHtml({ type: "origin", pos: cond.originCoord, name: cond.originPlace }, first);
-  }
-  $("timeline").innerHTML = originPart + (list.length ? html : "");
-  $("tlEmpty").hidden = list.length > 0;
+  $("timeline").innerHTML = html;
+  $("tlEmpty").hidden = true;   // 시간대 존을 항상 그리므로 별도 빈 상태 안내는 쓰지 않는다
   renderMap();
 }
 
@@ -946,23 +1015,36 @@ const COND_OPTS = {
   origin: ["1시간 이내", "2시간 이내", "3시간 이내", "상관 없어요"],   // 출발지에서 첫 목적지까지 이동 가능 시간
   company: ["선택 안 함", "혼자", "연인과", "친구와", "가족과"],
 };
-function condSelect(field, value) {
+/* 장소 사이 거리는 선택지 자체에 시간 범위를 함께 적는다 (고를 때부터 보이게) */
+const DISTANCE_MIN = { "가깝게": "약 35분 이내", "적당히": "약 35~70분", "멀어도 괜찮아요": "약 70분 이상" };
+function optLabel(field, o) { return field === "distance" && DISTANCE_MIN[o] ? `${o} (${DISTANCE_MIN[o]})` : o; }
+/* 디자인 시스템의 chip-btn + menu 팝오버 드롭다운 (native select 대신) */
+function condDrop(field, value) {
   const opts = COND_OPTS[field];
   const list = opts.includes(value) ? opts : [value].concat(opts);   // 저장된 값이 목록에 없어도 유지
-  return `<select class="cond-select" data-field="${field}" aria-label="${field}">`
-    + list.map((o) => `<option value="${o}"${o === value ? " selected" : ""}>${o}</option>`).join("")
-    + `</select>`;
+  return `<div class="cond-drop" data-field="${field}" data-value="${escAttr(value)}">
+    <button class="chip-btn is-active" type="button" aria-haspopup="true" aria-expanded="false">
+      <span class="lb">${optLabel(field, value)}</span>
+      <span class="caret" aria-hidden="true">${ACT_ICON.caret}</span>
+    </button>
+    <div class="menu" role="menu">
+      ${list.map((o) => `<button class="menu-item ${o === value ? "is-selected" : ""}" type="button" role="menuitemradio" data-v="${escAttr(o)}" aria-checked="${o === value}">
+        <span>${optLabel(field, o)}</span>
+        <span class="check" aria-hidden="true">${ACT_ICON.check}</span>
+      </button>`).join("")}
+    </div>
+  </div>`;
 }
 /* 위저드 문항 순서 그대로, 모드별로 다르게. 필터형만. */
 function renderCond() {
   const rows = [];
-  if (cond.mode === "region") rows.push(["여행 지역", condSelect("region", cond.region || "강원")]);
-  rows.push(["여행 기간", condSelect("nights", cond.nights)]);
-  rows.push(["이동 수단", condSelect("transport", cond.transport)]);
-  rows.push(["일정 밀도", condSelect("pace", cond.pace)]);
-  rows.push(["장소 사이 거리", condSelect("distance", cond.distance)]);
-  if (cond.mode === "ai") rows.push(["이동 가능 시간", condSelect("origin", cond.origin || "상관 없어요")]);
-  rows.push(["동행", condSelect("company", cond.company || "선택 안 함")]);
+  if (cond.mode === "region") rows.push(["여행 지역", condDrop("region", cond.region || "강원")]);
+  rows.push(["여행 기간", condDrop("nights", cond.nights)]);
+  rows.push(["이동 수단", condDrop("transport", cond.transport)]);
+  rows.push(["일정 밀도", condDrop("pace", cond.pace)]);
+  rows.push(["장소 사이 거리", condDrop("distance", cond.distance)]);
+  if (cond.mode === "ai") rows.push(["이동 가능 시간", condDrop("origin", cond.origin || "상관 없어요")]);
+  rows.push(["동행", condDrop("company", cond.company || "선택 안 함")]);
   $("condLive").innerHTML = rows.map(([k, v]) => `<div class="cond-row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
 }
 
@@ -1030,17 +1112,21 @@ function closeMenus() {
 }
 function after(msg) { setDirty(true); renderDay(); say(msg); }
 
-/* 위·아래 이동은 인접 항목과 순서와 시간대를 함께 바꾼다 (PRD 4.6) */
-function move(i, dir) {
-  const j = i + dir, list = shown(at);
-  if (j < 0 || j >= list.length) return;
-  const a = realIndex(at, i), b = realIndex(at, j);
-  const A = days[at][a], B = days[at][b];
-  const tmp = A.slot; A.slot = B.slot; B.slot = tmp;
-  days[at][a] = B; days[at][b] = A;
-  days[at].sort((x, y) => SLOT_ORDER[x.slot] - SLOT_ORDER[y.slot]);
+/* 드래그로 순서를 바꾼다 — 놓은 위치의 시간대를 물려받아 시간대 순으로 다시 정렬 (PRD 4.6) */
+function reorderPlace(fromShown, toShown) {
+  if (fromShown === toShown) return;
+  const list = shown(at);
+  const dragged = list[fromShown], target = list[toShown];
+  if (!dragged || !target) return;
+  const arr = days[at];
+  arr.splice(arr.indexOf(dragged), 1);                    // 드래그한 항목을 빼고
+  dragged.slot = target.slot;                             // 놓은 자리의 시간대를 물려받는다
+  let ti = arr.indexOf(target);
+  if (fromShown < toShown) ti += 1;                       // 아래로 끌면 대상 뒤에 넣는다
+  arr.splice(ti, 0, dragged);                             // 다시 끼워 넣고
+  arr.sort((x, y) => SLOT_ORDER[x.slot] - SLOT_ORDER[y.slot]);   // 시간대 순 (같은 시간대 안은 순서 유지)
   panel = null;
-  after(`${A.name} 순서를 옮기고 이동 시간을 다시 계산했어요`);
+  after(`${dragged.name} 순서를 옮기고 이동 시간을 다시 계산했어요`);
 }
 function setSlot(i, slot) {
   const it = days[at][realIndex(at, i)];
@@ -1082,31 +1168,12 @@ function addPlace(id) {
 }
 
 $("timeline").addEventListener("click", (e) => {
-  // ----- 출발지 인라인 편집 -----
-  if (e.target.closest("[data-origin-edit]")) {
-    editStay = null; editOrigin = true; renderDay();
-    const i = $("timeline").querySelector("[data-origin-input]"); if (i) { i.focus(); i.select(); }
-    return;
-  }
-  if (e.target.closest("[data-origin-cancel]")) { editOrigin = false; renderDay(); return; }
-  if (e.target.closest("[data-origin-save]")) {
-    const sel = $("timeline").querySelector("[data-origin-input]");
-    cond.originPlace = sel ? sel.value : cond.originPlace;
-    cond.originCoord = null;   // 지역이 바뀌면 이전 좌표는 버린다
-    persistCond(); editOrigin = false; setDirty(true); renderDay();
-    if (!cond.originPlace) { say("출발지를 비웠어요"); return; }
-    say(`출발지를 ${cond.originPlace}(으)로 저장했어요`);
-    geocode(cond.originPlace).then((c) => {
-      if (!c) return;
-      cond.originCoord = c; persistCond(); renderDay();
-      say(`출발지 좌표를 찾았어요 (${c[0].toFixed(3)}, ${c[1].toFixed(3)})`);
-    });
-    return;
-  }
+  // ----- 출발 설정: 모달 열기 (출발지 + 출발 시각) -----
+  if (e.target.closest("[data-origin-edit]")) { openOrigin(); return; }
   // ----- 숙소 인라인 편집 -----
   const stayEdit = e.target.closest("[data-stay-edit]");
   if (stayEdit) {
-    editOrigin = false; editStay = +stayEdit.dataset.stayEdit; renderDay();
+    editStay = +stayEdit.dataset.stayEdit; renderDay();
     const i = $("timeline").querySelector("[data-stay-input]"); if (i) { i.focus(); i.select(); }
     return;
   }
@@ -1145,8 +1212,6 @@ $("timeline").addEventListener("click", (e) => {
   if (!act) { closeMenus(); return; }
   const i = +act.dataset.i;
   switch (act.dataset.act) {
-    case "up": move(i, -1); break;
-    case "down": move(i, 1); break;
     case "swap": panel = (panel && panel.kind === "replace" && panel.idx === i) ? null : { kind: "replace", day: at, idx: i, page: 0 }; renderDay(); break;
     case "del": askDelete(i); break;
     case "add": panel = panel && panel.kind === "add" ? null : { kind: "add", day: at, idx: null, page: 0 }; renderDay(); break;
@@ -1167,10 +1232,44 @@ document.addEventListener("click", (e) => { if (!e.target.closest(".tl-actwrap")
 
 /* 인라인 편집: Enter = 저장, Esc = 취소 */
 $("timeline").addEventListener("keydown", (e) => {
-  const box = e.target.closest(".tl-stay.is-edit, .tl-origin.is-edit");
+  const box = e.target.closest(".tl-stay.is-edit");
   if (!box) return;
-  if (e.key === "Enter") { e.preventDefault(); const b = box.querySelector("[data-stay-save],[data-origin-save]"); if (b) b.click(); }
-  else if (e.key === "Escape") { editStay = null; editOrigin = false; renderDay(); }
+  if (e.key === "Enter") { e.preventDefault(); const b = box.querySelector("[data-stay-save]"); if (b) b.click(); }
+  else if (e.key === "Escape") { editStay = null; renderDay(); }
+});
+
+/* 카드 드래그로 순서 변경 */
+let dragShown = null;
+$("timeline").addEventListener("dragstart", (e) => {
+  const it = e.target.closest(".tl-item");
+  if (!it) return;
+  dragShown = +it.dataset.i;
+  it.classList.add("is-dragging");
+  e.dataTransfer.effectAllowed = "move";
+  try { e.dataTransfer.setData("text/plain", String(dragShown)); } catch (x) {}
+});
+$("timeline").addEventListener("dragover", (e) => {
+  if (dragShown === null) return;
+  e.preventDefault();   // drop 허용
+  const t = e.target.closest(".tl-item, .tl-drop");
+  $("timeline").querySelectorAll(".is-over").forEach((n) => n.classList.remove("is-over"));
+  if (t && !(t.classList.contains("tl-item") && +t.dataset.i === dragShown)) t.classList.add("is-over");
+});
+$("timeline").addEventListener("drop", (e) => {
+  if (dragShown === null) return;
+  e.preventDefault();
+  const from = dragShown; dragShown = null;
+  const card = e.target.closest(".tl-item");
+  const zone = e.target.closest(".tl-drop");
+  if (card && +card.dataset.i !== from) { reorderPlace(from, +card.dataset.i); return; }   // 카드 위 → 순서 변경
+  if (zone) {                                                                                // 시간대 존 → 시간대 변경
+    const d = shown(at)[from];
+    if (d && d.slot !== zone.dataset.slot) setSlot(from, zone.dataset.slot);
+  }
+});
+$("timeline").addEventListener("dragend", () => {
+  dragShown = null;
+  $("timeline").querySelectorAll(".is-dragging, .is-over").forEach((n) => n.classList.remove("is-dragging", "is-over"));
 });
 
 /* 삭제는 되돌릴 수 없으니 한 번 묻는다 (PRD 4.6) */
@@ -1208,16 +1307,82 @@ function closeCond() {
   scrim.classList.remove("is-open");
   setTimeout(() => { scrim.hidden = true; }, 160);
 }
-/* 셀렉트 값을 조건에 반영하고 저장한다 */
+/* 드롭다운에서 고른 값을 조건에 반영하고 저장한다 */
 function applyCond() {
-  $("condLive").querySelectorAll(".cond-select").forEach((s) => { cond[s.dataset.field] = s.value; });
+  $("condLive").querySelectorAll(".cond-drop").forEach((d) => { cond[d.dataset.field] = d.dataset.value; });
   persistCond();
+}
+function closeCondMenus() {
+  $("condLive").querySelectorAll(".menu.is-open").forEach((m) => m.classList.remove("is-open"));
+  $("condLive").querySelectorAll('.chip-btn[aria-expanded="true"]').forEach((b) => b.setAttribute("aria-expanded", "false"));
 }
 $("condBtn").addEventListener("click", openCond);
 $("condModal").addEventListener("click", (e) => {
   if (e.target === $("condModal") || e.target.closest("[data-cond-cancel]")) closeCond();
 });
+/* 드롭다운 열기/선택 (디자인 시스템 chip-btn + menu) */
+$("condLive").addEventListener("click", (e) => {
+  const trigger = e.target.closest(".chip-btn");
+  if (trigger) {
+    const menu = trigger.nextElementSibling, open = !menu.classList.contains("is-open");
+    closeCondMenus();
+    menu.classList.toggle("is-open", open);
+    trigger.setAttribute("aria-expanded", open ? "true" : "false");
+    e.stopPropagation();
+    return;
+  }
+  const item = e.target.closest(".menu-item");
+  if (item) {
+    const drop = item.closest(".cond-drop"), v = item.dataset.v;
+    drop.dataset.value = v;
+    drop.querySelector(".chip-btn .lb").textContent = optLabel(drop.dataset.field, v);
+    drop.querySelectorAll(".menu-item").forEach((mi) => {
+      const on = mi.dataset.v === v;
+      mi.classList.toggle("is-selected", on);
+      mi.setAttribute("aria-checked", on ? "true" : "false");
+    });
+    closeCondMenus();
+  }
+});
+document.addEventListener("click", (e) => { if (!e.target.closest(".cond-drop")) closeCondMenus(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("condModal").hidden) closeCond(); });
+
+/* ---------- 출발 설정 모달 (출발지 + 출발 시각) ---------- */
+function openOrigin() {
+  $("originPlaceInput").value = cond.originPlace || "";
+  $("originTimeInput").value = cond.departAt || "";
+  const scrim = $("originModal");
+  scrim.hidden = false;
+  void scrim.offsetWidth;
+  scrim.classList.add("is-open");
+  $("originPlaceInput").focus();
+}
+function closeOrigin() {
+  const scrim = $("originModal");
+  scrim.classList.remove("is-open");
+  setTimeout(() => { scrim.hidden = true; }, 160);
+}
+function saveOrigin() {
+  const slotBefore = firstSlotDay1();
+  cond.originPlace = $("originPlaceInput").value.trim();
+  cond.departAt = $("originTimeInput").value;
+  cond.originCoord = null;                       // 출발지가 바뀌면 이전 좌표는 버린다
+  persistCond(); setDirty(true); closeOrigin();
+  if (firstSlotDay1() !== slotBefore) generate(false); else renderDay();   // 시작 슬롯이 바뀔 때만 재구성
+  if (!cond.originPlace) { say("출발 정보를 저장했어요"); return; }
+  const s2 = firstSlotDay1();
+  geocode(cond.originPlace).then((c) => {
+    if (!c) return;
+    cond.originCoord = c; persistCond();
+    if (cond.departAt && firstSlotDay1() !== s2) generate(false); else renderDay();   // 실제 이동시간으로 슬롯이 바뀌면 다시
+    say(`출발지 좌표를 찾았어요 (${c[0].toFixed(3)}, ${c[1].toFixed(3)})`);
+  });
+}
+$("originModal").addEventListener("click", (e) => {
+  if (e.target === $("originModal") || e.target.closest("[data-origin-cancel]")) closeOrigin();
+  if (e.target.closest("[data-origin-save]")) saveOrigin();
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("originModal").hidden) closeOrigin(); });
 
 /* 타임라인 ↔ 지도 양방향 강조 (PRD 4.10) */
 function link(i, on) {
