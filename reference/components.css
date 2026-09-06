@@ -135,6 +135,28 @@ label:hover > .ck-radio { border-color: var(--color-border-strong); }
 .chip-btn[aria-expanded="true"] .caret { transform: rotate(180deg); }
 
 /* ============================================================
+   선택 칩 — .chip-pick
+   필터 칩(.chip-btn)과 같은 규격(44px 높이·pill·16px)이지만 역할이 다르다.
+   .chip-btn 은 팝오버를 여는 트리거, 이쪽은 답을 고르는 칩이라
+   선택되면 브랜드 그린으로 채운다. 나란히 놓여도 높이가 맞는다.
+   ============================================================ */
+.chip-pick {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 44px; padding: 0 var(--space-16);
+  border: 1px solid var(--color-neutral-border); border-radius: var(--radius-full);
+  background: var(--color-surface-overlay);
+  font-size: var(--text-body-16); font-weight: 500; line-height: 1.5;
+  color: var(--color-content-default); white-space: nowrap; cursor: pointer;
+  transition: background .16s ease, border-color .16s ease, color .16s ease;
+}
+.chip-pick:hover { background: var(--color-state-hover-brand); }
+.chip-pick[aria-pressed="true"] {
+  background: var(--color-primary); border-color: var(--color-primary);
+  color: var(--color-base-white); font-weight: 600;
+}
+.chip-pick:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
+
+/* ============================================================
    팝오버 메뉴 — .menu > .menu-item
    여는 방법: .is-open. 선택 표시는 오른쪽 체크(.check) 하나로 통일한다.
    ============================================================ */
@@ -218,3 +240,75 @@ label:hover > .ck-radio { border-color: var(--color-border-strong); }
    ============================================================ */
 .av.has-photo { background-size: cover; background-position: center; }
 .av.has-photo .av-svg { display: none; }
+
+/* ============================================================
+   앱 셸 — 헤더(.nav) · 프로필 팝오버(.popover) · 푸터(.footer)
+   9개 화면에 그대로 복붙돼 있던 것을 여기로 모았다. 화면마다 조금씩
+   갈라져 있어서(마이페이지만 호버 색이 다르는 식) 다수 값을 기준으로 맞췄다.
+   화면 폭에 따라 달라지는 패딩·숨김 처리는 페이지마다 기준점이 달라
+   각 화면의 <style> 에 남겨둔다.
+   ============================================================ */
+
+/* ---------- 브랜드 ---------- */
+.brand { display: flex; align-items: center; gap: var(--space-6); height: 56px; width: 128px; text-decoration: none; flex: none; }
+.brand-bars { display: flex; align-items: center; gap: var(--space-2); height: 24px; }
+.brand-bars i { display: block; width: 4px; border-radius: var(--radius-full); background: var(--gradient-brand); }
+.brand-bars i:nth-child(1) { height: 8px; }
+.brand-bars i:nth-child(2) { height: 18px; opacity: .7; }
+.brand-bars i:nth-child(3) { height: 12px; opacity: .4; }
+.brand-name {
+  font-size: var(--text-heading-20); font-weight: 600; line-height: 1.25;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text; background-clip: text; color: transparent; white-space: nowrap;
+}
+
+/* ---------- 헤더 ---------- */
+.nav { display: flex; align-items: center; height: 56px; padding: 0 28px; width: 100%; background: var(--color-surface-overlay); position: relative; z-index: 10; justify-content: space-between; }
+.nav-center { position: absolute; left: 50%; top: 0; transform: translateX(-50%); height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.nav-list { display: flex; align-items: center; justify-content: center; gap: var(--space-32); }
+.nav-link { display: flex; align-items: center; justify-content: center; height: 56px; font-size: var(--text-body-16); line-height: 1.5; font-weight: 500; color: var(--color-content-nav); text-decoration: none; }
+.nav-link:hover { color: var(--color-content-nav-hover); }
+.nav-link.is-selected { font-weight: 600; color: var(--color-content-nav-selected); }
+.nav-right { display: flex; align-items: center; }
+
+/* ---------- 아바타 · 프로필 칩 ---------- */
+.pill-name { font-size: 13px; font-weight: 600; line-height: 1.5; color: var(--color-content-muted); white-space: nowrap; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+.av { border-radius: var(--radius-full); background: var(--color-surface-04); color: var(--color-content-on-fill); display: flex; align-items: center; justify-content: center; flex: none; overflow: hidden; }
+.av .av-svg { display: flex; width: 58%; height: 58%; }
+.av .av-svg svg { width: 100%; height: 100%; }
+.av-28 { width: 28px; height: 28px; }
+.av-36 { width: 36px; height: 36px; }
+.av-48 { width: 48px; height: 48px; }
+
+/* ---------- 프로필 팝오버 ---------- */
+.popover { position: absolute; top: calc(100% + 10px); right: 0; background: var(--color-surface-overlay); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); box-shadow: var(--elevation-lg); z-index: 300; opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity .18s ease, transform .18s ease, visibility .18s; }
+.popover.is-open { opacity: 1; visibility: visible; transform: none; }
+.pop-profile { display: flex; gap: var(--space-12); align-items: center; padding: var(--space-12); border-radius: var(--radius-md); width: 100%; text-align: left; text-decoration: none; }
+.pop-id { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.pop-name { font-size: var(--text-body-16); font-weight: 600; line-height: 1.3; color: var(--color-content-default); }
+.pop-taste { font-size: var(--text-body-14); font-weight: 500; line-height: 1.3; color: var(--color-content-subtle); }
+.pop-divider { height: 1px; background: var(--color-border-subtle); margin: var(--space-6) var(--space-8); }
+.pop-menu { display: flex; flex-direction: column; }
+.pop-item { display: flex; align-items: center; gap: var(--space-10); padding: var(--space-12); border-radius: var(--radius-md); font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-default); text-decoration: none; width: 100%; text-align: left; background: none; border: 0; }
+.pop-item:hover { background: var(--color-neutral-subtle); }
+.pop-item svg { width: 18px; height: 18px; color: var(--color-content-neutral-muted); flex: none; }
+
+/* ---------- 푸터 ---------- */
+/* margin-top: auto — 내용이 짧은 페이지에서 푸터를 바닥에 붙인다(블록 레이아웃에서는 무효과) */
+.footer { padding-top: 36px; width: 100%; margin-top: auto; }
+.footer-inner { background: var(--color-neutral-bg); padding: 48px 60px; display: flex; flex-direction: column; gap: var(--space-40); overflow: hidden; width: 100%; }
+.footer-top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-24); width: 100%; }
+.footer-brand-col { display: flex; flex-direction: column; gap: var(--space-20); width: 300px; flex: none; }
+.footer-brand { display: flex; align-items: center; gap: var(--space-6); }
+/* 자간은 body 의 --letter-spacing(-3%)을 그대로 쓴다 — 화면마다 -0.42px 를 덧쓰던 것을 걷어냈다 */
+.footer-desc { font-size: 15px; font-weight: 500; line-height: 1.5; color: var(--color-content-neutral-muted); }
+.footer-nav { flex: 1 0 0; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: var(--space-12); font-size: 15px; font-weight: 500; line-height: 1.5; color: var(--color-content-neutral-muted); text-align: right; }
+.footer-nav a { color: inherit; text-decoration: none; white-space: nowrap; }
+.footer-nav a:hover { color: var(--color-content-neutral); }
+.footer-bottom { display: flex; align-items: center; justify-content: space-between; gap: var(--space-24); width: 100%; padding-top: var(--space-40); border-top: 1px solid var(--color-neutral-border); font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; white-space: nowrap; }
+.footer-copy { font-weight: 400; color: var(--color-content-neutral-muted); text-decoration: none; }
+.footer-copy:hover { color: var(--color-content-neutral); }
+.footer-legal { display: flex; gap: var(--space-20); }
+.footer-legal a { text-decoration: none; white-space: nowrap; }
+.footer-legal .lgl-muted { color: var(--color-content-neutral-muted); }
+.footer-legal .lgl-strong { color: var(--color-content-neutral-muted); }
