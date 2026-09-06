@@ -14,7 +14,8 @@
 <style>
 /* ============================================================
    Scentrip — AI 맞춤 동선 · 결과 화면 (PRD_동선추천결과.md)
-   [1단계 뼈대] 3분할 레이아웃 · 결과 헤더 · 일차 탭 · 요약 · 로딩 · 지도.
+   2분할 레이아웃(좌: 일차별 동선 / 우: 지도) · 결과 헤더 · 일차 탭 · 요약 · 로딩 · 지도.
+   여행 조건은 헤더의 '여행 조건' 버튼 → 모달에서 수정한다.
    타임라인 노드(카드 액션·구간 이동시간·숙소)와 편집·저장은 다음 단계.
    조건은 위저드가 localStorage("scentrip_route_cond")로 넘긴다.
    웹 전용 · 최소 폭 1280px.
@@ -45,29 +46,20 @@ html .guest-only { display: none; }
 .profile { position: relative; }
 .profile-pop { width: 280px; padding: var(--space-8); }
 
-/* ---------- 상단 바 ---------- */
-.rr-top { display: flex; align-items: center; gap: var(--space-12); height: 56px; padding: 0 28px; border-bottom: 1px solid var(--color-border-subtle); background: var(--color-surface-overlay); }
-.rr-back { display: flex; align-items: center; gap: var(--space-6); height: 36px; padding: 0 var(--space-10); border-radius: var(--radius-full); font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-neutral-muted); }
-.rr-back:hover { background: var(--color-neutral-subtle); color: var(--color-content-default); }
-.rr-back svg { width: 16px; height: 16px; }
-.rr-top h1 { font-size: var(--text-body-16); font-weight: 600; }
+/* ---------- 상단 헤더 고정 (길찾기 링크도 .nav 라서 상단 내비만 따로 잡는다) ---------- */
+.rr-nav { position: sticky; top: 0; z-index: 800; border-bottom: 1px solid var(--color-border-subtle); }
 
-/* ---------- 3분할 ---------- */
-.rr-wrap { flex: 1 0 auto; display: grid; grid-template-columns: 300px minmax(0, 1fr) 420px; align-items: start; }
-.rr-side { position: sticky; top: 0; height: calc(100vh - 56px); overflow-y: auto; padding: var(--space-24); border-right: 1px solid var(--color-border-subtle); background: var(--color-surface-overlay); }
+/* ---------- 2분할 (좌: 일차별 동선 / 우: 지도, 1:1) ---------- */
+.rr-wrap { flex: 1 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
 .rr-main { min-width: 0; padding: var(--space-32); }
-.rr-mapcol { position: sticky; top: 0; height: calc(100vh - 56px); border-left: 1px solid var(--color-border-subtle); }
+.rr-mapcol { position: sticky; top: 56px; height: calc(100vh - 56px); border-left: 1px solid var(--color-border-subtle); }
 
-/* ---------- 조건 사이드바 ---------- */
-.rr-side h2 { font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-neutral-muted); }
-.cond-group { margin-top: var(--space-20); }
-.cond-group + .cond-group { padding-top: var(--space-20); border-top: 1px solid var(--color-border-subtle); }
-.cond-row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-12); padding: var(--space-8) 0; }
+/* ---------- 조건 (여행 조건 수정 모달에서 사용) ---------- */
+.cond-group + .cond-group { margin-top: var(--space-4); padding-top: var(--space-20); border-top: 1px solid var(--color-border-subtle); }
+.cond-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-12); padding: var(--space-6) 0; min-height: 40px; }
 .cond-row dt { flex: none; font-size: 13px; font-weight: 500; color: var(--color-content-subtle); }
 .cond-row dd { font-size: var(--text-body-14); font-weight: 600; text-align: right; }
 .cond-note { margin-top: var(--space-10); font-size: var(--text-caption-12); line-height: 1.6; color: var(--color-content-subtle); }
-.cond-regen { display: flex; align-items: center; justify-content: center; width: 100%; height: 44px; margin-top: var(--space-16); border-radius: var(--radius-full); border: 1px solid var(--color-neutral-border); font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-neutral); }
-.cond-regen:hover { background: var(--color-neutral-subtle); }
 
 /* ---------- 결과 헤더 ---------- */
 .rr-head { display: flex; align-items: flex-start; gap: var(--space-16); }
@@ -78,15 +70,15 @@ html .guest-only { display: none; }
 .match-badge svg { width: 14px; height: 14px; }
 .dirty-badge { display: inline-flex; align-items: center; height: 26px; padding: 0 var(--space-10); border-radius: var(--radius-full); background: var(--color-neutral-subtle); color: var(--color-content-neutral-muted); font-size: var(--text-caption-12); font-weight: 600; }
 .dirty-badge[hidden] { display: none; }
-.rr-basis { margin-top: var(--space-8); font-size: var(--text-body-14); line-height: 1.6; color: var(--color-content-neutral-muted); }
+.rr-lead { margin-top: var(--space-10); font-size: var(--text-body-16); line-height: 1.6; color: var(--color-content-neutral); }
+.rr-conceptrow { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-10); margin-top: var(--space-12); }
+.rr-concept { display: inline-flex; align-items: center; gap: var(--space-8); padding: var(--space-10) var(--space-16); border-radius: var(--radius-lg); background: var(--color-surface-01); font-size: var(--text-body-14); line-height: 1.6; color: var(--color-content-neutral); }
+.rr-concept svg { width: 18px; height: 18px; flex: none; color: var(--color-primary); }
+.rr-concept b { flex: none; font-weight: 600; color: var(--color-primary); }
+.rr-conceptrow .reco-again { border: 1px solid var(--color-neutral-border); }
 
-/* 추천 이유 배너 */
-.reco { display: flex; align-items: center; gap: var(--space-12); margin-top: var(--space-20); padding: var(--space-16); border-radius: var(--radius-lg); background: var(--color-surface-01); }
-.reco[hidden] { display: none; }
-.reco-ic { display: flex; width: 32px; height: 32px; flex: none; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--color-base-white); color: var(--color-primary); }
-.reco-ic svg { width: 18px; height: 18px; }
-.reco-tx { flex: 1 1 auto; min-width: 0; font-size: var(--text-body-14); font-weight: 500; line-height: 1.6; color: var(--color-content-neutral); }
-.reco-again { flex: none; height: 36px; padding: 0 var(--space-14); border-radius: var(--radius-full); background: var(--color-base-white); font-size: 13px; font-weight: 600; color: var(--color-primary); }
+/* '다른 지역으로 다시 추천' 버튼 (AI 모드에서 컨셉 박스 옆) */
+.reco-again { flex: none; height: 40px; padding: 0 var(--space-14); border-radius: var(--radius-full); background: var(--color-surface-overlay); font-size: 13px; font-weight: 600; color: var(--color-primary); }
 .reco-again:hover { background: var(--color-state-hover-brand); }
 
 /* ---------- 일차 탭 ---------- */
@@ -244,6 +236,28 @@ html .guest-only { display: none; }
 .save-bar p { font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-neutral-muted); }
 .save-btn { height: 44px; padding: 0 var(--space-24); border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-base-white); font-size: var(--text-body-14); font-weight: 600; }
 .save-btn:hover { background: var(--scent-green-700); }
+
+/* ---------- 여행 조건: 헤더 버튼 + 수정 모달 ---------- */
+.cond-btn { display: inline-flex; align-items: center; gap: var(--space-8); margin-left: auto; flex: none; height: 40px; padding: 0 var(--space-20); border-radius: var(--radius-full); border: 1px solid var(--color-neutral-border); background: var(--color-surface-overlay); font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-neutral); }
+.cond-btn:hover { background: var(--color-neutral-subtle); color: var(--color-content-default); }
+.cond-btn svg { width: 16px; height: 16px; }
+.cond-modal-body { display: flex; flex-direction: column; }
+.cond-sub { margin-bottom: var(--space-4); font-size: var(--text-caption-12); font-weight: 600; color: var(--color-content-subtle); }
+.cond-select {
+  height: 36px; padding: 0 var(--space-32) 0 var(--space-12);
+  border-radius: var(--radius-md); border: 1px solid var(--color-neutral-border);
+  background-color: var(--color-surface-overlay);
+  font: inherit; letter-spacing: inherit; font-size: var(--text-body-14); font-weight: 600;
+  color: var(--color-content-default); cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' fill='%236b7a72'%3E%3Cpath d='M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right var(--space-10) center; background-size: 16px;
+}
+.cond-select:hover { border-color: var(--color-content-subtle); }
+.cond-select:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 1px; }
+.cond-foot { display: block; margin-top: 0; }
+.cond-foot .cond-cta { width: 100%; height: 48px; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-base-white); font-size: var(--text-body-16); font-weight: 600; }
+.cond-foot .cond-cta:hover { background: var(--scent-green-700); }
 </style>
 </head>
 <script>(function(){try{if((localStorage.getItem("scentrip_auth")||"in")==="out")document.documentElement.classList.add("is-guest");}catch(e){}})();</script>
@@ -251,7 +265,7 @@ html .guest-only { display: none; }
 <div class="page">
 
   <!-- ============ Nav ============ -->
-  <nav class="nav">
+  <nav class="nav rr-nav">
     <a class="brand" href="home.html" aria-label="Scentrip 홈">
       <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
       <span class="brand-name">Scentrip</span>
@@ -303,28 +317,7 @@ html .guest-only { display: none; }
     </div>
   </section>
 
-  <div class="rr-top auth-only">
-    <button class="rr-back" id="back" type="button">
-      <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/></svg>
-      뒤로
-    </button>
-    <h1>AI 맞춤 동선</h1>
-  </div>
-
   <div class="rr-wrap auth-only">
-
-    <!-- ============ 조건 사이드바 ============ -->
-    <aside class="rr-side">
-      <h2>여행 조건</h2>
-      <div class="cond-group">
-        <dl id="condLive"></dl>
-        <p class="cond-note">바꾸면 동선을 다시 구성합니다.</p>
-      </div>
-      <div class="cond-group">
-        <dl id="condFixed"></dl>
-        <button class="cond-regen" id="regen" type="button">이 조건으로 다시 만들기</button>
-      </div>
-    </aside>
 
     <!-- ============ 타임라인 ============ -->
     <main class="rr-main">
@@ -337,15 +330,20 @@ html .guest-only { display: none; }
               <span id="matchAvg">–</span>
             </span>
             <span class="dirty-badge" id="dirtyBadge" hidden>저장 안 된 변경</span>
+            <button class="cond-btn" id="condBtn" type="button" aria-haspopup="dialog">
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M40,88H73a32,32,0,0,0,62,0h81a8,8,0,0,0,0-16H135a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16Zm64-24A16,16,0,1,1,88,80,16,16,0,0,1,104,64ZM216,168H183a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16h81a32,32,0,0,0,62,0h33a8,8,0,0,0,0-16Zm-64,24a16,16,0,1,1,16-16A16,16,0,0,1,152,192Z"/></svg>
+              여행 조건
+            </button>
           </div>
-          <p class="rr-basis" id="rrBasis"></p>
+          <p class="rr-lead" id="rrLead"></p>
+          <div class="rr-conceptrow">
+            <span class="rr-concept">
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.13,104.13,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm50.34-138.34a8,8,0,0,0-8.68-1.74l-56,24a8,8,0,0,0-4.21,4.21l-24,56A8,8,0,0,0,92.8,170.2a8,8,0,0,0,6.54-.48l56-24a8,8,0,0,0,4.21-4.21l24-56A8,8,0,0,0,178.34,77.66ZM128,140a12,12,0,1,1,12-12A12,12,0,0,1,128,140Z"/></svg>
+              <b>여행 컨셉</b><span id="rrConcept"></span>
+            </span>
+            <button class="reco-again" id="recoAgain" type="button" hidden>다른 지역으로 다시 추천</button>
+          </div>
         </div>
-      </div>
-
-      <div class="reco" id="reco" hidden>
-        <span class="reco-ic" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M128,16a88.1,88.1,0,0,0-88,88c0,75.3,80,132.17,83.41,134.55a8,8,0,0,0,9.18,0C136,236.17,216,179.3,216,104A88.1,88.1,0,0,0,128,16Zm0,56a32,32,0,1,1-32,32A32,32,0,0,1,128,72Z"/></svg></span>
-        <p class="reco-tx" id="recoTx"></p>
-        <button class="reco-again" id="recoAgain" type="button">다른 지역으로 다시 추천</button>
       </div>
 
       <nav class="day-tabs" id="dayTabs" aria-label="일차 선택"></nav>
@@ -411,6 +409,25 @@ html .guest-only { display: none; }
   </div>
 </div>
 
+<!-- ============ 여행 조건 수정 ============ -->
+<div class="modal-scrim" id="condModal" hidden>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="condTitle">
+    <div class="modal-head">
+      <h2 id="condTitle">여행 조건</h2>
+      <button class="modal-close" type="button" data-cond-cancel aria-label="닫기"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
+    </div>
+    <div class="cond-modal-body">
+      <div class="cond-group">
+        <div id="condLive"></div>
+        <p class="cond-note">바꾸면 동선을 다시 구성합니다.</p>
+      </div>
+    </div>
+    <div class="modal-foot cond-foot">
+      <button class="cond-cta" id="regen" type="button">이 조건으로 다시 만들기</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite">
   <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></svg>
   <span id="toastMsg"></span>
@@ -434,7 +451,6 @@ function readCond() {
 }
 const cond = readCond();
 
-const FLOW_NAME = { ai: "AI에게 여행지 추천 받기", region: "원하는 지역의 동선 추천 받기", picked: "찜한 장소로 동선 추천 받기" };
 
 /* ---------- 지역 확정 ---------- */
 const REGION_ORDER = ["gangneung", "gyeongju", "andong", "damyang", "jeju"];
@@ -655,19 +671,16 @@ function renderHead() {
   const all = days.flatMap((_, i) => shown(i));
   const avg = all.length ? Math.round(all.reduce((s, p) => s + p.match, 0) / all.length) : 0;
   $("matchAvg").textContent = `${avg}%`;
-  $("rrBasis").textContent = `${meta.scentProfile[0]} 기준 · ${meta.label} 일대 · ${meta.tagline}`;
 
-  // 추천 이유 배너는 지역까지 AI 가 고른 경우에만 (PRD 4.3)
-  const showReco = cond.mode === "ai";
-  $("reco").hidden = !showReco;
-  if (showReco) {
-    const bits = [`${meta.scentProfile[0]} 취향 · ${meta.label}`];
-    if (cond.origin && cond.originPlace) bits.push(`${cond.originPlace}에서 ${cond.origin}`);
-    $("recoTx").textContent = bits.join(" · ");
-  }
-  if (fallbackFrom) {
-    $("rrBasis").textContent += ` (${fallbackFrom}은 향 데이터가 없어 ${meta.label}로 대체했어요)`;
-  }
+  // 타이틀 아래: 취향 분석 문구 + 여행 컨셉 (지역 tagline 기반)
+  const name = (document.querySelector(".pill-name") || {}).textContent || "회원";
+  $("rrLead").textContent = `${name}님의 취향을 분석해 좋아하실 만한 장소로 구성했어요.`;
+  let concept = `${meta.label} 일대의 ${meta.tagline} 여행`;
+  if (fallbackFrom) concept += ` (${fallbackFrom}은 향 데이터가 없어 ${meta.label}로 대체했어요)`;
+  $("rrConcept").textContent = ` · ${concept}`;
+
+  // 지역까지 AI 가 고른 경우에만 '다른 지역으로 다시 추천'을 노출 (지역 선택 모드는 모달에서 바꾼다)
+  $("recoAgain").hidden = cond.mode !== "ai";
 }
 
 function renderTabs() {
@@ -848,23 +861,37 @@ function renderDay() {
   renderMap();
 }
 
+/* 모달에서 바꿀 수 있는 필터 항목의 선택지 — 위저드(route-conditions.html)와 값을 맞춘다.
+   장소형(출발지·숙소·찜)은 2차에서 동선 화면 인라인으로 뺀다. */
+const SIDO = ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
+              "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"];
+const COND_OPTS = {
+  region: SIDO,
+  nights: ["당일치기", "1박 2일", "2박 3일", "3박 4일", "4박 5일"],
+  transport: ["자동차", "도보/대중교통"],
+  pace: ["넉넉하게", "빽빽하게"],
+  distance: ["가깝게", "적당히", "멀어도 괜찮아요"],
+  origin: ["1시간 이내", "2시간 이내", "3시간 이내", "상관 없어요"],   // 출발지에서 첫 목적지까지 이동 가능 시간
+  company: ["선택 안 함", "혼자", "연인과", "친구와", "가족과"],
+};
+function condSelect(field, value) {
+  const opts = COND_OPTS[field];
+  const list = opts.includes(value) ? opts : [value].concat(opts);   // 저장된 값이 목록에 없어도 유지
+  return `<select class="cond-select" data-field="${field}" aria-label="${field}">`
+    + list.map((o) => `<option value="${o}"${o === value ? " selected" : ""}>${o}</option>`).join("")
+    + `</select>`;
+}
+/* 위저드 문항 순서 그대로, 모드별로 다르게. 필터형만. */
 function renderCond() {
-  const stayTx = !cond.stay || !cond.stay.length ? "미정"
-    : cond.stay.map((s, i) => `${i + 1}박 ${s && s.pick === "정해졌어요" ? (s.addr || "입력") : "미정"}`).join(" · ");
-  $("condLive").innerHTML = [
-    ["여행 기간", cond.nights],
-    ["장소 사이 거리", cond.distance],
-    ["동행", cond.company || "선택 안 함"],
-    ["숙소", dayCount() > 1 ? stayTx : "당일치기"],
-    ["일정 밀도", cond.pace],
-    ["현지 이동", cond.transport],
-  ].map(([k, v]) => `<div class="cond-row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
-  $("condFixed").innerHTML = [
-    ["생성 방식", FLOW_NAME[cond.mode] || FLOW_NAME.ai],
-    ["여행 지역", REGION_META[regionKey].label],
-    ["출발지", cond.originPlace || "선택 안 함"],
-    ["이동 가능 시간", cond.origin || "상관 없어요"],
-  ].map(([k, v]) => `<div class="cond-row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+  const rows = [];
+  if (cond.mode === "region") rows.push(["여행 지역", condSelect("region", cond.region || "강원")]);
+  rows.push(["여행 기간", condSelect("nights", cond.nights)]);
+  rows.push(["이동 수단", condSelect("transport", cond.transport)]);
+  rows.push(["일정 밀도", condSelect("pace", cond.pace)]);
+  rows.push(["장소 사이 거리", condSelect("distance", cond.distance)]);
+  if (cond.mode === "ai") rows.push(["이동 가능 시간", condSelect("origin", cond.origin || "상관 없어요")]);
+  rows.push(["동행", condSelect("company", cond.company || "선택 안 함")]);
+  $("condLive").innerHTML = rows.map(([k, v]) => `<div class="cond-row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
 }
 
 /* ---------- 지도 ---------- */
@@ -1008,6 +1035,30 @@ $("delModal").addEventListener("click", (e) => {
 });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("delModal").hidden) closeDelete(); });
 
+/* ---------- 여행 조건 수정 모달 ---------- */
+function openCond() {
+  renderCond();                 // 열 때마다 현재 조건으로 초기화 (닫고 다시 열면 미적용 변경은 버려진다)
+  const scrim = $("condModal");
+  scrim.hidden = false;
+  void scrim.offsetWidth;
+  scrim.classList.add("is-open");
+}
+function closeCond() {
+  const scrim = $("condModal");
+  scrim.classList.remove("is-open");
+  setTimeout(() => { scrim.hidden = true; }, 160);
+}
+/* 셀렉트 값을 조건에 반영하고 저장한다 */
+function applyCond() {
+  $("condLive").querySelectorAll(".cond-select").forEach((s) => { cond[s.dataset.field] = s.value; });
+  try { localStorage.setItem(COND_KEY, JSON.stringify(cond)); } catch (e) {}
+}
+$("condBtn").addEventListener("click", openCond);
+$("condModal").addEventListener("click", (e) => {
+  if (e.target === $("condModal") || e.target.closest("[data-cond-cancel]")) closeCond();
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("condModal").hidden) closeCond(); });
+
 /* 타임라인 ↔ 지도 양방향 강조 (PRD 4.10) */
 function link(i, on) {
   const item = $("timeline").querySelector(`.tl-item[data-i="${i}"]`);
@@ -1072,11 +1123,15 @@ $("recoAgain").addEventListener("click", () => {
   setDirty(true);
   if (wrapped) say("추천할 지역을 한 바퀴 돌았어요");
 });
-$("back").addEventListener("click", () => {
-  if (dirty && !confirm("저장하지 않은 변경사항이 있어요. 나가시겠어요?")) return;
-  location.href = "route-conditions.html?mode=" + (cond.mode || "ai");
+/* 서브헤더의 '뒤로' 대신 브라우저 뒤로가기·새로고침·탭 닫기에 이탈 가드를 건다 */
+window.addEventListener("beforeunload", (e) => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+$("regen").addEventListener("click", () => {
+  applyCond();
+  if (cond.mode === "region") regionKey = resolveRegion();   // 지역을 바꿨으면 다시 확정
+  closeCond();
+  generate(false);
+  setDirty(true);
 });
-$("regen").addEventListener("click", () => { generate(false); setDirty(true); });
 $("saveBtn").addEventListener("click", () => say("저장은 다음 단계에서 붙습니다"));
 
 initMap();
