@@ -184,6 +184,24 @@ html .guest-only { display: none; }
 .tl-stay b { font-size: var(--text-body-14); font-weight: 600; }
 .tl-stay p { margin-top: 2px; font-size: 13px; color: var(--color-content-neutral-muted); }
 .tl-stay .undecided { font-size: var(--text-caption-11); font-weight: 600; color: var(--color-content-subtle); }
+
+/* 출발지 노드 — 숙소와 같은 골격, 점선 테두리로 '아직 채워지지 않은 지점' 느낌 */
+.tl-origin { border-style: dashed; background: var(--color-surface-overlay); margin-bottom: var(--space-4); }
+.tl-origin .ic { background: var(--color-surface-01); color: var(--color-primary); }
+
+/* 인라인 편집 (출발지·숙소 공용) */
+.tl-stay-edit { flex: none; height: 32px; padding: 0 var(--space-12); border-radius: var(--radius-full); border: 1px solid var(--color-neutral-border); background: var(--color-surface-overlay); font-size: var(--text-caption-12); font-weight: 600; color: var(--color-content-neutral); }
+.tl-stay-edit:hover { background: var(--color-neutral-subtle); color: var(--color-content-default); }
+.stay-input { width: 100%; height: 36px; margin-top: var(--space-6); padding: 0 var(--space-12); border-radius: var(--radius-md); border: 1px solid var(--color-neutral-border); background: var(--color-surface-overlay); font: inherit; letter-spacing: inherit; font-size: var(--text-body-14); color: var(--color-content-default); }
+.stay-input:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 1px; }
+.stay-actions { display: flex; align-items: center; gap: var(--space-6); flex: none; align-self: flex-end; }
+.stay-save { height: 36px; padding: 0 var(--space-16); border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-base-white); font-size: var(--text-caption-12); font-weight: 600; }
+.stay-save:hover { background: var(--scent-green-700); }
+.stay-cancel { height: 36px; padding: 0 var(--space-16); border-radius: var(--radius-full); font-size: var(--text-caption-12); font-weight: 600; color: var(--color-content-neutral-muted); }
+.stay-cancel:hover { background: var(--color-neutral-subtle); color: var(--color-content-default); }
+.tl-stay.is-edit { align-items: flex-end; }
+.tl-stay.is-edit .ic { align-self: center; }   /* 깃발 아이콘은 세로 중앙 */
+.tl-stay.is-edit .tx { min-width: 0; }
 .tl-empty { display: flex; flex-direction: column; align-items: center; gap: var(--space-8); padding: 80px var(--space-24); text-align: center; }
 .tl-empty b { font-size: var(--text-body-16); font-weight: 600; }
 .tl-empty p { font-size: var(--text-body-14); color: var(--color-content-neutral-muted); }
@@ -220,6 +238,7 @@ html .guest-only { display: none; }
 .pin .no { position: absolute; left: 0; right: 0; top: 5px; text-align: center; font-size: var(--text-caption-11); font-weight: 700; color: var(--color-base-white); }
 .pin:hover, .pin.is-on { color: var(--color-primary-active); }
 .pin:hover svg, .pin.is-on svg { transform: scale(1.18); }
+.pin-alt { color: var(--color-content-neutral-muted); }   /* 출발지·숙소 등 보조 핀 */
 
 /* 삭제 확인 모달 — 모달 껍데기는 components.css, 버튼만 여기서 */
 .modal-body { margin-top: var(--space-12); font-size: var(--text-body-14); font-weight: 400; line-height: 1.7; color: var(--color-content-neutral-muted); }
@@ -566,11 +585,13 @@ function minText(m) { return m >= 60 ? `${Math.floor(m / 60)}시간${m % 60 ? " 
 function stayOf(night) {
   const row = (cond.stay || [])[night - 1];
   const decided = row && row.pick === "정해졌어요" && (row.addr || "").trim();
+  const coord = row && Array.isArray(row.coord) ? row.coord : null;   // 지오코딩된 실좌표
   return { night, decided: !!decided, addr: decided ? row.addr.trim() : "",
-           pos: decided ? REGION_META[regionKey].center : null };
+           pos: coord || (decided ? REGION_META[regionKey].center : null), exact: !!coord };
 }
+/* 정해진 숙소 중 실좌표가 아직 없는(지역 중심으로 대체 중인) 것이 있는지 */
 function stayApprox() {
-  return (cond.stay || []).some((r) => r && r.pick === "정해졌어요" && (r.addr || "").trim());
+  return (cond.stay || []).some((r) => r && r.pick === "정해졌어요" && (r.addr || "").trim() && !Array.isArray(r.coord));
 }
 
 /* ---------- 타임라인 노드 (PRD 4.5) ---------- */
@@ -581,7 +602,7 @@ function nodesFor(d) {
   if (total > 1 && day < total) out.push({ type: "stay", stay: stayOf(day), role: "복귀" });
   return out;
 }
-const posOf = (n) => n.type === "place" ? [n.p.lat, n.p.lng] : n.stay.pos;
+const posOf = (n) => n.type === "place" ? [n.p.lat, n.p.lng] : n.type === "origin" ? (n.pos || null) : n.stay.pos;
 
 /* ---------- 교체·추가 후보 (PRD 4.7 / 4.8) ---------- */
 const SLOT_WINDOW = { "오전": [9, 12], "오후": [12, 18], "저녁": [18, 21] };
@@ -663,7 +684,11 @@ function candidatesFor(d, shownIdx, kind) {
 
 /* ---------- 그리기 ---------- */
 let at = 0;   // 활성 일차 인덱스
+let editOrigin = false;   // 출발지 인라인 편집 중
+let editStay = null;      // 인라인 편집 중인 숙박(박) 번호
 const $ = (id) => document.getElementById(id);
+const escAttr = (s) => String(s == null ? "" : s).replace(/"/g, "&quot;");
+function persistCond() { try { localStorage.setItem(COND_KEY, JSON.stringify(cond)); } catch (e) {} }
 
 function renderHead() {
   const meta = REGION_META[regionKey];
@@ -697,12 +722,14 @@ const ICON = {
   walk: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M152,44a20,20,0,1,1,20,20A20,20,0,0,1,152,44ZM199.6,94.8l-24-13.9a39.9,39.9,0,0,0-46.1,4.2L104.7,106a8,8,0,0,0-2.5,3.7L86.6,158.3l-30.9,42a8,8,0,1,0,12.9,9.5l32-43.5a8.1,8.1,0,0,0,1.2-2.3l7.9-24.6,22.6,21.3-14.9,63.5a8,8,0,0,0,6,9.6,7.5,7.5,0,0,0,1.8.2,8,8,0,0,0,7.8-6.2l16-68a8,8,0,0,0-2.3-7.7l-25.8-24.3,15.5-13a23.9,23.9,0,0,1,27.7-2.6l24,13.9a8,8,0,0,0,8-13.9Z"/></svg>',
   bed: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M232,96H208V72a16,16,0,0,0-16-16H64A16,16,0,0,0,48,72V96H24a8,8,0,0,0-8,8v88a8,8,0,0,0,16,0V176H224v16a8,8,0,0,0,16,0V104A8,8,0,0,0,232,96ZM64,72H192V96H176a24,24,0,0,0-24-24H104A24,24,0,0,0,80,96H64ZM160,96H96a8,8,0,0,1,8-8h48A8,8,0,0,1,160,96ZM32,160V112H224v48Z"/></svg>',
   warn: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM120,104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm8,88a12,12,0,1,1,12-12A12,12,0,0,1,128,192Z"/></svg>',
+  flag: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M42.76,50.9A8,8,0,0,0,40,56.94V216a8,8,0,0,0,16,0V158.42c16.33-8.51,35.14-4.6,58.5,3.72,24.14,8.59,51.5,18.32,80.19,4.68a15.82,15.82,0,0,0,9.31-14.53V57.13a16,16,0,0,0-22.87-14.45c-23.34,11.11-45.72,3.14-69.42-5.29C89.71,29.16,65.87,20.68,42.76,50.9Z"/></svg>',
 };
 
 /* 구간 하나를 그린다. 숙소가 미정이면 시간 대신 안내 문구를 둔다(PRD 4.5). */
 function segHtml(a, b) {
   const pa = posOf(a), pb = posOf(b);
   if (!pa || !pb) {
+    if (a.type === "origin" || b.type === "origin") return "";   // 출발지가 비면 구간을 그리지 않는다
     return `<div class="tl-seg is-none"><span class="t">숙소를 입력하면 이 구간의 이동 시간을 계산해 드려요</span></div>`;
   }
   const L = leg(pa, pb);
@@ -794,15 +821,54 @@ function panelHtml() {
   </div>`;
 }
 
+/* 출발지 — 1일차 맨 위. 모든 모드에서 비어 있어도 채워 넣을 수 있다 (좌표 연동 전이라 표시용) */
+function originHtml() {
+  const val = cond.originPlace || "";
+  if (editOrigin) {
+    return `<div class="tl-stay tl-origin is-edit">
+      <span class="ic" aria-hidden="true">${ICON.flag}</span>
+      <div class="tx">
+        <b>출발지</b>
+        <input class="stay-input" type="text" value="${escAttr(val)}" placeholder="출발지 주소나 장소명 (예: 서울역)" data-origin-input>
+      </div>
+      <div class="stay-actions">
+        <button class="stay-save" type="button" data-origin-save>저장</button>
+        <button class="stay-cancel" type="button" data-origin-cancel>취소</button>
+      </div>
+    </div>`;
+  }
+  return `<div class="tl-stay tl-origin">
+    <span class="ic" aria-hidden="true">${ICON.flag}</span>
+    <span class="tx">
+      <b>출발지</b>
+      <p>${val ? `${val}에서 출발` : "출발지를 정하면 여행 시작점을 표시해 드려요"}</p>
+    </span>
+    <button class="tl-stay-edit" type="button" data-origin-edit>${val ? "수정" : "＋ 출발지 추가"}</button>
+  </div>`;
+}
+
 function stayHtml(n) {
   const st = n.stay;
+  if (editStay === st.night) {
+    return `<div class="tl-stay is-edit">
+      <span class="ic" aria-hidden="true">${ICON.bed}</span>
+      <div class="tx">
+        <b>${st.night}박 숙소</b>
+        <input class="stay-input" type="text" value="${escAttr(st.decided ? st.addr : "")}" placeholder="숙소 이름이나 주소" data-stay-input>
+      </div>
+      <div class="stay-actions">
+        <button class="stay-save" type="button" data-stay-save="${st.night}">저장</button>
+        <button class="stay-cancel" type="button" data-stay-cancel>취소</button>
+      </div>
+    </div>`;
+  }
   return `<div class="tl-stay">
     <span class="ic" aria-hidden="true">${ICON.bed}</span>
     <span class="tx">
       <b>${st.night}박 · ${n.role}</b>
       <p>${st.decided ? st.addr : "숙소가 아직 정해지지 않았어요"}</p>
     </span>
-    ${st.decided ? "" : '<span class="undecided">미정</span>'}
+    <button class="tl-stay-edit" type="button" data-stay-edit="${st.night}">${st.decided ? "수정" : "＋ 숙소 입력"}</button>
   </div>`;
 }
 
@@ -856,7 +922,13 @@ function renderDay() {
   const hiddenCount = days[at].length - list.length;
   if (hiddenCount > 0) html += `<p class="tl-todo">넉넉한 일정에서 ${hiddenCount}곳이 가려졌어요 · 모두 보기</p>`;
 
-  $("timeline").innerHTML = list.length ? html : "";
+  let originPart = at === 0 ? originHtml() : "";   // 출발지는 1일차 맨 위에만
+  // 출발지 좌표가 있으면 첫 장소까지의 이동 구간을 붙인다
+  if (at === 0 && Array.isArray(cond.originCoord)) {
+    const first = nodesFor(at).find((n) => posOf(n));
+    if (first) originPart += segHtml({ type: "origin", pos: cond.originCoord, name: cond.originPlace }, first);
+  }
+  $("timeline").innerHTML = originPart + (list.length ? html : "");
   $("tlEmpty").hidden = list.length > 0;
   renderMap();
 }
@@ -894,6 +966,34 @@ function renderCond() {
   $("condLive").innerHTML = rows.map(([k, v]) => `<div class="cond-row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
 }
 
+/* ---------- 카카오 지오코딩 (시험 연결) ----------
+   주소·장소명 → 좌표. 카카오 JS 키가 있을 때만 동작하고, 없으면 기존처럼 표시용으로만 둔다.
+   키 발급: https://developers.kakao.com → 내 애플리케이션 → 앱 키 → JavaScript 키
+   그리고 [플랫폼 > Web]에 사이트 도메인(예: http://localhost:8000) 등록 필요. */
+const KAKAO_JS_KEY = "";   // ← 여기에 카카오 JavaScript 키를 붙여넣으세요
+let geocoderReady = false;
+function loadKakao() {
+  if (!KAKAO_JS_KEY) return;   // 키가 없으면 아무것도 하지 않는다 (프로토타입 그대로 동작)
+  const s = document.createElement("script");
+  s.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_JS_KEY}&libraries=services&autoload=false`;
+  s.onload = () => window.kakao && kakao.maps.load(() => { geocoderReady = true; renderDay(); });
+  s.onerror = () => say("카카오 지도를 불러오지 못했어요 (키·도메인 등록 확인)");
+  document.head.appendChild(s);
+}
+/* 주소로 먼저 찾고, 없으면 장소명(키워드)으로 다시 찾는다 → [위도, 경도] 또는 null */
+function geocode(query) {
+  return new Promise((resolve) => {
+    if (!geocoderReady || !query) return resolve(null);
+    const geo = new kakao.maps.services.Geocoder();
+    geo.addressSearch(query, (res, status) => {
+      if (status === kakao.maps.services.Status.OK && res[0]) return resolve([+res[0].y, +res[0].x]);
+      const ps = new kakao.maps.services.Places();
+      ps.keywordSearch(query, (r2, st2) =>
+        resolve(st2 === kakao.maps.services.Status.OK && r2[0] ? [+r2[0].y, +r2[0].x] : null));
+    });
+  });
+}
+
 /* ---------- 지도 ---------- */
 const pinShape = '<svg viewBox="0 0 26 34" fill="none" aria-hidden="true"><path d="M13 0C5.82 0 0 5.82 0 13c0 9.1 11.1 20.02 11.57 20.48a2 2 0 0 0 2.86 0C14.9 33.02 26 22.1 26 13 26 5.82 20.18 0 13 0Z" fill="currentColor"/></svg>';
 let mapReady = false;
@@ -913,7 +1013,12 @@ function renderMap() {
     const html = `<button class="pin" type="button" data-i="${i}" aria-label="${p.name}">${pinShape}<span class="no">${i + 1}</span></button>`;
     ScentMap.addMarker(i, [p.lat, p.lng], html);
   });
-  const pts = list.map((p) => [p.lat, p.lng]);
+  let pts = list.map((p) => [p.lat, p.lng]);
+  // 지오코딩된 출발지는 1일차 지도에 함께 찍고 경로 앞에 잇는다
+  if (at === 0 && Array.isArray(cond.originCoord)) {
+    ScentMap.addMarker("origin", cond.originCoord, `<span class="pin pin-alt" aria-label="출발지">${pinShape}</span>`);
+    pts = [cond.originCoord].concat(pts);
+  }
   ScentMap.drawRoute(pts);
   ScentMap.fitAll(pts, 13);
 }
@@ -977,6 +1082,53 @@ function addPlace(id) {
 }
 
 $("timeline").addEventListener("click", (e) => {
+  // ----- 출발지 인라인 편집 -----
+  if (e.target.closest("[data-origin-edit]")) {
+    editStay = null; editOrigin = true; renderDay();
+    const i = $("timeline").querySelector("[data-origin-input]"); if (i) { i.focus(); i.select(); }
+    return;
+  }
+  if (e.target.closest("[data-origin-cancel]")) { editOrigin = false; renderDay(); return; }
+  if (e.target.closest("[data-origin-save]")) {
+    const sel = $("timeline").querySelector("[data-origin-input]");
+    cond.originPlace = sel ? sel.value : cond.originPlace;
+    cond.originCoord = null;   // 지역이 바뀌면 이전 좌표는 버린다
+    persistCond(); editOrigin = false; setDirty(true); renderDay();
+    if (!cond.originPlace) { say("출발지를 비웠어요"); return; }
+    say(`출발지를 ${cond.originPlace}(으)로 저장했어요`);
+    geocode(cond.originPlace).then((c) => {
+      if (!c) return;
+      cond.originCoord = c; persistCond(); renderDay();
+      say(`출발지 좌표를 찾았어요 (${c[0].toFixed(3)}, ${c[1].toFixed(3)})`);
+    });
+    return;
+  }
+  // ----- 숙소 인라인 편집 -----
+  const stayEdit = e.target.closest("[data-stay-edit]");
+  if (stayEdit) {
+    editOrigin = false; editStay = +stayEdit.dataset.stayEdit; renderDay();
+    const i = $("timeline").querySelector("[data-stay-input]"); if (i) { i.focus(); i.select(); }
+    return;
+  }
+  if (e.target.closest("[data-stay-cancel]")) { editStay = null; renderDay(); return; }
+  const staySave = e.target.closest("[data-stay-save]");
+  if (staySave) {
+    const night = +staySave.dataset.staySave;
+    const input = $("timeline").querySelector("[data-stay-input]");
+    const addr = input ? input.value.trim() : "";
+    if (!Array.isArray(cond.stay)) cond.stay = [];
+    cond.stay[night - 1] = addr ? { pick: "정해졌어요", addr } : { pick: "미정", addr: "" };
+    persistCond(); editStay = null; setDirty(true); renderDay();
+    if (!addr) { say(`${night}박 숙소를 미정으로 두었어요`); return; }
+    say(`${night}박 숙소를 저장했어요`);
+    geocode(addr).then((c) => {
+      if (!c) return;
+      cond.stay[night - 1].coord = c; persistCond(); renderDay();
+      say(`${night}박 숙소 좌표를 찾았어요`);
+    });
+    return;
+  }
+
   const pick = e.target.closest("[data-pick]");
   if (pick) {
     closeMenus();
@@ -1012,6 +1164,14 @@ $("timeline").addEventListener("click", (e) => {
   }
 });
 document.addEventListener("click", (e) => { if (!e.target.closest(".tl-actwrap")) closeMenus(); });
+
+/* 인라인 편집: Enter = 저장, Esc = 취소 */
+$("timeline").addEventListener("keydown", (e) => {
+  const box = e.target.closest(".tl-stay.is-edit, .tl-origin.is-edit");
+  if (!box) return;
+  if (e.key === "Enter") { e.preventDefault(); const b = box.querySelector("[data-stay-save],[data-origin-save]"); if (b) b.click(); }
+  else if (e.key === "Escape") { editStay = null; editOrigin = false; renderDay(); }
+});
 
 /* 삭제는 되돌릴 수 없으니 한 번 묻는다 (PRD 4.6) */
 let pendingDelete = null;
@@ -1051,7 +1211,7 @@ function closeCond() {
 /* 셀렉트 값을 조건에 반영하고 저장한다 */
 function applyCond() {
   $("condLive").querySelectorAll(".cond-select").forEach((s) => { cond[s.dataset.field] = s.value; });
-  try { localStorage.setItem(COND_KEY, JSON.stringify(cond)); } catch (e) {}
+  persistCond();
 }
 $("condBtn").addEventListener("click", openCond);
 $("condModal").addEventListener("click", (e) => {
@@ -1134,6 +1294,7 @@ $("regen").addEventListener("click", () => {
 });
 $("saveBtn").addEventListener("click", () => say("저장은 다음 단계에서 붙습니다"));
 
+loadKakao();
 initMap();
 generate(true);
 </script>
