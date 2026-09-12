@@ -1490,9 +1490,29 @@ $("regen").addEventListener("click", () => {
 });
 $("saveBtn").addEventListener("click", saveRoute);
 
+/* 동선 상세(route-detail.html)의 [편집하기]·[이 동선으로 여행 만들기]로 들어온 경우 — 넘겨받은 동선을 그대로 연다.
+   edit = 내가 저장한 동선(저장하면 같은 동선을 덮어씀) · copy = 남의 동선 복사본(저장하면 새 동선)
+   새로고침해도 같은 동선이 보이도록 scentrip_route_open 은 지우지 않는다(?open=1 일 때만 읽는다). */
+function openFromDetail() {
+  if (!/[?&]open=1\b/.test(location.search)) return false;
+  let o = null;
+  try { o = JSON.parse(localStorage.getItem("scentrip_route_open") || "null"); } catch (e) {}
+  if (!o || !o.snapshot || !Array.isArray(o.snapshot.days) || !o.snapshot.days.length) return false;
+  Object.assign(cond, o.snapshot.cond || {});
+  if (REGION_META[o.snapshot.regionKey]) regionKey = o.snapshot.regionKey;
+  days = o.snapshot.days;
+  quota = days.map((_, d) => shown(d).length);
+  at = 0;
+  if (o.mode === "edit" && o.id) savedId = o.id;
+  renderHead(); renderTabs(); renderCond(); renderDay();
+  setDirty(false);
+  say(o.mode === "edit" ? "저장한 동선을 불러왔어요" : "가져온 동선이에요. 내 일정에 맞게 바꾼 뒤 저장해 보세요");
+  return true;
+}
+
 loadKakao();
 initMap();
-generate(true);
+if (!openFromDetail()) generate(true);
 </script>
 <script>
 /* 프로필 팝오버 */

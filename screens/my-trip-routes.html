@@ -275,6 +275,14 @@ html .guest-only { display: none; }
 .rm-next:hover { background: var(--color-primary-hover); }
 .rm-next:active { background: var(--color-primary-active); }
 @media (max-width: 560px) { .rm-opt { gap: var(--space-12); padding: var(--space-12); } .rm-ic { width: 40px; height: 40px; } }
+
+/* 동선 카드 → 동선 상세 (route-detail.html). 제목 링크를 카드 전체로 늘리고, 하트는 그 위에 남긴다 */
+.route-card { position: relative; }
+.route-card .rd-link, .featured-card .rd-link { color: inherit; text-decoration: none; }
+.route-card .rd-link::after, .featured-card .rd-link::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.route-card .rd-link:focus-visible, .featured-card .rd-link:focus-visible { outline: none; }
+.route-card .rd-link:focus-visible::after, .featured-card .rd-link:focus-visible::after { outline: 3px solid var(--color-border-focus); outline-offset: 4px; border-radius: var(--radius-lg); }
+.route-card .heart-btn, .route-card .heart { z-index: 3; }
 </style>
 <script>(function(){try{if((localStorage.getItem("scentrip_auth")||"in")==="out")document.documentElement.classList.add("is-guest");}catch(e){}})();</script>
 </head>
@@ -402,6 +410,11 @@ const xCircle = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="tru
 const check = '<svg class="check" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/></svg>';
 
 /* ---------- 동선 카드 (지도+마커) ---------- */
+/* 동선 상세로 — 저장한 동선은 id, 샘플 동선은 카드 정보를 넘겨 상세에서 코스를 채운다 */
+function detailHref(r) {
+  if (r.id) return `route-detail.html?from=mytrip&saved=${encodeURIComponent(r.id)}`;
+  return "route-detail.html?" + new URLSearchParams({ from: "mytrip", name: r.name, place: r.place, desc: r.desc, meta: r.meta, match: r.match, pop: r.pop, sido: r.sido, owner: r.owner });
+}
 function routeCard(r, i) {
   return `
     <article class="route-card is-saved" data-i="${i}">
@@ -414,7 +427,7 @@ function routeCard(r, i) {
         <span class="route-marker m1">1</span><span class="route-marker m2">2</span><span class="route-marker m3">3</span><span class="route-marker m4">4</span><span class="route-marker m5">5</span>
       </div>
       <div class="route-body">
-        <div class="route-title"><span class="place">${r.place}</span><span class="name">${r.name}</span></div>
+        <div class="route-title"><span class="place">${r.place}</span><a class="name rd-link" href="${detailHref(r)}">${r.name}</a></div>
         <p class="route-desc">${r.desc}</p>
         <div class="route-meta">${r.meta}</div>
       </div>

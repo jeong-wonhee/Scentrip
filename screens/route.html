@@ -228,6 +228,16 @@ html .guest-only { display: none; }
 .rm-next:hover { background: var(--color-primary-hover); }
 .rm-next:active { background: var(--color-primary-active); }
 @media (max-width: 560px) { .rm-opt { gap: var(--space-12); padding: var(--space-12); } .rm-ic { width: 40px; height: 40px; } }
+
+/* 동선 카드 → 동선 상세 (route-detail.html). 제목 링크를 카드 전체로 늘리고, 하트는 그 위에 남긴다 */
+.route-card { position: relative; }
+.route-card .rd-link, .featured-card .rd-link { color: inherit; text-decoration: none; }
+.route-card .rd-link::after, .featured-card .rd-link::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.route-card .rd-link:focus-visible, .featured-card .rd-link:focus-visible { outline: none; }
+.route-card .rd-link:focus-visible::after, .featured-card .rd-link:focus-visible::after { outline: 3px solid var(--color-border-focus); outline-offset: 4px; border-radius: var(--radius-lg); }
+.route-card .heart-btn, .route-card .heart { z-index: 3; }
+.featured-card { position: relative; }
+.featured-card .fc-badgerow { position: relative; z-index: 2; }
 </style>
 <script>(function(){try{if((localStorage.getItem("scentrip_auth")||"in")==="out")document.documentElement.classList.add("is-guest");}catch(e){}})();</script>
 </head>
@@ -379,7 +389,7 @@ function featuredCard() {
         </div>
         <div class="fc-title">
           <p class="t1">이서연님의 취향을 만족시켜줄</p>
-          <p class="t2">운치있는 담양 당일치기 코스</p>
+          <p class="t2"><a class="rd-link" href="route-detail.html?from=explore&amp;name=%EC%9A%B4%EC%B9%98%EC%9E%88%EB%8A%94+%EB%8B%B4%EC%96%91+%EB%8B%B9%EC%9D%BC%EC%B9%98%EA%B8%B0+%EC%BD%94%EC%8A%A4&amp;place=%5B%EC%A3%BD%EB%85%B9%EC%9B%90%5D&amp;desc=%EC%9D%B4%EC%84%9C%EC%97%B0%EB%8B%98%EC%9D%98+%EC%B7%A8%ED%96%A5%EC%9D%84+%EB%A7%8C%EC%A1%B1%EC%8B%9C%EC%BC%9C%EC%A4%84+%EC%9A%B4%EC%B9%98%EC%9E%88%EB%8A%94+%EB%8B%B4%EC%96%91+%EB%8B%B9%EC%9D%BC%EC%B9%98%EA%B8%B0+%EC%BD%94%EC%8A%A4&amp;meta=5%EA%B0%9C+%EC%9E%A5%EC%86%8C+%C2%B7+%EB%8B%B9%EC%9D%BC%EC%B9%98%EA%B8%B0+%C2%B7+%EC%97%AC%EC%9C%A0%EB%A1%9C%EC%9A%B4+%EC%BD%94%EC%8A%A4&amp;match=88">운치있는 담양 당일치기 코스</a></p>
         </div>
         <div class="fc-meta"><span>5개 장소</span><span>·</span><span>경북 안동</span><span>·</span><span>여유로운 코스</span></div>
       </div>
@@ -397,6 +407,10 @@ function featuredCard() {
 document.getElementById("featuredRow").innerHTML = featuredCard() + featuredCard();
 
 /* ---------- 동선 카드 (지도+마커) ---------- */
+/* 동선 상세로 — 카드 정보를 넘겨 상세에서 코스를 채운다 (TODO(개발): 동선 id 로 교체) */
+function detailHref(r) {
+  return "route-detail.html?" + new URLSearchParams({ from: "explore", name: r.name, place: r.place, desc: r.desc, meta: r.meta, match: r.match, pop: r.pop });
+}
 function routeCard(r) {
   return `
     <article class="route-card" data-match="${r.match}" data-pop="${r.pop}">
@@ -409,7 +423,7 @@ function routeCard(r) {
         <span class="route-marker m1">1</span><span class="route-marker m2">2</span><span class="route-marker m3">3</span><span class="route-marker m4">4</span><span class="route-marker m5">5</span>
       </div>
       <div class="route-body">
-        <div class="route-title"><span class="place">${r.place}</span><span class="name">${r.name}</span></div>
+        <div class="route-title"><span class="place">${r.place}</span><a class="name rd-link" href="${detailHref(r)}">${r.name}</a></div>
         <p class="route-desc">${r.desc}</p>
         <div class="route-meta">${r.meta}</div>
       </div>

@@ -260,6 +260,14 @@ html .guest-only { display: none; }
 .rm-next:hover { background: var(--color-primary-hover); }
 .rm-next:active { background: var(--color-primary-active); }
 @media (max-width: 560px) { .rm-opt { gap: var(--space-12); padding: var(--space-12); } .rm-ic { width: 40px; height: 40px; } }
+
+/* 동선 카드 → 동선 상세 (route-detail.html). 제목 링크를 카드 전체로 늘리고, 하트는 그 위에 남긴다 */
+.route-card { position: relative; }
+.route-card .rd-link, .featured-card .rd-link { color: inherit; text-decoration: none; }
+.route-card .rd-link::after, .featured-card .rd-link::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.route-card .rd-link:focus-visible, .featured-card .rd-link:focus-visible { outline: none; }
+.route-card .rd-link:focus-visible::after, .featured-card .rd-link:focus-visible::after { outline: 3px solid var(--color-border-focus); outline-offset: 4px; border-radius: var(--radius-lg); }
+.route-card .heart-btn, .route-card .heart { z-index: 3; }
 </style>
 <script>(function(){try{if((localStorage.getItem("scentrip_auth")||"in")==="out")document.documentElement.classList.add("is-guest");}catch(e){}})();</script>
 </head>
@@ -530,7 +538,7 @@ function routeCard(inset, place, name, desc, meta) {
         <span class="route-marker m5">5</span>
       </div>
       <div class="route-body">
-        <div class="route-title"><span class="place">${place}</span><span class="name">${name}</span></div>
+        <div class="route-title"><span class="place">${place}</span><a class="name rd-link" href="route-detail.html?${new URLSearchParams({ from: "home", name, place, desc, meta, match: 88 })}">${name}</a></div>
         <p class="route-desc">${desc}</p>
         <div class="route-meta">${meta}</div>
       </div>
