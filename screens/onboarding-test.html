@@ -2197,8 +2197,9 @@ $("ctaSection").addEventListener("click", (e) => {
   if (action === "retry") { retryTest(); return; }
   // 여행지 둘러보기 · 업데이트하고 추천받기 → 장소 추천 화면으로 이동
   if (action === "explore" || action === "update-explore") { location.href = "place-recommend.html"; return; }
+  // 가입하고 여행지 추천받기 → 로그인. 신규 회원은 가입 완료 화면에서 '검사 결과를 계정에 저장' 안내 (from=test)
+  if (action === "signup") { location.href = "login.html?next=place-recommend.html&from=test"; return; }
   const msg = {
-    signup: "로그인 화면으로 이동합니다. (프로토타입 — 로그인 화면 준비 중)",
     share: "결과 공유 시트를 엽니다. (프로토타입)",
   };
   alert(msg[action] || "(프로토타입)");

@@ -1205,8 +1205,18 @@ renderReviews();
 document.addEventListener('click',function(e){
   var lo=e.target.closest('[data-logout]'), li=e.target.closest('[data-login]');
   if(lo){e.preventDefault();try{localStorage.setItem('scentrip_auth','out');}catch(x){}location.href='home.html';}
-  if(li){e.preventDefault();try{localStorage.setItem('scentrip_auth','in');}catch(x){}location.reload();}
+  if(li){e.preventDefault();location.href='login.html?next='+encodeURIComponent((location.pathname.split('/').pop()||'home.html')+location.search+location.hash);}
 });
+</script>
+<script>
+/* 가입 때 정한 닉네임을 헤더 프로필에 반영 (signup.html 에서 저장) */
+(function () {
+  try {
+    const nick = localStorage.getItem("scentrip_nickname");
+    if (!nick) return;
+    document.querySelectorAll(".pill-name, .pop-name").forEach((el) => { el.textContent = nick; });
+  } catch (e) {}
+})();
 </script>
 <script>
 /* 저장된 프로필 사진을 모든 아바타에 반영 (마이페이지에서 변경) */

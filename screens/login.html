@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scentrip — 로그인</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="../reference/tokens.css">
+<link rel="stylesheet" href="../reference/components.css">
+<style>
+/* ============================================================
+   Scentrip — 로그인 (Google 단일 로그인)
+   Figma 프레임 없음 — 기존 화면·디자인 시스템 기준 시안. 기획 초안: SCENTrip_login_signup_spec.md
+   흐름: Google로 계속하기 → (Google 공식 화면 — 우리가 만들지 않음) → 콜백
+         → 신규/가입 중단(PENDING) = signup.html · 기존 = ?next 로 복귀 · 실패 = 이 화면에 안내
+   프로토타입은 오른쪽 아래 '검수용 스위처'로 Google 인증 결과를 고른다 (개발 전달 시 제거).
+   개발: 콜백 실패 시 login.html?error=cancel|expired|failed|network|noemail|suspended|withdrawn 로 보내면
+         같은 안내가 뜬다. 복귀 주소(next)는 내부 화면만 허용.
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing);
+  color: var(--color-content-default);
+  background: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+img { display: block; max-width: 100%; }
+button { font-family: inherit; letter-spacing: inherit; cursor: pointer; background: none; border: 0; color: inherit; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--color-border-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+/* ---------- 레이아웃 — 좌: 사진 비주얼 / 우: 폼 ---------- */
+.auth { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: 100vh; }
+.auth-visual { position: sticky; top: 0; height: 100vh; overflow: hidden; background: var(--color-primary); }
+.auth-visual img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.04); animation: drift 26s ease-in-out infinite alternate; }
+@keyframes drift { to { transform: scale(1.1) translate(-1.5%, -1%); } }
+.auth-visual::after { content: ""; position: absolute; inset: 0; background: var(--gradient-depth); opacity: .62; mix-blend-mode: multiply; }
+.auth-copy { position: absolute; left: 56px; right: 56px; bottom: 64px; z-index: 1; color: var(--color-content-on-fill); }
+.auth-copy .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; opacity: .7; }
+.auth-copy .lead { margin-top: var(--space-12); font-size: var(--text-heading-24); font-weight: 600; line-height: 1.5; }
+
+.auth-main { display: flex; flex-direction: column; min-width: 0; padding: var(--space-8) var(--space-40) var(--space-24); }
+.auth-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-16); }
+.auth-back { display: inline-flex; align-items: center; gap: var(--space-4); height: 36px; padding: 0 var(--space-12); border-radius: var(--radius-full); font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-neutral-muted); text-decoration: none; transition: background .14s ease, color .14s ease; }
+.auth-back:hover { background: var(--color-state-hover); color: var(--color-content-default); }
+.auth-back svg { width: 16px; height: 16px; }
+
+.auth-card { display: flex; flex-direction: column; width: 100%; max-width: 400px; margin: auto; padding: var(--space-48) 0; animation: rise .5s cubic-bezier(.22, .61, .36, 1) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+.auth-title { font-size: var(--text-title-28); font-weight: 600; line-height: 1.4; color: var(--color-content-default); }
+.auth-sub { margin-top: var(--space-12); font-size: var(--text-body-16); line-height: 1.6; color: var(--color-content-neutral-muted); }
+
+/* ---------- 오류 안내 ---------- */
+.auth-alert { display: flex; gap: var(--space-10); margin-top: var(--space-24); padding: var(--space-12) var(--space-16); border: 1px solid var(--color-error-border); border-radius: var(--radius-md); background: var(--color-error-subtle); color: var(--color-content-error); animation: rise .3s ease both; }
+.auth-alert[hidden] { display: none; }
+.auth-alert svg { width: 20px; height: 20px; flex: none; margin-top: 1px; }
+.auth-alert b { display: block; font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; }
+.auth-alert p { margin-top: 2px; font-size: var(--text-body-14); line-height: 1.6; color: var(--color-content-neutral); }
+
+/* ---------- Google 버튼 — 흰 바탕 + 공식 G 로고 (Google 브랜드 가이드) ---------- */
+.btn-google { position: relative; display: flex; align-items: center; justify-content: center; gap: var(--space-12); width: 100%; height: 52px; margin-top: var(--space-32); border: 1px solid var(--color-neutral-border); border-radius: var(--radius-full); background: var(--color-surface-overlay); font-size: var(--text-body-16); font-weight: 600; color: var(--color-content-neutral); box-shadow: var(--elevation-xs); transition: box-shadow .18s ease, background .18s ease, border-color .18s ease; }
+.auth-alert + .btn-google { margin-top: var(--space-16); }
+/* 호버·프레스는 색을 바꾸지 않고 상태 레이어를 겹친다 */
+.btn-google:hover { background: linear-gradient(var(--color-state-hover), var(--color-state-hover)), var(--color-surface-overlay); border-color: var(--color-border-strong); box-shadow: var(--elevation-sm); }
+.btn-google:active { background: linear-gradient(var(--color-state-pressed), var(--color-state-pressed)), var(--color-surface-overlay); }
+.btn-google:disabled { cursor: progress; box-shadow: none; background: var(--color-neutral-bg); color: var(--color-content-neutral-muted); }
+.g-logo { width: 20px; height: 20px; flex: none; }
+.spinner { width: 18px; height: 18px; flex: none; border: 2px solid currentColor; border-right-color: transparent; border-radius: var(--radius-full); animation: spin .7s linear infinite; }
+.spinner[hidden], .g-logo[hidden] { display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.auth-legal { margin-top: var(--space-20); font-size: 13px; line-height: 1.7; color: var(--color-content-neutral-muted); text-align: center; }
+.legal-link { font-size: inherit; font-weight: 600; color: var(--color-content-neutral); text-decoration: underline; text-underline-offset: 3px; }
+.legal-link:hover { color: var(--color-primary); }
+
+/* ---------- 약관 전문 모달 — terms/privacy.html 을 ?embed=1 로 그대로 띄운다 ---------- */
+.legal-box { --modal-w: 720px; height: min(760px, calc(100vh - 48px)); }
+.legal-frame { flex: 1 1 auto; width: 100%; min-height: 0; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); background: var(--color-background); }
+.modal-foot { display: flex; justify-content: flex-end; gap: var(--space-8); }
+.btn-fill { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-8); height: 44px; padding: 0 var(--space-24); border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-content-on-fill); font-size: var(--text-body-14); font-weight: 600; text-decoration: none; transition: background .16s ease; }
+.btn-fill:hover { background: var(--color-primary-hover); }
+
+/* ---------- 검수용 스위처 (onboarding-test 와 같은 모양 · 개발 전달 시 제거) ---------- */
+.state-switch { position: fixed; right: var(--space-16); bottom: var(--space-16); z-index: 200; display: flex; align-items: center; gap: var(--space-8); padding: var(--space-8) var(--space-12); border: 1px solid var(--color-border-default); border-radius: var(--radius-full); background: var(--color-surface-overlay); box-shadow: var(--elevation-lg); font-size: var(--text-caption-12); color: var(--color-content-subtle); }
+.state-switch select { border: 0; background: none; font-family: inherit; letter-spacing: inherit; font-size: var(--text-caption-12); font-weight: 600; color: var(--color-content-default); cursor: pointer; }
+
+/* ---------- 반응형 ---------- */
+@media (max-width: 900px) {
+  .auth { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .auth-visual { position: relative; height: 200px; }
+  .auth-copy { left: 20px; right: 20px; bottom: 20px; }
+  .auth-copy .lead { font-size: var(--text-body-16); }
+  .auth-main { padding: var(--space-8) var(--space-20) var(--space-24); }
+  .auth-card { margin: 0 auto; padding: var(--space-32) 0 var(--space-48); }
+}
+@media (max-width: 560px) {
+  .auth-copy .eyebrow { display: none; }
+  .modal-box { padding: var(--space-20); }
+  .state-switch { left: var(--space-16); right: var(--space-16); justify-content: space-between; border-radius: var(--radius-lg); }
+}
+</style>
+</head>
+<body>
+
+<div class="auth">
+  <!-- 좌: 비주얼 -->
+  <aside class="auth-visual" aria-hidden="true">
+    <img src="../assets/about/forest-trail.jpg" alt="">
+    <div class="auth-copy">
+      <p class="eyebrow">SCENTRIP</p>
+      <p class="lead">나만의 취향을 찾아 떠나는 특별한 여행,<br>센트립이 당신의 여정을 함께합니다.</p>
+    </div>
+  </aside>
+
+  <!-- 우: 로그인 -->
+  <main class="auth-main">
+    <div class="auth-top">
+      <a class="brand" href="home.html" aria-label="Scentrip 홈">
+        <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="brand-name">Scentrip</span>
+      </a>
+      <a class="auth-back" id="backLink" href="home.html">
+        <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/></svg>
+        둘러보기로 돌아가기
+      </a>
+    </div>
+
+    <section class="auth-card" aria-labelledby="loginTitle">
+      <h1 class="auth-title" id="loginTitle">나의 향 취향을<br>여행으로 이어가요</h1>
+      <p class="auth-sub">검사 결과와 추천 여행지를 저장하려면<br>Google 계정으로 시작해 주세요.</p>
+
+      <div class="auth-alert" id="alert" role="alert" hidden>
+        <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-8,56a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm8,104a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z"/></svg>
+        <div><b id="alertTitle"></b><p id="alertDesc" hidden></p></div>
+      </div>
+
+      <button class="btn-google" id="googleBtn" type="button">
+        <svg class="g-logo" id="gLogo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        <span class="spinner" id="gSpin" hidden></span>
+        <span id="googleLabel">Google로 계속하기</span>
+      </button>
+
+      <p class="auth-legal">계속하면 Scentrip의 <button class="legal-link" type="button" data-legal="terms">이용약관</button> 및 <button class="legal-link" type="button" data-legal="privacy">개인정보처리방침</button>을<br>확인할 수 있습니다.</p>
+    </section>
+  </main>
+</div>
+
+<!-- 약관 전문 모달 -->
+<div class="modal-scrim" id="legalModal" hidden>
+  <div class="modal-box legal-box" role="dialog" aria-modal="true" aria-labelledby="legalTitle">
+    <div class="modal-head">
+      <h2 id="legalTitle">이용약관</h2>
+      <button class="modal-close" type="button" data-legal-close aria-label="닫기"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
+    </div>
+    <iframe class="legal-frame" id="legalFrame" title="약관 전문"></iframe>
+    <div class="modal-foot">
+      <button class="btn-fill" type="button" data-legal-close>확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 검수용 스위처 — 개발 전달 시 제거 (실서비스는 Google OAuth 콜백 결과로 분기) -->
+<div class="state-switch">
+  <label for="qaResult">Google 인증 결과</label>
+  <select id="qaResult">
+    <option value="new">신규 회원 → 가입</option>
+    <option value="existing">기존 회원 → 바로 로그인</option>
+    <option value="pending">가입 중단 회원 → 약관부터 이어서</option>
+    <option value="cancel">로그인 취소</option>
+    <option value="expired">인증 시간 만료</option>
+    <option value="failed">인증 실패</option>
+    <option value="network">네트워크·서버 오류</option>
+    <option value="noemail">이메일 제공 미동의</option>
+    <option value="suspended">이용 제한 계정</option>
+    <option value="withdrawn">탈퇴한 계정</option>
+  </select>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+
+/* 로그인 후 돌아갈 곳 — 내부 화면 파일명만 허용한다 (명세 14: 외부 URL 금지). 아니면 홈 */
+function safeNext(v) {
+  return /^[a-z0-9-]+\.html(\?[^#\s]*)?(#[\w-]*)?$/i.test(v || "") && !/^(login|signup)\.html/i.test(v) ? v : "home.html";
+}
+const next = safeNext(params.get("next"));
+const from = params.get("from") === "test" ? "test" : "";
+$("backLink").href = next;
+
+/* 오류·예외 안내 (명세 17) */
+const MSG = {
+  cancel:    { t: "Google 로그인이 취소되었습니다. 다시 시도해 주세요." },
+  expired:   { t: "로그인 시간이 만료되었습니다. 다시 로그인해 주세요." },
+  failed:    { t: "Google 계정을 확인하지 못했습니다. 잠시 후 다시 시도해 주세요." },
+  network:   { t: "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해 주세요." },
+  noemail:   { t: "이메일 제공에 동의해 주셔야 가입할 수 있어요.", d: "Scentrip은 계정 확인과 중요한 안내를 위해 이메일을 사용해요. 다시 로그인하면서 이메일 제공에 동의해 주세요." },
+  suspended: { t: "이용이 제한된 계정이에요.", d: "제한 사유와 해제 방법은 info.scentrip@gmail.com 으로 문의해 주세요." },
+  withdrawn: { t: "탈퇴 처리된 계정이에요.", d: "다시 가입하려면 info.scentrip@gmail.com 으로 문의해 주세요." },
+};
+function showAlert(key) {
+  const m = MSG[key];
+  if (!m) return;
+  $("alertTitle").textContent = m.t;
+  $("alertDesc").textContent = m.d || "";
+  $("alertDesc").hidden = !m.d;
+  $("alert").hidden = false;
+}
+
+function setBusy(on) {
+  $("googleBtn").disabled = on;
+  $("gLogo").hidden = on;
+  $("gSpin").hidden = !on;
+  $("googleLabel").textContent = on ? "Google로 연결 중..." : "Google로 계속하기";
+}
+
+/* Google로 계속하기 — 여러 번 눌러도 첫 요청만 처리 (명세 17·20)
+   TODO(개발): 여기서 서버의 OAuth 시작 주소로 이동 (state·PKCE·nonce, next 는 서버 세션에 저장) */
+$("googleBtn").addEventListener("click", () => {
+  if ($("googleBtn").disabled) return;
+  $("alert").hidden = true;
+  setBusy(true);
+  setTimeout(() => {
+    const r = $("qaResult").value;
+    if (r === "new" || r === "pending") {
+      const q = new URLSearchParams({ next });
+      if (from) q.set("from", from);
+      if (r === "pending") q.set("resume", "1");
+      location.href = "signup.html?" + q.toString();
+      return;
+    }
+    if (r === "existing") {
+      try { localStorage.setItem("scentrip_auth", "in"); } catch (e) {}
+      location.href = next;
+      return;
+    }
+    setBusy(false);
+    showAlert(r);
+    $("googleBtn").focus();
+  }, 1100);
+});
+
+/* 콜백에서 오류로 돌아온 경우 */
+showAlert(params.get("error"));
+
+/* ---------- 약관 전문 모달 ---------- */
+let lastTrigger = null;
+function openLegal(kind) {
+  lastTrigger = document.activeElement;
+  $("legalTitle").textContent = kind === "privacy" ? "개인정보처리방침" : "이용약관";
+  $("legalFrame").src = (kind === "privacy" ? "privacy.html" : "terms.html") + "?embed=1";
+  const s = $("legalModal");
+  s.hidden = false;
+  void s.offsetWidth;
+  s.classList.add("is-open");
+  setTimeout(() => s.querySelector(".modal-close").focus(), 40);   // visibility 전환이 끝난 뒤에야 포커스가 들어간다
+}
+function closeLegal() {
+  const s = $("legalModal");
+  if (s.hidden) return;
+  s.classList.remove("is-open");
+  setTimeout(() => { s.hidden = true; }, 180);
+  if (lastTrigger) lastTrigger.focus();
+}
+document.addEventListener("click", (e) => {
+  const open = e.target.closest("[data-legal]");
+  if (open) { openLegal(open.dataset.legal); return; }
+  if (e.target.closest("[data-legal-close]") || e.target === $("legalModal")) closeLegal();
+});
+/* Esc 로 닫기 + 모달 안에서만 Tab 이동 (명세 21) */
+document.addEventListener("keydown", (e) => {
+  if ($("legalModal").hidden) return;
+  if (e.key === "Escape") { closeLegal(); return; }
+  if (e.key !== "Tab") return;
+  const f = [...$("legalModal").querySelectorAll("button, iframe")];
+  const first = f[0], last = f[f.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
+</script>
+</body>
+</html>

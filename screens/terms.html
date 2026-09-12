@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="../reference/tokens.css">
 <link rel="stylesheet" href="../reference/components.css">
 <script>(function(){try{if((localStorage.getItem("scentrip_auth")||"in")==="out")document.documentElement.classList.add("is-guest");}catch(e){}})();</script>
+<script>if(/[?&]embed\b/.test(location.search))document.documentElement.classList.add("is-embed");</script>
 <style>
 /* ============================================================
    Scentrip — 이용약관 · Figma node 748:3122 이식
@@ -56,6 +57,12 @@ html .guest-only { display: none; }
 .terms-art p, .terms-art li { font-size: var(--text-body-16); font-weight: 400; line-height: 1.5; color: var(--color-content-neutral); }
 .terms-art ol { padding-left: var(--space-24); list-style: decimal; }
 .footer-legal a[aria-current="page"] { text-decoration: underline; text-underline-offset: 3px; }
+
+/* 로그인·가입 화면의 '보기' 모달 안에서 열 때 (?embed=1) — 헤더·푸터·제목 없이 본문만 */
+.is-embed .nav, .is-embed .footer, .is-embed .terms-title { display: none; }
+.is-embed .page { min-height: 0; }
+.is-embed .terms { padding: var(--space-16) var(--space-20) var(--space-32); }
+.is-embed .terms-inner { gap: var(--space-24); }
 
 /* ---------- 반응형 ---------- */
 @media (max-width: 1120px) {
@@ -356,8 +363,18 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { pop.clas
 document.addEventListener('click',function(e){
   var lo=e.target.closest('[data-logout]'), li=e.target.closest('[data-login]');
   if(lo){e.preventDefault();try{localStorage.setItem('scentrip_auth','out');}catch(x){}location.href='home.html';}
-  if(li){e.preventDefault();try{localStorage.setItem('scentrip_auth','in');}catch(x){}location.reload();}
+  if(li){e.preventDefault();location.href='login.html?next='+encodeURIComponent((location.pathname.split('/').pop()||'home.html')+location.search+location.hash);}
 });
+</script>
+<script>
+/* 가입 때 정한 닉네임을 헤더 프로필에 반영 (signup.html 에서 저장) */
+(function () {
+  try {
+    const nick = localStorage.getItem("scentrip_nickname");
+    if (!nick) return;
+    document.querySelectorAll(".pill-name, .pop-name").forEach((el) => { el.textContent = nick; });
+  } catch (e) {}
+})();
 </script>
 <script>
 /* 저장된 프로필 사진을 모든 아바타에 반영 (마이페이지에서 변경) */
