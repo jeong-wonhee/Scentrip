@@ -119,7 +119,7 @@ a { color: inherit; }
   <!-- 우: 로그인 -->
   <main class="auth-main">
     <div class="auth-top">
-      <a class="brand" id="brandLink" href="home.html" aria-label="Scentrip — 이전 화면으로">
+      <a class="brand" href="home.html" aria-label="Scentrip 홈">
         <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
         <span class="brand-name">Scentrip</span>
       </a>
@@ -186,7 +186,6 @@ function safeNext(v) {
 }
 const next = safeNext(params.get("next"));
 const from = params.get("from") === "test" ? "test" : "";
-$("brandLink").href = next;   // 로고 = 로그인 전에 보던 화면으로 (없으면 홈)
 
 /* 오류·예외 안내 (명세 17) */
 const MSG = {
