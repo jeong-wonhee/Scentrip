@@ -110,6 +110,9 @@ a { color: inherit; }
 
 /* ---------- 가입 완료 ---------- */
 .auth-done { align-items: center; text-align: center; }
+/* 가입 첫 화면(약관·닉네임)도 머리글은 가운데 — 동의 목록·입력칸은 읽고 누르기 쉽게 왼쪽 정렬 유지 */
+#form > .auth-step, #form > .auth-title, #form > .auth-sub { text-align: center; }
+#form > .auth-step { align-self: center; }
 .done-mark { position: relative; display: flex; width: 72px; height: 72px; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--color-surface-01); color: var(--color-primary); animation: pop .5s cubic-bezier(.34, 1.56, .64, 1) both; }
 .done-mark::after { content: ""; position: absolute; inset: -8px; border-radius: var(--radius-full); border: 2px solid var(--color-border-default); animation: ring 1.4s ease-out .2s both; }
 .done-mark svg { width: 34px; height: 34px; }

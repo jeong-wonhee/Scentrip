@@ -294,6 +294,7 @@ html .guest-only { display: none; }
 .rc-more-btn:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
 .rc-more .menu { top: calc(100% + 6px); right: 0; left: auto; min-width: 140px; }
 .rc-more .menu-item.danger { color: var(--color-content-error); }
+.rc-more .menu-sep { height: 1px; margin: var(--space-6) 0; background: var(--color-border-subtle); }
 .rc-more .menu-item .ic { display: inline-flex; align-items: center; gap: var(--space-8); }
 .rc-more .menu-item .ic svg { width: 16px; height: 16px; }
 /* 삭제 확인 */
@@ -432,13 +433,19 @@ const xCircle = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="tru
 
 const check = '<svg class="check" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/></svg>';
 
-/* 내가 만든 동선의 더보기(⋯) 메뉴 — 지금은 삭제 하나 (편집은 동선 상세의 [편집하기]) */
+/* 내가 만든 동선의 더보기(⋯) 메뉴 — 편집하기(동선 결과 화면에서 이어서 편집) · 삭제
+   이름 바꾸기는 넣지 않았다: 동선 제목은 편집 화면에서 지역·기간으로 정해지고, 따로 고치는 곳이 아직 없다 */
+const pencil = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.68,147.31,64l24-24L216,84.68Z"/></svg>';
 const dots = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128Zm56-12a12,12,0,1,0,12,12A12,12,0,0,0,196,116ZM60,116a12,12,0,1,0,12,12A12,12,0,0,0,60,116Z"/></svg>';
 const trash = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"/></svg>';
 function moreMenu(r) {
   return `<div class="rc-more">
         <button class="rc-more-btn" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="${r.name} 더보기">${dots}</button>
-        <div class="menu" role="menu"><button class="menu-item danger" type="button" role="menuitem" data-delete><span class="ic">${trash}삭제</span></button></div>
+        <div class="menu" role="menu">
+          <button class="menu-item" type="button" role="menuitem" data-edit><span class="ic">${pencil}편집하기</span></button>
+          <div class="menu-sep" role="separator"></div>
+          <button class="menu-item danger" type="button" role="menuitem" data-delete><span class="ic">${trash}삭제</span></button>
+        </div>
       </div>`;
 }
 
@@ -1030,6 +1037,8 @@ document.addEventListener('click',function(e){
       if (on) m.querySelector(".menu-item").focus();
       return;
     }
+    const edit = e.target.closest("[data-edit]");   // 동선 상세가 편집용 동선을 담아 편집 화면으로 바로 넘긴다
+    if (edit) { e.preventDefault(); e.stopPropagation(); location.href = detailHref(ROUTES[+edit.closest(".route-card").dataset.i]) + "&edit=1"; return; }
     const del = e.target.closest("[data-delete]");
     if (del) { e.preventDefault(); e.stopPropagation(); closeMenus(); openModal(del.closest(".route-card"), del.closest(".rc-more").querySelector(".rc-more-btn")); }
   });

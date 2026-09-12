@@ -53,7 +53,8 @@ html .guest-only { display: none; }
 /* ---------- 여행 소식 공용 ---------- */
 .nw-cat { display: inline-flex; align-items: center; height: 26px; padding: 0 var(--space-10); border-radius: var(--radius-full); background: var(--color-surface-01); border: 1px solid var(--color-border-subtle); font-size: var(--text-caption-12); font-weight: 600; line-height: 1; color: var(--color-content-muted); white-space: nowrap; }
 .nw-dots { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-8); }
-.nw-dots > * + *::before { content: ""; display: inline-block; width: 3px; height: 3px; margin-right: var(--space-8); border-radius: var(--radius-full); background: currentColor; opacity: .5; vertical-align: middle; }
+.nw-dots > * + *::before { content: ""; display: inline-block; width: 3px; height: 3px; margin-right: var(--space-8); border-radius: var(--radius-full); background: var(--color-content-neutral-subtle); opacity: .5; vertical-align: middle; }
+.nw-region { color: var(--neutral-600); }   /* 지역은 날짜·읽는 시간보다 한 단계 진하게 — 시맨틱 토큰에 subtle(500)과 muted(700) 사이 값이 없어 프리미티브 600을 쓴다. 점(·)은 그대로 */
 .nw-art { position: absolute; inset: 0; display: block; }
 .nw-art svg { display: block; width: 100%; height: 100%; }
 .badge { display: inline-flex; align-items: center; gap: var(--space-6); padding: var(--space-4) var(--space-10); border-radius: var(--radius-full); background: var(--color-surface-overlay); border: 1px solid var(--color-border-default); }
@@ -350,7 +351,7 @@ function render() {
   const cta = places.length === 1 ? "이 장소로 동선 만들기" : `이 이야기 속 ${places.length}곳으로 동선 만들기`;
   $("nd").innerHTML = `
     <header>
-      <div class="nd-kicker nw-dots"><span class="nw-cat">${esc(m.category)}</span><span>${regions.map((k) => esc(REGION_META[k].label)).join(" · ")}</span><span>${newsFmtDate(m.date)}</span><span>읽는 데 약 ${newsReadMin(m)}분</span></div>
+      <div class="nd-kicker nw-dots"><span class="nw-cat">${esc(m.category)}</span><span class="nw-region">${regions.map((k) => esc(REGION_META[k].label)).join(" · ")}</span><span>${newsFmtDate(m.date)}</span><span>읽는 데 약 ${newsReadMin(m)}분</span></div>
       <h1 class="nd-title">${esc(m.title)}</h1>
       <p class="nd-dek">${esc(m.dek)}</p>
       <div class="nd-tools"><button class="nd-tool" id="shareBtn" type="button">${share}<span>공유</span></button></div>
