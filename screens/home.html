@@ -102,18 +102,15 @@ html .guest-only { display: none; }
 .taste-character { position: absolute; right: clamp(12px, 3%, 24px); bottom: 0; width: clamp(116px, 42%, 240px); display: flex; align-items: flex-end; justify-content: center; z-index: 1; pointer-events: none; }
 .char-slot { position: relative; width: 100%; aspect-ratio: 4 / 5; display: flex; align-items: center; justify-content: center; }
 .char-slot .emoji { font-size: 72px; line-height: 1; }
-/* 비회원: 아직 모르는 여행 취향 — 점선 비행기 실루엣 + 물음표 (테스트하면 캐릭터가 이 자리에 들어온다) */
-.guest-plane { display: none; width: 88%; height: auto; overflow: visible; color: var(--type-accent); animation: plane-float 4.8s ease-in-out infinite; }
+/* 비회원: 아직 모르는 여행 취향 — 점선 비행기 실루엣 (테스트하면 캐릭터가 이 자리에 들어온다) */
+.guest-plane { display: none; width: 88%; height: auto; overflow: visible; color: var(--type-accent); }
 .is-guest .guest-plane { display: block; }
 /* 크게 키워 카드 오른쪽 아래 모서리 밖으로 걸치게 — 카드(overflow:hidden)가 잘라 준다. 380px 이하는 글 아래로 내려가는 배치라 그대로 */
-.is-guest .taste-character { right: -10%; bottom: -24%; width: clamp(220px, 58%, 420px); }
+.is-guest .taste-character { right: -16%; bottom: -34%; width: clamp(260px, 72%, 520px); }
 .is-guest .char-slot { aspect-ratio: 1 / 1; }
 .is-guest .guest-plane { width: 100%; }
 @media (max-width: 380px) { .is-guest .taste-character { right: auto; bottom: auto; width: 100%; } .is-guest .guest-plane { width: 88%; } }
-.guest-plane .gp-body { fill: color-mix(in srgb, currentColor 10%, transparent); stroke: currentColor; stroke-width: 2.5; stroke-dasharray: 7 6; stroke-linejoin: round; stroke-linecap: round; }
-.guest-plane .gp-q { font-family: var(--font-family); font-size: 44px; font-weight: 700; fill: var(--type-deep); opacity: .72; }
-@keyframes plane-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-@media (prefers-reduced-motion: reduce) { .guest-plane { animation: none; } }
+.guest-plane .gp-body { fill: color-mix(in srgb, currentColor 8%, transparent); stroke: currentColor; stroke-opacity: .5; stroke-width: 2; stroke-dasharray: 6 5; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }   /* 그림을 키워도 선 두께·점선 간격은 화면 기준 그대로 */
 /* 캐릭터 이미지 — 어두운 배경 위에 밝은 부분만 얹혀 은은한 글로우(향의 정령) */
 .char-slot .char-img {
   position: relative; z-index: 1;
@@ -353,7 +350,6 @@ a.news-item:hover .news-title { color: var(--color-primary); }
             <g transform="rotate(45 100 100) translate(100 100) scale(.8) translate(-100 -100)">
               <path class="gp-body" d="M100 12C109 12 116 24 116 40V78L184 112V130L116 110V150L140 168V182L100 172L60 182V168L84 150V110L16 130V112L84 78V40C84 24 91 12 100 12Z"/>
             </g>
-            <text class="gp-q" x="100" y="100" text-anchor="middle" dominant-baseline="central">?</text>
           </svg></div>
         </div>
         <div class="taste-inner">
