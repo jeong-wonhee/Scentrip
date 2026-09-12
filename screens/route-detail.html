@@ -432,7 +432,6 @@ html .guest-only { display: none; }
    ============================================================ */
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
-if (/[?&]edit=1\b/.test(location.search)) document.documentElement.style.visibility = "hidden";   // 편집으로 바로 넘어갈 때 상세가 번쩍 보이지 않게
 const FROM = ["explore", "home", "mytrip"].includes(params.get("from")) ? params.get("from") : "explore";
 
 let cond = { mode: "ai", nights: "당일치기", transport: "자동차", pace: "넉넉하게", distance: "적당히", departAt: "", stay: [] };
@@ -725,13 +724,6 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {}
     location.href = "route-result.html?open=1";
   });
-
-  /* 내 동선 ⋯ 메뉴의 [편집하기]로 들어온 경우(?edit=1) — 상세를 거치지 않고 바로 편집 화면으로.
-     replace 로 넘겨서 편집 화면에서 뒤로 가면 상세가 아니라 내 동선 목록으로 돌아간다 */
-  if (params.get("edit") === "1" && route.owner === "mine") {
-    try { localStorage.setItem("scentrip_route_open", JSON.stringify({ mode: "edit", id: route.savedId, name: route.name, snapshot: { regionKey, cond, days } })); } catch (e) {}
-    location.replace("route-result.html?open=1");
-  }
 });
 </script>
 <script>
