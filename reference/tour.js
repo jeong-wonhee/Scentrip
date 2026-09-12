@@ -118,7 +118,8 @@
       root.querySelector(".tour-count").textContent = `${i + 1} / ${steps.length}`;
       root.querySelectorAll(".tour-dots i").forEach((d, k) => d.classList.toggle("is-on", k === i));
       root.querySelector(".tour-prev").hidden = i === 0;
-      root.querySelector(".tour-next").textContent = i === steps.length - 1 ? "시작하기" : "다음";
+      // 마지막 버튼은 '투어를 닫는다'만 뜻하게 — '시작하기'는 마지막 단계(동선 만들기 등)를 시작하라는 뜻으로 읽힌다
+      root.querySelector(".tour-next").textContent = i === steps.length - 1 ? "알겠어요" : "다음";
       pop.classList.remove("is-in");
       void pop.offsetWidth;
       pop.classList.add("is-in");
