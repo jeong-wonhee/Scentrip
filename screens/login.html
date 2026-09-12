@@ -11,6 +11,8 @@
 /* ============================================================
    Scentrip — 로그인 (Google 단일 로그인)
    Figma 프레임 없음 — 기존 화면·디자인 시스템 기준 시안. 기획 초안: SCENTrip_login_signup_spec.md
+   레이아웃: 옅은 그린 면(--gradient-mist) + 가운데 발광(--gradient-aura) 위에 카드 하나.
+             사진 대신 '로그인하면 좋은 점' 3줄로 가입할 이유를 보여준다.
    흐름: Google로 계속하기 → (Google 공식 화면 — 우리가 만들지 않음) → 콜백
          → 신규/가입 중단(PENDING) = signup.html · 기존 = ?next 로 복귀 · 실패 = 이 화면에 안내
    프로토타입은 오른쪽 아래 '검수용 스위처'로 Google 인증 결과를 고른다 (개발 전달 시 제거).
@@ -30,37 +32,35 @@ body {
 img { display: block; max-width: 100%; }
 button { font-family: inherit; letter-spacing: inherit; cursor: pointer; background: none; border: 0; color: inherit; }
 a { color: inherit; }
+ul { list-style: none; }
 :focus-visible { outline: 3px solid var(--color-border-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
 
-/* ---------- 레이아웃 — 좌: 사진 비주얼 / 우: 폼 ---------- */
-.auth { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: 100vh; }
-.auth-visual { order: 2; position: sticky; top: 0; height: 100vh; overflow: hidden; background: var(--color-primary); }   /* 데스크톱: 폼 왼쪽 · 사진 오른쪽 */
-.auth-visual img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.04); animation: drift 26s ease-in-out infinite alternate; }
-@keyframes drift { to { transform: scale(1.1) translate(-1.5%, -1%); } }
-.auth-visual::after { content: ""; position: absolute; inset: 0; background: var(--gradient-depth); opacity: .62; mix-blend-mode: multiply; }
-.auth-copy { position: absolute; left: 56px; right: 56px; bottom: 64px; z-index: 1; color: var(--color-content-on-fill); }
-.auth-copy .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; opacity: .7; }
-.auth-copy .lead { margin-top: var(--space-12); font-size: var(--text-heading-24); font-weight: 600; line-height: 1.5; }
-
-.auth-main { display: flex; flex-direction: column; min-width: 0; padding: var(--space-8) var(--space-40) var(--space-24); }
-.auth-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-16); }
-
-.auth-card { display: flex; flex-direction: column; width: 100%; max-width: 400px; margin: auto; padding: var(--space-48) 0; animation: rise .5s cubic-bezier(.22, .61, .36, 1) both; }
+/* ---------- 레이아웃 — mist 면 + aura 발광 + 가운데 카드 ---------- */
+.auth { display: flex; flex-direction: column; min-height: 100vh; padding: 0 var(--space-40) var(--space-40); background: var(--gradient-aura) 50% 42% / 110% 80% no-repeat, var(--gradient-mist); }
+.auth-top { display: flex; align-items: center; height: 72px; }
+.auth-main { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
+.auth-card { display: flex; flex-direction: column; width: 100%; max-width: 440px; margin: auto; padding: var(--space-48) var(--space-40) var(--space-40); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-2xl); background: var(--color-surface-overlay); box-shadow: var(--elevation-lg); animation: rise .5s cubic-bezier(.22, .61, .36, 1) both; }
 @keyframes rise { from { opacity: 0; transform: translateY(12px); } }
 .auth-title { font-size: var(--text-title-28); font-weight: 600; line-height: 1.4; color: var(--color-content-default); }
 .auth-sub { margin-top: var(--space-12); font-size: var(--text-body-16); line-height: 1.6; color: var(--color-content-neutral-muted); }
 
+/* ---------- 로그인하면 좋은 점 ---------- */
+.auth-perks { display: flex; flex-direction: column; gap: var(--space-12); margin-top: var(--space-24); padding: var(--space-16) var(--space-20); border-radius: var(--radius-lg); background: var(--color-surface-01); }
+.auth-perks li { display: flex; align-items: center; gap: var(--space-12); font-size: var(--text-body-14); font-weight: 500; line-height: 1.5; color: var(--color-content-neutral); }
+.perk-ic { display: flex; width: 32px; height: 32px; flex: none; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--color-surface-overlay); color: var(--color-primary); box-shadow: var(--elevation-xs); }
+.perk-ic svg { width: 16px; height: 16px; }
+
 /* ---------- 오류 안내 ---------- */
-.auth-alert { display: flex; gap: var(--space-10); margin-top: var(--space-24); padding: var(--space-12) var(--space-16); border: 1px solid var(--color-error-border); border-radius: var(--radius-md); background: var(--color-error-subtle); color: var(--color-content-error); animation: rise .3s ease both; }
+.auth-alert { display: flex; gap: var(--space-10); margin-top: var(--space-16); padding: var(--space-12) var(--space-16); border: 1px solid var(--color-error-border); border-radius: var(--radius-md); background: var(--color-error-subtle); color: var(--color-content-error); animation: rise .3s ease both; }
 .auth-alert[hidden] { display: none; }
 .auth-alert svg { width: 20px; height: 20px; flex: none; margin-top: 1px; }
 .auth-alert b { display: block; font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; }
 .auth-alert p { margin-top: 2px; font-size: var(--text-body-14); line-height: 1.6; color: var(--color-content-neutral); }
 
 /* ---------- Google 버튼 — 흰 바탕 + 공식 G 로고 (Google 브랜드 가이드) ---------- */
-.btn-google { position: relative; display: flex; align-items: center; justify-content: center; gap: var(--space-12); width: 100%; height: 52px; margin-top: var(--space-32); border: 1px solid var(--color-neutral-border); border-radius: var(--radius-full); background: var(--color-surface-overlay); font-size: var(--text-body-16); font-weight: 600; color: var(--color-content-neutral); box-shadow: var(--elevation-xs); transition: box-shadow .18s ease, background .18s ease, border-color .18s ease; }
-.auth-alert + .btn-google { margin-top: var(--space-16); }
+.btn-google { position: relative; display: flex; align-items: center; justify-content: center; gap: var(--space-12); width: 100%; height: 52px; margin-top: var(--space-24); border: 1px solid var(--color-neutral-border); border-radius: var(--radius-full); background: var(--color-surface-overlay); font-size: var(--text-body-16); font-weight: 600; color: var(--color-content-neutral); box-shadow: var(--elevation-xs); transition: box-shadow .18s ease, background .18s ease, border-color .18s ease; }
+.auth-alert:not([hidden]) + .btn-google { margin-top: var(--space-16); }
 /* 호버·프레스는 색을 바꾸지 않고 상태 레이어를 겹친다 */
 .btn-google:hover { background: linear-gradient(var(--color-state-hover), var(--color-state-hover)), var(--color-surface-overlay); border-color: var(--color-border-strong); box-shadow: var(--elevation-sm); }
 .btn-google:active { background: linear-gradient(var(--color-state-pressed), var(--color-state-pressed)), var(--color-surface-overlay); }
@@ -90,15 +90,11 @@ a { color: inherit; }
 
 /* ---------- 반응형 ---------- */
 @media (max-width: 900px) {
-  .auth { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
-  .auth-visual { order: 0; position: relative; height: 200px; }   /* 모바일: 사진 띠를 위로 */
-  .auth-copy { left: 20px; right: 20px; bottom: 20px; }
-  .auth-copy .lead { font-size: var(--text-body-16); }
-  .auth-main { padding: var(--space-8) var(--space-20) var(--space-24); }
-  .auth-card { margin: 0 auto; padding: var(--space-32) 0 var(--space-48); }
+  .auth { padding: 0 var(--space-16) var(--space-24); }
+  .auth-top { height: 56px; }
 }
 @media (max-width: 560px) {
-  .auth-copy .eyebrow { display: none; }
+  .auth-card { padding: var(--space-32) var(--space-20) var(--space-24); border-radius: var(--radius-xl); }
   .modal-box { padding: var(--space-20); }
   .state-switch { left: var(--space-16); right: var(--space-16); justify-content: space-between; border-radius: var(--radius-lg); }
 }
@@ -107,27 +103,23 @@ a { color: inherit; }
 <body>
 
 <div class="auth">
-  <!-- 좌: 비주얼 -->
-  <aside class="auth-visual" aria-hidden="true">
-    <img src="../assets/about/forest-trail.jpg" alt="">
-    <div class="auth-copy">
-      <p class="eyebrow">SCENTRIP</p>
-      <p class="lead">나만의 취향을 찾아 떠나는 특별한 여행,<br>센트립이 당신의 여정을 함께합니다.</p>
-    </div>
-  </aside>
+  <div class="auth-top">
+    <a class="brand" href="home.html" aria-label="Scentrip 홈">
+      <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="brand-name">Scentrip</span>
+    </a>
+  </div>
 
-  <!-- 우: 로그인 -->
   <main class="auth-main">
-    <div class="auth-top">
-      <a class="brand" href="home.html" aria-label="Scentrip 홈">
-        <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span class="brand-name">Scentrip</span>
-      </a>
-    </div>
-
     <section class="auth-card" aria-labelledby="loginTitle">
       <h1 class="auth-title" id="loginTitle">나의 향 취향을<br>여행으로 이어가요</h1>
       <p class="auth-sub">검사 결과와 추천 여행지를 저장하려면<br>Google 계정으로 시작해 주세요.</p>
+
+      <ul class="auth-perks" aria-label="로그인하면 할 수 있어요">
+        <li><span class="perk-ic" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M240,128a15.79,15.79,0,0,1-10.5,15l-63.44,23.06L143,229.5a16,16,0,0,1-30,0L89.94,166.06,26.5,143a16,16,0,0,1,0-30l63.44-23.06L113,26.5a16,16,0,0,1,30,0l23.06,63.44L229.5,113A15.79,15.79,0,0,1,240,128Z"/></svg></span>향 취향 검사 결과를 저장해요</li>
+        <li><span class="perk-ic" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M178,32c-20.65,0-38.73,8.88-50,23.89C116.73,40.88,98.65,32,78,32A62.07,62.07,0,0,0,16,94c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,220.66,240,164,240,94A62.07,62.07,0,0,0,178,32Zm-50,174c-18.26-11.06-96-64.11-96-112A46.06,46.06,0,0,1,78,48c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0C142.22,58.36,158.55,48,178,48a46.06,46.06,0,0,1,46,46C224,141.87,146.24,194.93,128,206Z"/></svg></span>마음에 드는 여행지를 찜해요</li>
+        <li><span class="perk-ic" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M228.92,49.69a8,8,0,0,0-6.86-1.45L160.93,63.52,99.58,32.84a8,8,0,0,0-5.52-.6l-64,16A8,8,0,0,0,24,56V200a8,8,0,0,0,9.94,7.76l61.13-15.28,61.35,30.68A8.15,8.15,0,0,0,160,224a8,8,0,0,0,1.94-.24l64-16A8,8,0,0,0,232,200V56A8,8,0,0,0,228.92,49.69ZM104,52.94l48,24V203.06l-48-24ZM40,62.25l48-12v127.5l-48,12Zm176,131.5-48,12V78.25l48-12Z"/></svg></span>나만의 여행 동선을 만들고 저장해요</li>
+      </ul>
 
       <div class="auth-alert" id="alert" role="alert" hidden>
         <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-8,56a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm8,104a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z"/></svg>
