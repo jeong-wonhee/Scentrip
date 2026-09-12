@@ -299,9 +299,9 @@ function render() {
   $("moreWrap").hidden = more <= 0;
   if (more > 0) $("moreBtn").textContent = `소식 더 보기 (${more}편)`;
   renderChip();
-  const p = new URLSearchParams();
-  if (sortKey !== "match" && !IS_GUEST) p.set("sort", sortKey);
-  if (region) p.set("region", region);
+  const p = new URLSearchParams(location.search);   // ?tour=1 같은 다른 값은 지우지 않는다 — 정렬·지역만 바꾼다
+  if (sortKey !== "match" && !IS_GUEST) p.set("sort", sortKey); else p.delete("sort");
+  if (region) p.set("region", region); else p.delete("region");
   history.replaceState(null, "", location.pathname + (p.toString() ? "?" + p : ""));
 }
 function refresh() {   // 정렬·필터가 바뀌면 살짝 페이드
