@@ -102,6 +102,13 @@ html .guest-only { display: none; }
 .taste-character { position: absolute; right: clamp(12px, 3%, 24px); bottom: 0; width: clamp(116px, 42%, 240px); display: flex; align-items: flex-end; justify-content: center; z-index: 1; pointer-events: none; }
 .char-slot { position: relative; width: 100%; aspect-ratio: 4 / 5; display: flex; align-items: center; justify-content: center; }
 .char-slot .emoji { font-size: 72px; line-height: 1; }
+/* 비회원: 아직 모르는 여행 취향 — 점선 비행기 실루엣 + 물음표 (테스트하면 캐릭터가 이 자리에 들어온다) */
+.guest-plane { display: none; width: 88%; height: auto; overflow: visible; color: var(--type-accent); animation: plane-float 4.8s ease-in-out infinite; }
+.is-guest .guest-plane { display: block; }
+.guest-plane .gp-body { fill: color-mix(in srgb, currentColor 10%, transparent); stroke: currentColor; stroke-width: 2.5; stroke-dasharray: 7 6; stroke-linejoin: round; stroke-linecap: round; }
+.guest-plane .gp-q { font-family: var(--font-family); font-size: 44px; font-weight: 700; fill: var(--type-deep); opacity: .72; }
+@keyframes plane-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@media (prefers-reduced-motion: reduce) { .guest-plane { animation: none; } }
 /* 캐릭터 이미지 — 어두운 배경 위에 밝은 부분만 얹혀 은은한 글로우(향의 정령) */
 .char-slot .char-img {
   position: relative; z-index: 1;
@@ -336,7 +343,13 @@ a.news-item:hover .news-title { color: var(--color-primary); }
         <span class="blur-b" aria-hidden="true"></span>
         <div class="taste-atmos" aria-hidden="true"></div>
         <div class="taste-character" aria-hidden="true">
-          <div class="char-slot"><img class="char-img" id="tasteChar" alt="" hidden><span class="emoji" id="tasteEmoji" hidden>🧭</span></div>
+          <div class="char-slot"><img class="char-img" id="tasteChar" alt="" hidden><span class="emoji" id="tasteEmoji" hidden>🧭</span>
+          <svg class="guest-plane" viewBox="0 0 200 200" aria-hidden="true">
+            <g transform="rotate(45 100 100) translate(100 100) scale(.8) translate(-100 -100)">
+              <path class="gp-body" d="M100 12C109 12 116 24 116 40V78L184 112V130L116 110V150L140 168V182L100 172L60 182V168L84 150V110L16 130V112L84 78V40C84 24 91 12 100 12Z"/>
+            </g>
+            <text class="gp-q" x="100" y="100" text-anchor="middle" dominant-baseline="central">?</text>
+          </svg></div>
         </div>
         <div class="taste-inner">
           <div class="taste-labels auth-only">
@@ -478,7 +491,7 @@ function applyTaste(code){
 const IS_GUEST = document.documentElement.classList.contains("is-guest");
 if (IS_GUEST) {
   // 게스트: 개인화 색/캐릭터 대신 중립 브랜드 톤, 헤딩을 일반 문구로
-  const gEmoji = document.getElementById("tasteEmoji"); gEmoji.textContent = "🧭"; gEmoji.hidden = false;
+  document.getElementById("tasteEmoji").hidden = true;   // 비회원은 나침반 대신 점선 비행기(.guest-plane, CSS 로 표시)
   document.getElementById("tasteChar").hidden = true;
   const newsH2 = document.querySelector(".news-head-title h2");
   if (newsH2) newsH2.textContent = "지금 뜨는 여행 소식";
