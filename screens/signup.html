@@ -34,7 +34,7 @@ a { color: inherit; }
 
 /* ---------- 레이아웃 (login.html 과 동일) ---------- */
 .auth { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: 100vh; }
-.auth-visual { position: sticky; top: 0; height: 100vh; overflow: hidden; background: var(--color-primary); }
+.auth-visual { order: 2; position: sticky; top: 0; height: 100vh; overflow: hidden; background: var(--color-primary); }   /* 데스크톱: 폼 왼쪽 · 사진 오른쪽 */
 .auth-visual img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.04); animation: drift 26s ease-in-out infinite alternate; }
 @keyframes drift { to { transform: scale(1.1) translate(-1.5%, -1%); } }
 .auth-visual::after { content: ""; position: absolute; inset: 0; background: var(--gradient-depth); opacity: .62; mix-blend-mode: multiply; }
@@ -115,9 +115,6 @@ a { color: inherit; }
 .spinner { width: 18px; height: 18px; flex: none; border: 2px solid currentColor; border-right-color: transparent; border-radius: var(--radius-full); animation: spin .7s linear infinite; }
 .spinner[hidden] { display: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.auth-later { align-self: center; margin-top: var(--space-16); padding: var(--space-4) var(--space-8); font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-neutral-muted); text-decoration: underline; text-underline-offset: 3px; }
-.auth-later:hover { color: var(--color-content-default); }
-.auth-later-note { margin-top: var(--space-4); font-size: var(--text-caption-12); line-height: 1.5; color: var(--color-content-neutral-subtle); text-align: center; }
 
 /* ---------- 가입 완료 ---------- */
 .auth-done { align-items: center; text-align: center; }
@@ -148,7 +145,7 @@ a { color: inherit; }
 /* ---------- 반응형 ---------- */
 @media (max-width: 900px) {
   .auth { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
-  .auth-visual { position: relative; height: 160px; }
+  .auth-visual { order: 0; position: relative; height: 160px; }   /* 모바일: 사진 띠를 위로 */
   .auth-copy { display: none; }
   .auth-main { padding: var(--space-8) var(--space-20) var(--space-24); }
   .auth-card { margin: 0 auto; padding: var(--space-24) 0 var(--space-48); }
@@ -245,8 +242,6 @@ a { color: inherit; }
         <span class="spinner" id="submitSpin" hidden></span>
         <span id="submitLabel">가입 완료하기</span>
       </button>
-      <a class="auth-later" id="laterLink" href="home.html">나중에 가입할게요</a>
-      <p class="auth-later-note">다음에 로그인하면 이 단계부터 이어서 진행해요.</p>
     </section>
 
     <!-- ② 가입 완료 -->
@@ -304,7 +299,6 @@ function safeNext(v) {
 const next = safeNext(params.get("next"));
 $("qaFrom").value = params.get("from") === "test" ? "test" : "";
 $("resumeNote").hidden = !params.has("resume");
-$("laterLink").href = next;
 
 /* 동의 문서 버전 — 약관 부칙·방침 버전과 맞춘다. 실서비스는 서버가 버전·동의 시각(서버 시간)을 기록 (명세 9) */
 const TERMS_VERSION = "2026-08-09";

@@ -35,7 +35,7 @@ a { color: inherit; }
 
 /* ---------- 레이아웃 — 좌: 사진 비주얼 / 우: 폼 ---------- */
 .auth { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: 100vh; }
-.auth-visual { position: sticky; top: 0; height: 100vh; overflow: hidden; background: var(--color-primary); }
+.auth-visual { order: 2; position: sticky; top: 0; height: 100vh; overflow: hidden; background: var(--color-primary); }   /* 데스크톱: 폼 왼쪽 · 사진 오른쪽 */
 .auth-visual img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.04); animation: drift 26s ease-in-out infinite alternate; }
 @keyframes drift { to { transform: scale(1.1) translate(-1.5%, -1%); } }
 .auth-visual::after { content: ""; position: absolute; inset: 0; background: var(--gradient-depth); opacity: .62; mix-blend-mode: multiply; }
@@ -45,9 +45,6 @@ a { color: inherit; }
 
 .auth-main { display: flex; flex-direction: column; min-width: 0; padding: var(--space-8) var(--space-40) var(--space-24); }
 .auth-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-16); }
-.auth-back { display: inline-flex; align-items: center; gap: var(--space-4); height: 36px; padding: 0 var(--space-12); border-radius: var(--radius-full); font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-neutral-muted); text-decoration: none; transition: background .14s ease, color .14s ease; }
-.auth-back:hover { background: var(--color-state-hover); color: var(--color-content-default); }
-.auth-back svg { width: 16px; height: 16px; }
 
 .auth-card { display: flex; flex-direction: column; width: 100%; max-width: 400px; margin: auto; padding: var(--space-48) 0; animation: rise .5s cubic-bezier(.22, .61, .36, 1) both; }
 @keyframes rise { from { opacity: 0; transform: translateY(12px); } }
@@ -94,7 +91,7 @@ a { color: inherit; }
 /* ---------- 반응형 ---------- */
 @media (max-width: 900px) {
   .auth { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
-  .auth-visual { position: relative; height: 200px; }
+  .auth-visual { order: 0; position: relative; height: 200px; }   /* 모바일: 사진 띠를 위로 */
   .auth-copy { left: 20px; right: 20px; bottom: 20px; }
   .auth-copy .lead { font-size: var(--text-body-16); }
   .auth-main { padding: var(--space-8) var(--space-20) var(--space-24); }
@@ -122,13 +119,9 @@ a { color: inherit; }
   <!-- 우: 로그인 -->
   <main class="auth-main">
     <div class="auth-top">
-      <a class="brand" href="home.html" aria-label="Scentrip 홈">
+      <a class="brand" id="brandLink" href="home.html" aria-label="Scentrip — 이전 화면으로">
         <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
         <span class="brand-name">Scentrip</span>
-      </a>
-      <a class="auth-back" id="backLink" href="home.html">
-        <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/></svg>
-        둘러보기로 돌아가기
       </a>
     </div>
 
@@ -193,7 +186,7 @@ function safeNext(v) {
 }
 const next = safeNext(params.get("next"));
 const from = params.get("from") === "test" ? "test" : "";
-$("backLink").href = next;
+$("brandLink").href = next;   // 로고 = 로그인 전에 보던 화면으로 (없으면 홈)
 
 /* 오류·예외 안내 (명세 17) */
 const MSG = {
