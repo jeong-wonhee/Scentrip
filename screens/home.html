@@ -105,6 +105,11 @@ html .guest-only { display: none; }
 /* 비회원: 아직 모르는 여행 취향 — 점선 비행기 실루엣 + 물음표 (테스트하면 캐릭터가 이 자리에 들어온다) */
 .guest-plane { display: none; width: 88%; height: auto; overflow: visible; color: var(--type-accent); animation: plane-float 4.8s ease-in-out infinite; }
 .is-guest .guest-plane { display: block; }
+/* 크게 키워 카드 오른쪽 아래 모서리 밖으로 걸치게 — 카드(overflow:hidden)가 잘라 준다. 380px 이하는 글 아래로 내려가는 배치라 그대로 */
+.is-guest .taste-character { right: -10%; bottom: -24%; width: clamp(220px, 58%, 420px); }
+.is-guest .char-slot { aspect-ratio: 1 / 1; }
+.is-guest .guest-plane { width: 100%; }
+@media (max-width: 380px) { .is-guest .taste-character { right: auto; bottom: auto; width: 100%; } .is-guest .guest-plane { width: 88%; } }
 .guest-plane .gp-body { fill: color-mix(in srgb, currentColor 10%, transparent); stroke: currentColor; stroke-width: 2.5; stroke-dasharray: 7 6; stroke-linejoin: round; stroke-linecap: round; }
 .guest-plane .gp-q { font-family: var(--font-family); font-size: 44px; font-weight: 700; fill: var(--type-deep); opacity: .72; }
 @keyframes plane-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
