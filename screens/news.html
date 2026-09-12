@@ -66,7 +66,7 @@ html .guest-only { display: none; }
    ============================================================ */
 .nw-head { display: flex; flex-direction: column; gap: var(--space-8); padding: 36px 60px 0; width: 100%; }
 .nw-head h1 { font-size: var(--text-title-32); font-weight: 600; line-height: 1.25; color: var(--color-content-neutral); }   /* 페이지 제목은 내 여행 제목과 같은 검정 — 초록은 탐색 탭의 '선택됨' 표시에만 쓴다 */
-.nw-head p { max-width: 640px; font-size: var(--text-body-16); font-weight: 400; line-height: 1.5; color: var(--color-content-neutral-muted); }
+.nw-head p { font-size: var(--text-body-16); font-weight: 400; line-height: 1.5; color: var(--color-content-neutral-muted); }
 
 .content { display: flex; flex-direction: column; gap: 28px; align-items: center; padding: 28px 60px 36px; width: 100%; background: var(--color-background); }
 .filterbar { display: flex; gap: var(--space-24); align-items: center; width: 100%; }
@@ -445,5 +445,6 @@ ScentTour.run("news", [
   { el: "#grid > :first-child", title: "이야기 카드", body: "AI 매칭 %는 글 속 장소들의 취향 매칭 평균이에요. 글을 읽고 그 장소들로 바로 동선을 만들 수 있어요." },
 ]);
 </script>
+<script src="../reference/lang.js"></script>
 </body>
 </html>

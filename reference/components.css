@@ -365,3 +365,17 @@ label:hover > .ck-radio { border-color: var(--color-border-strong); }
   .tour, .tour-hole, .tour-pop { transition: none; }
   .tour-hole::after, .tour-pop.is-in { animation: none; }
 }
+
+/* ============================================================
+   언어 변경 — .lang (reference/lang.js 가 헤더 오른쪽에 넣는다)
+   지구본 + 현재 언어 코드. 프로필 칩보다 한 단계 가벼운 고스트 버튼, 메뉴는 공용 .menu 를 오른쪽 정렬로.
+   ============================================================ */
+.lang { position: relative; margin-right: var(--space-8); }
+.auth-top .lang { margin: 0 0 0 auto; }
+.lang-btn { display: inline-flex; align-items: center; gap: var(--space-6); height: 36px; padding: 0 var(--space-12); border: 0; border-radius: var(--radius-full); background: none; font-family: inherit; letter-spacing: inherit; font-size: 13px; font-weight: 600; line-height: 1; color: var(--color-content-neutral-muted); cursor: pointer; transition: background .14s ease, color .14s ease; }
+.lang-btn svg { width: 18px; height: 18px; flex: none; }
+.lang-btn:hover, .lang-btn[aria-expanded="true"] { background: var(--color-neutral-subtle); color: var(--color-content-neutral); }
+.lang-btn:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
+.lang .menu { left: auto; right: 0; min-width: 200px; }
+.lang .menu-item em { margin-left: var(--space-6); font-style: normal; font-size: var(--text-caption-12); font-weight: 400; color: var(--color-content-neutral-subtle); }
+.lang-toast svg { color: var(--color-content-on-fill); opacity: .8; }

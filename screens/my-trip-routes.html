@@ -283,6 +283,29 @@ html .guest-only { display: none; }
 .route-card .rd-link:focus-visible, .featured-card .rd-link:focus-visible { outline: none; }
 .route-card .rd-link:focus-visible::after, .featured-card .rd-link:focus-visible::after { outline: 3px solid var(--color-border-focus); outline-offset: 4px; border-radius: var(--radius-lg); }
 .route-card .heart-btn, .route-card .heart { z-index: 3; }
+
+/* 내가 만든 동선 — 하트(저장) 대신 더보기(⋯) 메뉴 → 삭제.
+   사진 영역은 overflow:hidden 이라 메뉴가 잘리지 않게 카드(.route-card) 기준으로 띄운다 (위치는 하트와 같은 자리) */
+.rc-more { position: absolute; top: 12px; right: 12px; z-index: 3; }
+.rc-more:has(.menu.is-open) { z-index: 5; }
+.rc-more-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: var(--radius-full); background: var(--color-surface-overlay); color: var(--color-content-neutral); box-shadow: var(--elevation-sm); cursor: pointer; transition: background .14s ease; }
+.rc-more-btn svg { width: 20px; height: 20px; }
+.rc-more-btn:hover, .rc-more-btn[aria-expanded="true"] { background: var(--color-neutral-subtle); }
+.rc-more-btn:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
+.rc-more .menu { top: calc(100% + 6px); right: 0; left: auto; min-width: 140px; }
+.rc-more .menu-item.danger { color: var(--color-content-error); }
+.rc-more .menu-item .ic { display: inline-flex; align-items: center; gap: var(--space-8); }
+.rc-more .menu-item .ic svg { width: 16px; height: 16px; }
+/* 삭제 확인 */
+#delModal .modal-box { width: 400px; max-width: calc(100vw - 32px); }
+.del-desc { margin-top: var(--space-6); font-size: var(--text-body-14); font-weight: 400; line-height: 1.6; color: var(--color-content-neutral-muted); }
+.del-desc b { font-weight: 600; color: var(--color-content-neutral); }
+.del-foot { display: flex; justify-content: flex-end; gap: var(--space-8); }
+.rc-cancel, .rc-del { height: 44px; padding: 0 var(--space-20); border-radius: var(--radius-full); font-family: inherit; letter-spacing: inherit; font-size: var(--text-body-14); font-weight: 600; cursor: pointer; transition: background .14s ease; }
+.rc-cancel { border: 1px solid var(--color-neutral-border); background: var(--color-surface-overlay); color: var(--color-content-neutral); }
+.rc-cancel:hover { background: var(--color-neutral-subtle); }
+.rc-del { border: 0; background: var(--color-error); color: var(--color-content-on-fill); }
+.rc-del:hover { background: var(--color-content-error); }
 </style>
 <script>(function(){try{if((localStorage.getItem("scentrip_auth")||"in")==="out")document.documentElement.classList.add("is-guest");}catch(e){}})();</script>
 </head>
@@ -409,6 +432,16 @@ const xCircle = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="tru
 
 const check = '<svg class="check" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/></svg>';
 
+/* 내가 만든 동선의 더보기(⋯) 메뉴 — 지금은 삭제 하나 (편집은 동선 상세의 [편집하기]) */
+const dots = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128Zm56-12a12,12,0,1,0,12,12A12,12,0,0,0,196,116ZM60,116a12,12,0,1,0,12,12A12,12,0,0,0,60,116Z"/></svg>';
+const trash = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"/></svg>';
+function moreMenu(r) {
+  return `<div class="rc-more">
+        <button class="rc-more-btn" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="${r.name} 더보기">${dots}</button>
+        <div class="menu" role="menu"><button class="menu-item danger" type="button" role="menuitem" data-delete><span class="ic">${trash}삭제</span></button></div>
+      </div>`;
+}
+
 /* ---------- 동선 카드 (지도+마커) ---------- */
 /* 동선 상세로 — 저장한 동선은 id, 샘플 동선은 카드 정보를 넘겨 상세에서 코스를 채운다 */
 function detailHref(r) {
@@ -423,9 +456,10 @@ function routeCard(r, i) {
         <svg class="route-lines" viewBox="0 0 371 200" preserveAspectRatio="none" aria-hidden="true"><polyline points="202.67,39 280.67,100 240.67,120 210.67,160 310.67,150"/></svg>
         <div class="route-inset"><img src="../assets/home/${r.inset}.jpg" alt=""></div>
         <span class="badge">${starFour}<span>AI 매칭 ${r.match}%</span></span>
-        <button class="heart-btn" type="button" data-unsave aria-label="${r.name} 저장 해제" aria-pressed="true">${heart}</button>
+        ${r.owner === "mine" ? "" : `<button class="heart-btn" type="button" data-unsave aria-label="${r.name} 저장 해제" aria-pressed="true">${heart}</button>`}
         <span class="route-marker m1">1</span><span class="route-marker m2">2</span><span class="route-marker m3">3</span><span class="route-marker m4">4</span><span class="route-marker m5">5</span>
       </div>
+      ${r.owner === "mine" ? moreMenu(r) : ""}
       <div class="route-body">
         <div class="route-title"><span class="place">${r.place}</span><a class="name rd-link" href="${detailHref(r)}">${r.name}</a></div>
         <p class="route-desc">${r.desc}</p>
@@ -944,5 +978,74 @@ document.addEventListener('click',function(e){
   } catch (e) {}
 })();
 </script>
+
+<!-- 내가 만든 동선 삭제 확인 -->
+<div class="modal-scrim" id="delModal" hidden>
+  <div class="modal-box" role="alertdialog" aria-modal="true" aria-labelledby="delTitle" aria-describedby="delDesc">
+    <div class="modal-head">
+      <div>
+        <h2 id="delTitle">이 동선을 삭제할까요?</h2>
+        <p class="del-desc" id="delDesc"><b id="delName"></b> 동선이 내 여행에서 사라져요. 삭제한 동선은 되돌릴 수 없어요.</p>
+      </div>
+      <button class="modal-close" type="button" aria-label="닫기"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
+    </div>
+    <div class="modal-foot del-foot">
+      <button class="rc-cancel" type="button">취소</button>
+      <button class="rc-del" type="button">삭제</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="rcToast" role="status" aria-live="polite"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></svg><span></span></div>
+<script>
+/* 내가 만든 동선 — ⋯ 메뉴 → 삭제. 확인 후 목록에서 바로 지운다 (하트 저장 해제와 달리 되돌릴 수 없다).
+   저장한 동선(동선 결과 화면에서 저장, id 있음)은 저장 목록에서 지우고, 샘플 동선은 숨김 목록에 남긴다.
+   TODO(개발): 동선 삭제 API */
+(function () {
+  const scrim = document.getElementById("delModal");
+  let target = null, opener = null, toastT;
+  function closeMenus() {
+    grid.querySelectorAll(".rc-more .menu.is-open").forEach((m) => { m.classList.remove("is-open"); m.previousElementSibling.setAttribute("aria-expanded", "false"); });
+  }
+  function openModal(card, btn) {
+    target = card; opener = btn;
+    document.getElementById("delName").textContent = `'${ROUTES[+card.dataset.i].name}'`;
+    scrim.hidden = false; void scrim.offsetWidth; scrim.classList.add("is-open");
+    scrim.querySelector(".rc-cancel").focus();
+  }
+  function closeModal() {
+    scrim.classList.remove("is-open");
+    setTimeout(() => { scrim.hidden = true; if (opener && opener.isConnected) opener.focus(); }, 160);
+  }
+  function say(msg) {
+    const t = document.getElementById("rcToast");
+    t.querySelector("span").textContent = msg; t.classList.add("is-open");
+    clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("is-open"), 2400);
+  }
+  grid.addEventListener("click", (e) => {
+    const mb = e.target.closest(".rc-more-btn");
+    if (mb) {
+      e.preventDefault(); e.stopPropagation();
+      const m = mb.nextElementSibling, on = !m.classList.contains("is-open");
+      closeMenus(); m.classList.toggle("is-open", on); mb.setAttribute("aria-expanded", on ? "true" : "false");
+      if (on) m.querySelector(".menu-item").focus();
+      return;
+    }
+    const del = e.target.closest("[data-delete]");
+    if (del) { e.preventDefault(); e.stopPropagation(); closeMenus(); openModal(del.closest(".route-card"), del.closest(".rc-more").querySelector(".rc-more-btn")); }
+  });
+  document.addEventListener("click", (e) => { if (!e.target.closest(".rc-more")) closeMenus(); });
+  document.addEventListener("keydown", (e) => { if (e.key !== "Escape") return; if (!scrim.hidden) closeModal(); else closeMenus(); });
+  scrim.addEventListener("click", (e) => { if (e.target === scrim || e.target.closest(".modal-close, .rc-cancel")) closeModal(); });
+  scrim.querySelector(".rc-del").addEventListener("click", () => {
+    const r = ROUTES[+target.dataset.i];
+    if (r.id) { try { localStorage.setItem(SAVED_KEY, JSON.stringify(readSaved().filter((x) => x.id !== r.id))); } catch (x) {} }
+    else { dropped.add(keyOf(r)); writeUnsaved(new Set([...dropped, ...unsaved])); }
+    target.remove(); refreshCount();
+    opener = null; closeModal();
+    say(`'${r.name}' 동선을 삭제했어요`);
+  });
+})();
+</script>
+<script src="../reference/lang.js"></script>
 </body>
 </html>
