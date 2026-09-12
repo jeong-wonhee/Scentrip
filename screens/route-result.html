@@ -52,7 +52,7 @@ html .guest-only { display: none; }
 /* ---------- 2분할 (좌: 일차별 동선 / 우: 지도, 1:1) ---------- */
 .rr-wrap { flex: 1 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
 .rr-main { min-width: 0; padding: var(--space-32); }
-.rr-mapcol { position: sticky; top: 56px; height: calc(100vh - 56px); border-left: 1px solid var(--color-border-subtle); }
+.rr-mapcol { position: sticky; top: 56px; height: calc(100vh - 56px - var(--save-bar-h));   /* 하단 저장 바만큼 줄여 지도 아래가 가려지지 않게 */ border-left: 1px solid var(--color-border-subtle); }
 
 /* ---------- 조건 (여행 조건 수정 모달에서 사용) ---------- */
 .cond-group + .cond-group { margin-top: var(--space-4); padding-top: var(--space-20); border-top: 1px solid var(--color-border-subtle); }
@@ -270,10 +270,19 @@ html .guest-only { display: none; }
 .btn-danger:hover { background: var(--color-error-hover); }
 
 /* ---------- 저장 바 ---------- */
-.save-bar { position: sticky; bottom: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: var(--space-16); margin-top: var(--space-32); padding: var(--space-16) var(--space-20); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); background: var(--color-surface-overlay); box-shadow: var(--elevation-md); }
+/* 화면 전체 너비로 하단에 붙는다(sticky). 위쪽만 라운드, 그림자는 위로 드리운다
+   (엘리베이션 토큰은 아래로만 떨어져서, 같은 그린 틴트 #1b231d 로 위 방향만 따로 둔다) */
+:root { --save-bar-h: 76px; }
+.save-bar { position: sticky; bottom: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: var(--space-16); height: var(--save-bar-h); padding: 0 var(--space-32); border: 1px solid var(--color-border-subtle); border-bottom: 0; border-radius: var(--radius-xl) var(--radius-xl) 0 0; background: var(--color-surface-overlay); box-shadow: 0 -6px 20px -8px rgba(27, 35, 29, .14); }
 .save-bar p { font-size: var(--text-body-14); font-weight: 500; color: var(--color-content-neutral-muted); }
 .save-btn { height: 44px; padding: 0 var(--space-24); border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-base-white); font-size: var(--text-body-14); font-weight: 600; }
 .save-btn:hover { background: var(--scent-green-700); }
+/* 저장 완료 — 같은 자리에서 옅은 그린으로 바뀐다 */
+.save-btn.is-done { background: var(--color-surface-02); color: var(--color-primary); }
+.save-btn.is-done:hover { background: var(--color-surface-02); }
+.save-bar p a { font-weight: 600; color: var(--color-primary); text-underline-offset: 3px; }
+/* 토스트는 하단 저장 바 위로 띄운다 */
+.toast { bottom: calc(var(--save-bar-h) + var(--space-16)); }
 
 /* ---------- 여행 조건: 헤더 버튼 + 수정 모달 ---------- */
 .cond-btn { display: inline-flex; align-items: center; gap: var(--space-8); margin-left: auto; flex: none; height: 40px; padding: 0 var(--space-20); border-radius: var(--radius-full); border: 1px solid var(--color-neutral-border); background: var(--color-background); font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-neutral); }
@@ -400,10 +409,6 @@ html .guest-only { display: none; }
         </div>
       </div>
 
-      <div class="save-bar">
-        <p id="saveMsg">아직 저장하지 않은 동선이에요</p>
-        <button class="save-btn" id="saveBtn" type="button">내 여행에 저장</button>
-      </div>
     </main>
 
     <!-- ============ 지도 ============ -->
@@ -418,6 +423,12 @@ html .guest-only { display: none; }
       </div>
     </div>
 
+  </div>
+
+  <!-- ============ 저장 바 (화면 하단 전체 너비) ============ -->
+  <div class="save-bar auth-only">
+    <p id="saveMsg">아직 저장하지 않은 동선이에요</p>
+    <button class="save-btn" id="saveBtn" type="button">내 여행에 저장</button>
   </div>
 
 </div>
@@ -1376,12 +1387,57 @@ $("map").addEventListener("click", (e) => {
   if (item) item.scrollIntoView({ block: "center", behavior: "smooth" });
 });
 
+/* ---------- 내 여행에 저장 ----------
+   프로토타입은 localStorage 에 둔다 → 내 여행 › 내 동선(my-trip-routes.html)이 읽어 목록 맨 앞에 보여준다.
+   레코드는 그 화면의 동선 카드 모양 그대로 + 다시 열 때 쓸 snapshot.
+   한 번 저장한 뒤 다시 저장하면 같은 동선을 덮어쓴다.
+   TODO(개발): 실서비스는 저장 API 로 대체 (snapshot = 요청 본문 후보) */
+const SAVED_KEY = "scentrip_saved_routes";
+const UNSAVED_ROUTES_KEY = "scentrip_unsaved_routes";
+let savedId = null;
+function saveRoute() {
+  if (savedId && !dirty) { say("이미 내 여행에 저장된 동선이에요"); return; }
+  const meta = REGION_META[regionKey];
+  const all = days.flatMap((_, i) => shown(i));
+  if (!all.length) { say("저장할 장소가 없어요"); return; }
+  const pace = cond.pace === "넉넉하게" ? "여유로운 코스" : cond.pace === "빽빽하게" ? "부지런한 코스" : "보통";
+  const period = cond.nights || "당일치기";
+  const rec = {
+    id: savedId || `r${Date.now()}`,
+    inset: "inset1",
+    place: `[${all[0].name}]`,
+    name: $("rrTitle").textContent,
+    sido: meta.sido, unit: meta.sigungu, period, pace, theme: "", owner: "mine",
+    desc: `${meta.label} 일대의 ${meta.tagline} 여행`,
+    meta: `${all.length}개 장소 · ${period.replace(/\s/g, "")} · ${pace} · AI 추천`,
+    match: Math.round(all.reduce((s, p) => s + p.match, 0) / all.length), pop: 0,
+    savedAt: new Date().toISOString(),
+    snapshot: { regionKey, cond: Object.assign({}, cond), days },
+  };
+  try {
+    const list = JSON.parse(localStorage.getItem(SAVED_KEY) || "[]").filter((r) => r && r.id !== rec.id);
+    localStorage.setItem(SAVED_KEY, JSON.stringify([rec, ...list]));
+    // 예전에 하트로 해제해 둔 기록이 있으면 지운다 (다시 저장한 것이므로)
+    const un = new Set(JSON.parse(localStorage.getItem(UNSAVED_ROUTES_KEY) || "[]"));
+    if (un.delete(rec.id)) localStorage.setItem(UNSAVED_ROUTES_KEY, JSON.stringify([...un]));
+  } catch (e) { say("저장하지 못했어요. 잠시 후 다시 시도해 주세요"); return; }
+  const first = !savedId;
+  savedId = rec.id;
+  setDirty(false);
+  say(first ? "내 여행에 저장했어요" : "변경사항을 저장했어요");
+}
+
 /* ---------- 변경 감지 ---------- */
 let dirty = false;
 function setDirty(on) {
   dirty = on;
   $("dirtyBadge").hidden = !on;
-  $("saveMsg").textContent = on ? "저장하지 않은 변경사항이 있어요" : "아직 저장하지 않은 동선이에요";
+  const msg = $("saveMsg"), btn = $("saveBtn");
+  if (on) msg.textContent = "저장하지 않은 변경사항이 있어요";
+  else if (savedId) msg.innerHTML = '내 여행에 저장된 동선이에요 · <a href="my-trip-routes.html">보러 가기</a>';
+  else msg.textContent = "아직 저장하지 않은 동선이에요";
+  btn.textContent = !savedId ? "내 여행에 저장" : on ? "변경사항 저장" : "저장됨";
+  btn.classList.toggle("is-done", !!savedId && !on);
 }
 
 /* ---------- 토스트 ---------- */
@@ -1432,7 +1488,7 @@ $("regen").addEventListener("click", () => {
   generate(false);
   setDirty(true);
 });
-$("saveBtn").addEventListener("click", () => say("저장은 다음 단계에서 붙습니다"));
+$("saveBtn").addEventListener("click", saveRoute);
 
 loadKakao();
 initMap();

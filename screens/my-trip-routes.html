@@ -423,8 +423,19 @@ function routeCard(r, i) {
     </article>`;
 }
 
+/* 동선 결과 화면(route-result.html)에서 '내 여행에 저장'한 동선 — 최근 저장이 맨 앞.
+   TODO(개발): 실서비스는 저장 목록 API 로 대체 */
+const SAVED_KEY = "scentrip_saved_routes";
+function readSaved() {
+  try { const a = JSON.parse(localStorage.getItem(SAVED_KEY) || "[]"); return Array.isArray(a) ? a.filter((r) => r && r.id && r.name) : []; }
+  catch (e) { return []; }
+}
+/* 저장 해제 기록의 키 — 저장한 동선은 id(같은 제목이 여러 개일 수 있음), 샘플 동선은 이름 */
+const keyOf = (r) => r.id || r.name;
+
 /* match(취향 매칭%) · pop(인기) 값을 넣어 정렬이 실제로 보이게 한다 */
 const ROUTES = [
+  ...readSaved(),
   { inset:"inset1", place:"[강릉]", name:"강릉 해안 드라이브 동선", sido:"강원", unit:"강릉시", period:"1박 2일", pace:"부지런한 코스", theme:"자연·힐링", owner:"others", desc:"시원한 바다를 끼고 달리는 최고의 힐링 코스", meta:"6개 장소 · 1박2일 · 부지런한 코스 · OOO 취향", match:96, pop:1240 },
   { inset:"inset2", place:"[연무장길]", name:"성수동 힙플레이스 탐방", sido:"서울", unit:"성동구", period:"당일치기", pace:"여유로운 코스", theme:"맛집·카페", owner:"others", desc:"요즘 가장 뜨거운 팝업과 카페만 모았습니다", meta:"6개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:88, pop:4200 },
   { inset:"inset3", place:"[황리단길]", name:"경주 황리단길 감성 산책", sido:"경북", unit:"경주시", period:"당일치기", pace:"여유로운 코스", theme:"역사·문화", owner:"mine", desc:"한옥의 고즈넉함과 맛집을 동시에 즐기는 여행", meta:"4개 장소 · 당일치기 · 여유로운 코스 · OOO 취향", match:94, pop:2050 },
@@ -444,7 +455,7 @@ function readUnsaved() { try { return new Set(JSON.parse(localStorage.getItem(UN
 function writeUnsaved(set) { try { localStorage.setItem(UNSAVE_KEY, JSON.stringify([...set])); } catch (e) {} }
 const dropped = readUnsaved();
 const unsaved = new Set();
-const LIVE = ROUTES.map((r, i) => i).filter((i) => !dropped.has(ROUTES[i].name));
+const LIVE = ROUTES.map((r, i) => i).filter((i) => !dropped.has(keyOf(ROUTES[i])));
 
 const grid = document.getElementById("routeGrid");
 grid.innerHTML = LIVE.map((i) => routeCard(ROUTES[i], i)).join("");
@@ -776,12 +787,12 @@ grid.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-unsave]"); if (!btn) return;
   e.preventDefault(); e.stopPropagation();
   const card = btn.closest(".route-card");
-  const name = ROUTES[+card.dataset.i].name;
+  const r = ROUTES[+card.dataset.i], name = r.name, key = keyOf(r);
   const saved = !card.classList.contains("is-saved");
   card.classList.toggle("is-saved", saved);
   btn.setAttribute("aria-pressed", saved ? "true" : "false");
   btn.setAttribute("aria-label", `${name} ${saved ? "저장 해제" : "다시 저장"}`);
-  saved ? unsaved.delete(name) : unsaved.add(name);
+  saved ? unsaved.delete(key) : unsaved.add(key);
   writeUnsaved(new Set([...dropped, ...unsaved]));
 });
 
