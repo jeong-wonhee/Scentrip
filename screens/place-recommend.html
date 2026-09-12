@@ -807,5 +807,15 @@ document.addEventListener('click',function(e){
   } catch (e) {}
 })();
 </script>
+<script src="../reference/tour.js"></script>
+<script>
+/* 첫 방문 튜토리얼 — 가입 직후 신규 회원에게 이 화면에서 한 번 (reference/tour.js). 검수: 주소에 ?tour=1 */
+ScentTour.run("explore", [
+  { el: ".tabs", fit: true, title: "장소와 동선 둘러보기", body: "여행 장소와 여행 동선을 탭으로 오가며 탐색할 수 있어요." },
+  { el: "#sortSeg", title: "취향 매칭순으로 보기", body: "기본은 취향 매칭순이에요. 내 취향과 잘 맞는 장소부터 보여드려요." },
+  { el: "#filterChips", title: "필터로 좁혀 보기", body: "지역·특징·취향으로 원하는 장소만 골라 볼 수 있어요." },
+  { el: "#grid > :first-child", title: "장소 카드", body: "AI 매칭 %로 내 취향과 얼마나 맞는지 알려줘요. 카드를 누르면 장소 상세를 볼 수 있어요." },
+]);
+</script>
 </body>
 </html>

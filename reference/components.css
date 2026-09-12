@@ -312,3 +312,56 @@ label:hover > .ck-radio { border-color: var(--color-border-strong); }
 .footer-legal a { text-decoration: none; white-space: nowrap; }
 .footer-legal .lgl-muted { color: var(--color-content-neutral-muted); }
 .footer-legal .lgl-strong { color: var(--color-content-neutral-muted); }
+
+/* ============================================================
+   코치마크 투어 — .tour (reference/tour.js)
+   가입 직후 신규 회원에게 화면별로 한 번. 비춘 영역(.tour-hole) 바깥을 스크림으로 덮고
+   말풍선(.tour-pop)으로 설명한다. 모바일(≤560px)은 말풍선이 화면 아래 시트로 붙는다.
+   ============================================================ */
+.tour { position: fixed; inset: 0; z-index: 1000; opacity: 0; transition: opacity .2s ease; }
+.tour.is-open { opacity: 1; }
+.tour-hole {
+  position: absolute; border-radius: var(--radius-lg); pointer-events: none;
+  box-shadow: 0 0 0 2px var(--color-surface-overlay), 0 0 0 9999px var(--color-state-scrim);
+  transition: top .32s cubic-bezier(.22, .61, .36, 1), left .32s cubic-bezier(.22, .61, .36, 1), width .32s cubic-bezier(.22, .61, .36, 1), height .32s cubic-bezier(.22, .61, .36, 1);
+}
+/* 비춘 영역 테두리에서 한 번씩 번지는 링 */
+.tour-hole::after { content: ""; position: absolute; inset: -2px; border-radius: inherit; border: 2px solid var(--color-surface-overlay); opacity: 0; animation: tour-pulse 1.8s ease-out .3s infinite; }
+@keyframes tour-pulse { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.04); } }
+.tour.is-center .tour-hole { box-shadow: 0 0 0 9999px var(--color-state-scrim); }
+.tour.is-center .tour-hole::after { display: none; }
+
+.tour-pop {
+  position: absolute; width: 340px; max-width: calc(100vw - 32px);
+  padding: var(--space-20) var(--space-24);
+  border-radius: var(--radius-xl); background: var(--color-surface-overlay); box-shadow: var(--elevation-xl);
+  transition: top .32s cubic-bezier(.22, .61, .36, 1), left .32s cubic-bezier(.22, .61, .36, 1);
+}
+.tour-pop.is-in { animation: tour-in .28s ease both; }
+@keyframes tour-in { from { opacity: 0; } }
+.tour.is-center .tour-pop { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.tour-top { display: flex; align-items: center; justify-content: space-between; }
+.tour-dots { display: flex; gap: var(--space-4); }
+.tour-dots i { width: 6px; height: 6px; border-radius: var(--radius-full); background: var(--color-neutral-border); transition: width .2s ease, background .2s ease; }
+.tour-dots i.is-on { width: 18px; background: var(--color-primary); }
+.tour-count { font-size: var(--text-caption-12); font-weight: 600; color: var(--color-content-subtle); font-variant-numeric: tabular-nums; }
+.tour-title { margin-top: var(--space-12); font-size: var(--text-heading-20); font-weight: 600; line-height: 1.4; color: var(--color-content-default); }
+.tour-body { margin-top: var(--space-6); font-size: var(--text-body-14); line-height: 1.6; color: var(--color-content-neutral-muted); }
+.tour-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-12); margin-top: var(--space-20); }
+.tour-skip { padding: var(--space-4) 0; border: 0; background: none; font-size: 13px; font-weight: 500; color: var(--color-content-neutral-muted); cursor: pointer; }
+.tour-skip:hover { color: var(--color-content-default); text-decoration: underline; text-underline-offset: 3px; }
+.tour-nav { display: flex; gap: var(--space-6); }
+.tour-prev, .tour-next { height: 36px; padding: 0 var(--space-16); border-radius: var(--radius-full); font-size: var(--text-body-14); font-weight: 600; cursor: pointer; transition: background .16s ease; }
+.tour-prev { border: 1px solid var(--color-neutral-border); background: var(--color-surface-overlay); color: var(--color-content-neutral); }
+.tour-prev:hover { background: var(--color-neutral-subtle); }
+.tour-prev[hidden] { display: none; }
+.tour-next { border: 0; background: var(--color-primary); color: var(--color-content-on-fill); }
+.tour-next:hover { background: var(--color-primary-hover); }
+@media (max-width: 560px) {
+  .tour-pop { top: auto; left: var(--space-16); right: var(--space-16); bottom: var(--space-16); width: auto; max-width: none; }
+  .tour.is-center .tour-pop { top: auto; left: var(--space-16); transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tour, .tour-hole, .tour-pop { transition: none; }
+  .tour-hole::after, .tour-pop.is-in { animation: none; }
+}

@@ -1027,5 +1027,15 @@ document.addEventListener('click',function(e){
   } catch (e) {}
 })();
 </script>
+<script src="../reference/tour.js"></script>
+<script>
+/* 첫 방문 튜토리얼 — 가입 직후 신규 회원에게 이 화면에서 한 번 (reference/tour.js). 검수: 주소에 ?tour=1 */
+ScentTour.run("mytrip", [
+  { el: ".subtabs", fit: true, title: "내 장소 · 내 동선", body: "찜한 장소와 저장한 여행 동선을 탭으로 나눠 모아 둬요." },
+  { el: "#filterChips", title: "필터로 찾아보기", body: "찜한 장소가 많아지면 필터로 원하는 장소만 볼 수 있어요." },
+  { el: ".btn-make", title: "찜한 장소로 동선 만들기", body: "모아 둔 장소를 골라 바로 여행 동선을 만들 수 있어요." },
+  { el: ".mt-map", title: "지도로 한눈에", body: "찜한 장소가 어디에 있는지 지도에서 확인해요." },
+]);
+</script>
 </body>
 </html>

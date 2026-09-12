@@ -360,6 +360,8 @@ function complete(nick) {
   try {
     localStorage.setItem("scentrip_auth", "in");
     localStorage.setItem("scentrip_nickname", nick);
+    localStorage.setItem("scentrip_tour_pending", "true");   // 첫 방문 튜토리얼 켜기 (reference/tour.js)
+    localStorage.removeItem("scentrip_tour_seen");
     localStorage.setItem("scentrip_consent", JSON.stringify({ terms: { version: TERMS_VERSION, at }, privacy: { version: PRIVACY_VERSION, at } }));
   } catch (e) {}
   const withResult = $("qaFrom").value === "test";
