@@ -135,6 +135,16 @@ html .guest-only { display: none; }
 .news-meta { display: flex; gap: var(--space-12); font-size: var(--text-body-16); line-height: 1.5; white-space: nowrap; }
 .news-meta .tag { font-weight: 600; color: var(--color-content-disabled); }
 .news-meta .date { font-weight: 500; color: var(--color-content-neutral-subtle); }
+/* 소식 카드 — 글 상세로 연결 (news-detail.html) */
+a.news-more { text-decoration: none; transition: color .16s ease; }
+a.news-more:hover { color: var(--color-primary); }
+a.news-item { color: inherit; text-decoration: none; }
+.news-item .news-thumb { position: relative; display: block; overflow: hidden; border: 1px solid var(--color-border-subtle); background: var(--color-surface-01); }
+.news-thumb svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; transition: transform .45s cubic-bezier(.22,.61,.36,1); }
+a.news-item:hover .news-thumb svg { transform: scale(1.05); }
+.news-item .news-title, .news-item .news-desc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.news-item .news-title { transition: color .16s ease; }
+a.news-item:hover .news-title { color: var(--color-primary); }
 
 /* ---------- 섹션 공용 ---------- */
 .section { padding: 36px 60px; width: 100%; background: var(--color-background); display: flex; flex-direction: column; gap: var(--space-24); }
@@ -270,6 +280,8 @@ html .guest-only { display: none; }
 .route-card .heart-btn, .route-card .heart { z-index: 3; }
 </style>
 <script>(function(){try{if((localStorage.getItem("scentrip_auth")||"in")==="out")document.documentElement.classList.add("is-guest");}catch(e){}})();</script>
+<script src="../reference/places.js"></script>
+<script src="../reference/news.js"></script>
 </head>
 <body>
 <div class="page">
@@ -282,7 +294,7 @@ html .guest-only { display: none; }
     </a>
     <div class="nav-center">
       <div class="nav-list">
-        <a class="nav-link" href="#">소식</a>
+        <a class="nav-link" href="news.html">소식</a>
         <a class="nav-link" href="place-recommend.html">탐색</a>
         <a class="nav-link" href="my-trip.html">내 여행</a>
       </div>
@@ -346,7 +358,7 @@ html .guest-only { display: none; }
             <img class="bird" src="../assets/home/bird.svg" alt="">
             <h2>이서연님을 위한 여행 소식</h2>
           </div>
-          <span class="news-more">전체 보기</span>
+          <a class="news-more" href="news.html">전체 보기</a>
         </div>
         <div class="news-list" id="newsList"></div>
       </div>
@@ -506,17 +518,17 @@ function placeCard(img, name) {
     </a>`;
 }
 
-/* 뉴스 아이템 */
-function newsItem(color) {
+/* 여행 소식 3편 — 이야기 속 장소의 취향 매칭 평균이 높은 순 (게스트는 최신순). 글 데이터: reference/news.js */
+function newsItem(m) {
   return `
-    <div class="news-item">
-      <div class="news-thumb" style="background:${color}"></div>
+    <a class="news-item" href="news-detail.html?id=${m.id}">
+      ${newsImgHTML(m.heroImageId, "news-thumb")}
       <div class="news-body">
-        <p class="news-title">Title</p>
-        <p class="news-desc">Description</p>
-        <div class="news-meta"><span class="tag">TAG</span><span class="date">0000.00.00</span></div>
+        <p class="news-title">${m.title}</p>
+        <p class="news-desc">${m.summary}</p>
+        <div class="news-meta"><span class="tag">${m.category}</span><span class="date">${newsFmtDate(m.date)}</span></div>
       </div>
-    </div>`;
+    </a>`;
 }
 
 /* 동선 카드 — 지도 배경 + 동선 라인 + 번호 마커 + 사진 인서트 */
@@ -546,7 +558,7 @@ function routeCard(inset, place, name, desc, meta) {
 }
 
 document.getElementById("newsList").innerHTML =
-  [ "var(--color-surface-04)", "var(--color-surface-03)", "var(--scent-teal-200)" ].map(newsItem).join("");
+  newsSort(NEWS, document.documentElement.classList.contains("is-guest") ? "latest" : "match").slice(0, 3).map(newsItem).join("");
 
 document.getElementById("placeRow").innerHTML =
   ["frame9", "frame10", "frame11", "frame12"].map((f) => placeCard(f, "여행장소명")).join("");
