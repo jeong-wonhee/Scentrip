@@ -327,7 +327,7 @@ body.has-bar .page { padding-bottom: 76px; }   /* 고정 바가 푸터를 가리
     </a>
     <div class="nav-center">
       <div class="nav-list">
-        <a class="nav-link" href="#">소식</a>
+        <a class="nav-link" href="news.html">소식</a>
         <a class="nav-link" href="place-recommend.html">탐색</a>
         <a class="nav-link" href="my-trip.html">내 여행</a>
       </div>
@@ -427,15 +427,13 @@ body.has-bar .page { padding-bottom: 76px; }   /* 고정 바가 푸터를 가리
         </div>
         <nav class="footer-nav">
           <a href="about.html">센트립 소개</a>
-          <a href="#">공지사항</a>
-          <a href="#">FAQ</a>
         </nav>
       </div>
       <div class="footer-bottom">
         <a class="footer-copy" href="mailto:info.scentrip@gmail.com">info.scentrip@gmail.com</a>
         <div class="footer-legal">
-          <a href="#" class="lgl-muted">이용약관</a>
-          <a href="#" class="lgl-strong">개인정보처리방침</a>
+          <a href="terms.html" class="lgl-muted">이용약관</a>
+          <a href="privacy.html" class="lgl-strong">개인정보처리방침</a>
         </div>
       </div>
     </div>
@@ -980,10 +978,20 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") { pop.clas
 document.addEventListener('click',function(e){
   var lo=e.target.closest('[data-logout]'), li=e.target.closest('[data-login]');
   if(lo){e.preventDefault();try{localStorage.setItem('scentrip_auth','out');}catch(x){}location.href='home.html';}
-  if(li){e.preventDefault();try{localStorage.setItem('scentrip_auth','in');}catch(x){}location.reload();}
+  if(li){e.preventDefault();location.href='login.html?next='+encodeURIComponent((location.pathname.split('/').pop()||'home.html')+location.search+location.hash);}
 });
 </script>
 
+<script>
+/* 가입 때 정한 닉네임을 헤더 프로필에 반영 (signup.html 에서 저장) */
+(function () {
+  try {
+    const nick = localStorage.getItem("scentrip_nickname");
+    if (!nick) return;
+    document.querySelectorAll(".pill-name, .pop-name").forEach((el) => { el.textContent = nick; });
+  } catch (e) {}
+})();
+</script>
 <script>
 /* 저장된 프로필 사진을 모든 아바타에 반영 (마이페이지에서 변경) */
 (function () {
@@ -997,5 +1005,6 @@ document.addEventListener('click',function(e){
   } catch (e) {}
 })();
 </script>
+<script src="../reference/lang.js"></script>
 </body>
 </html>

@@ -102,6 +102,15 @@ html .guest-only { display: none; }
 .taste-character { position: absolute; right: clamp(12px, 3%, 24px); bottom: 0; width: clamp(116px, 42%, 240px); display: flex; align-items: flex-end; justify-content: center; z-index: 1; pointer-events: none; }
 .char-slot { position: relative; width: 100%; aspect-ratio: 4 / 5; display: flex; align-items: center; justify-content: center; }
 .char-slot .emoji { font-size: 72px; line-height: 1; }
+/* 비회원: 아직 모르는 여행 취향 — 점선 비행기 실루엣 (테스트하면 캐릭터가 이 자리에 들어온다) */
+.guest-plane { display: none; width: 88%; height: auto; overflow: visible; color: var(--type-accent); }
+.is-guest .guest-plane { display: block; }
+/* 크게 키워 카드 오른쪽 아래 모서리 밖으로 걸치게 — 카드(overflow:hidden)가 잘라 준다. 380px 이하는 글 아래로 내려가는 배치라 그대로 */
+.is-guest .taste-character { right: -16%; bottom: -34%; width: clamp(260px, 72%, 520px); }
+.is-guest .char-slot { aspect-ratio: 1 / 1; }
+.is-guest .guest-plane { width: 100%; }
+@media (max-width: 380px) { .is-guest .taste-character { right: auto; bottom: auto; width: 100%; } .is-guest .guest-plane { width: 88%; } }
+.guest-plane .gp-body { fill: color-mix(in srgb, currentColor 8%, transparent); stroke: currentColor; stroke-opacity: .5; stroke-width: 2; stroke-dasharray: 6 5; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }   /* 그림을 키워도 선 두께·점선 간격은 화면 기준 그대로 */
 /* 캐릭터 이미지 — 어두운 배경 위에 밝은 부분만 얹혀 은은한 글로우(향의 정령) */
 .char-slot .char-img {
   position: relative; z-index: 1;
@@ -135,6 +144,16 @@ html .guest-only { display: none; }
 .news-meta { display: flex; gap: var(--space-12); font-size: var(--text-body-16); line-height: 1.5; white-space: nowrap; }
 .news-meta .tag { font-weight: 600; color: var(--color-content-disabled); }
 .news-meta .date { font-weight: 500; color: var(--color-content-neutral-subtle); }
+/* 소식 카드 — 글 상세로 연결 (news-detail.html) */
+a.news-more { text-decoration: none; transition: color .16s ease; }
+a.news-more:hover { color: var(--color-primary); }
+a.news-item { color: inherit; text-decoration: none; }
+.news-item .news-thumb { position: relative; display: block; overflow: hidden; border: 1px solid var(--color-border-subtle); background: var(--color-surface-01); }
+.news-thumb svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; transition: transform .45s cubic-bezier(.22,.61,.36,1); }
+a.news-item:hover .news-thumb svg { transform: scale(1.05); }
+.news-item .news-title, .news-item .news-desc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.news-item .news-title { transition: color .16s ease; }
+a.news-item:hover .news-title { color: var(--color-primary); }
 
 /* ---------- 섹션 공용 ---------- */
 .section { padding: 36px 60px; width: 100%; background: var(--color-background); display: flex; flex-direction: column; gap: var(--space-24); }
@@ -260,8 +279,18 @@ html .guest-only { display: none; }
 .rm-next:hover { background: var(--color-primary-hover); }
 .rm-next:active { background: var(--color-primary-active); }
 @media (max-width: 560px) { .rm-opt { gap: var(--space-12); padding: var(--space-12); } .rm-ic { width: 40px; height: 40px; } }
+
+/* 동선 카드 → 동선 상세 (route-detail.html). 제목 링크를 카드 전체로 늘리고, 하트는 그 위에 남긴다 */
+.route-card { position: relative; }
+.route-card .rd-link, .featured-card .rd-link { color: inherit; text-decoration: none; }
+.route-card .rd-link::after, .featured-card .rd-link::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.route-card .rd-link:focus-visible, .featured-card .rd-link:focus-visible { outline: none; }
+.route-card .rd-link:focus-visible::after, .featured-card .rd-link:focus-visible::after { outline: 3px solid var(--color-border-focus); outline-offset: 4px; border-radius: var(--radius-lg); }
+.route-card .heart-btn, .route-card .heart { z-index: 3; }
 </style>
 <script>(function(){try{if((localStorage.getItem("scentrip_auth")||"in")==="out")document.documentElement.classList.add("is-guest");}catch(e){}})();</script>
+<script src="../reference/places.js"></script>
+<script src="../reference/news.js"></script>
 </head>
 <body>
 <div class="page">
@@ -274,7 +303,7 @@ html .guest-only { display: none; }
     </a>
     <div class="nav-center">
       <div class="nav-list">
-        <a class="nav-link" href="#">소식</a>
+        <a class="nav-link" href="news.html">소식</a>
         <a class="nav-link" href="place-recommend.html">탐색</a>
         <a class="nav-link" href="my-trip.html">내 여행</a>
       </div>
@@ -316,7 +345,12 @@ html .guest-only { display: none; }
         <span class="blur-b" aria-hidden="true"></span>
         <div class="taste-atmos" aria-hidden="true"></div>
         <div class="taste-character" aria-hidden="true">
-          <div class="char-slot"><img class="char-img" id="tasteChar" alt="" hidden><span class="emoji" id="tasteEmoji" hidden>🧭</span></div>
+          <div class="char-slot"><img class="char-img" id="tasteChar" alt="" hidden><span class="emoji" id="tasteEmoji" hidden>🧭</span>
+          <svg class="guest-plane" viewBox="0 0 200 200" aria-hidden="true">
+            <g transform="rotate(45 100 100) translate(100 100) scale(.8) translate(-100 -100)">
+              <path class="gp-body" d="M100 12C109 12 116 24 116 40V78L184 112V130L116 110V150L140 168V182L100 172L60 182V168L84 150V110L16 130V112L84 78V40C84 24 91 12 100 12Z"/>
+            </g>
+          </svg></div>
         </div>
         <div class="taste-inner">
           <div class="taste-labels auth-only">
@@ -338,7 +372,7 @@ html .guest-only { display: none; }
             <img class="bird" src="../assets/home/bird.svg" alt="">
             <h2>이서연님을 위한 여행 소식</h2>
           </div>
-          <span class="news-more">전체 보기</span>
+          <a class="news-more" href="news.html">전체 보기</a>
         </div>
         <div class="news-list" id="newsList"></div>
       </div>
@@ -396,15 +430,13 @@ html .guest-only { display: none; }
         </div>
         <nav class="footer-nav">
           <a href="about.html">센트립 소개</a>
-          <a href="#">공지사항</a>
-          <a href="#">FAQ</a>
         </nav>
       </div>
       <div class="footer-bottom">
         <a class="footer-copy" href="mailto:info.scentrip@gmail.com">info.scentrip@gmail.com</a>
         <div class="footer-legal">
-          <a href="#" class="lgl-muted">이용약관</a>
-          <a href="#" class="lgl-strong">개인정보처리방침</a>
+          <a href="terms.html" class="lgl-muted">이용약관</a>
+          <a href="privacy.html" class="lgl-strong">개인정보처리방침</a>
         </div>
       </div>
     </div>
@@ -460,7 +492,7 @@ function applyTaste(code){
 const IS_GUEST = document.documentElement.classList.contains("is-guest");
 if (IS_GUEST) {
   // 게스트: 개인화 색/캐릭터 대신 중립 브랜드 톤, 헤딩을 일반 문구로
-  const gEmoji = document.getElementById("tasteEmoji"); gEmoji.textContent = "🧭"; gEmoji.hidden = false;
+  document.getElementById("tasteEmoji").hidden = true;   // 비회원은 나침반 대신 점선 비행기(.guest-plane, CSS 로 표시)
   document.getElementById("tasteChar").hidden = true;
   const newsH2 = document.querySelector(".news-head-title h2");
   if (newsH2) newsH2.textContent = "지금 뜨는 여행 소식";
@@ -500,17 +532,17 @@ function placeCard(img, name) {
     </a>`;
 }
 
-/* 뉴스 아이템 */
-function newsItem(color) {
+/* 여행 소식 3편 — 이야기 속 장소의 취향 매칭 평균이 높은 순 (게스트는 최신순). 글 데이터: reference/news.js */
+function newsItem(m) {
   return `
-    <div class="news-item">
-      <div class="news-thumb" style="background:${color}"></div>
+    <a class="news-item" href="news-detail.html?id=${m.id}">
+      ${newsImgHTML(m.heroImageId, "news-thumb")}
       <div class="news-body">
-        <p class="news-title">Title</p>
-        <p class="news-desc">Description</p>
-        <div class="news-meta"><span class="tag">TAG</span><span class="date">0000.00.00</span></div>
+        <p class="news-title">${m.title}</p>
+        <p class="news-desc">${m.summary}</p>
+        <div class="news-meta"><span class="tag">${m.category}</span><span class="date">${newsFmtDate(m.date)}</span></div>
       </div>
-    </div>`;
+    </a>`;
 }
 
 /* 동선 카드 — 지도 배경 + 동선 라인 + 번호 마커 + 사진 인서트 */
@@ -532,7 +564,7 @@ function routeCard(inset, place, name, desc, meta) {
         <span class="route-marker m5">5</span>
       </div>
       <div class="route-body">
-        <div class="route-title"><span class="place">${place}</span><span class="name">${name}</span></div>
+        <div class="route-title"><span class="place">${place}</span><a class="name rd-link" href="route-detail.html?${new URLSearchParams({ from: "home", name, place, desc, meta, match: 88 })}">${name}</a></div>
         <p class="route-desc">${desc}</p>
         <div class="route-meta">${meta}</div>
       </div>
@@ -540,7 +572,7 @@ function routeCard(inset, place, name, desc, meta) {
 }
 
 document.getElementById("newsList").innerHTML =
-  [ "var(--color-surface-04)", "var(--color-surface-03)", "var(--scent-teal-200)" ].map(newsItem).join("");
+  newsSort(NEWS, document.documentElement.classList.contains("is-guest") ? "latest" : "match").slice(0, 3).map(newsItem).join("");
 
 document.getElementById("placeRow").innerHTML =
   ["frame9", "frame10", "frame11", "frame12"].map((f) => placeCard(f, "여행장소명")).join("");
@@ -571,7 +603,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") { pop.clas
 document.addEventListener('click',function(e){
   var lo=e.target.closest('[data-logout]'), li=e.target.closest('[data-login]');
   if(lo){e.preventDefault();try{localStorage.setItem('scentrip_auth','out');}catch(x){}location.href='home.html';}
-  if(li){e.preventDefault();try{localStorage.setItem('scentrip_auth','in');}catch(x){}location.reload();}
+  if(li){e.preventDefault();location.href='login.html?next='+encodeURIComponent((location.pathname.split('/').pop()||'home.html')+location.search+location.hash);}
 });
 </script>
 
@@ -678,6 +710,16 @@ document.addEventListener('click',function(e){
 })();
 </script>
 <script>
+/* 가입 때 정한 닉네임을 헤더 프로필에 반영 (signup.html 에서 저장) */
+(function () {
+  try {
+    const nick = localStorage.getItem("scentrip_nickname");
+    if (!nick) return;
+    document.querySelectorAll(".pill-name, .pop-name").forEach((el) => { el.textContent = nick; });
+  } catch (e) {}
+})();
+</script>
+<script>
 /* 저장된 프로필 사진을 모든 아바타에 반영 (마이페이지에서 변경) */
 (function () {
   try {
@@ -690,5 +732,16 @@ document.addEventListener('click',function(e){
   } catch (e) {}
 })();
 </script>
+<script src="../reference/tour.js"></script>
+<script>
+/* 첫 방문 튜토리얼 — 가입 직후 신규 회원에게 이 화면에서 한 번 (reference/tour.js). 검수: 주소에 ?tour=1 */
+ScentTour.run("home", [
+  { el: "#tasteCard", title: "나의 여행 취향", body: "향 취향 검사로 찾은 내 여행 유형이에요. '자세히 보기'에서 유형 설명과 어울리는 향을 확인할 수 있어요." },
+  { el: ".news", title: "나를 위한 여행 소식", body: "취향에 맞춘 여행 소식과 읽을거리를 모아 보여드려요." },
+  { el: "section:has(#placeRow)", fit: true, title: "취향 맞춤 장소 추천", body: "AI 매칭 %가 높은 장소부터 추천해요. '전체 보기'를 누르면 더 많은 장소를 볼 수 있어요." },
+  { el: ".ai-banner", title: "AI로 나만의 동선 만들기", body: "AI 추천, 원하는 지역, 찜한 장소 중 편한 방식을 골라 취향에 맞는 여행 동선을 만들 수 있어요." },
+]);
+</script>
+<script src="../reference/lang.js"></script>
 </body>
 </html>

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scentrip — 회원가입</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="../reference/tokens.css">
+<link rel="stylesheet" href="../reference/components.css">
+<style>
+/* ============================================================
+   Scentrip — 회원가입 (Google 인증 후 신규 회원만)
+   Figma 프레임 없음 — login.html 과 같은 셸. 기획 초안: SCENTrip_login_signup_spec.md §8~11, 13, 20
+   구성: Google 프로필 확인 → 약관 동의(전체 / [필수] 2개) → 닉네임 → 가입 완료하기 → 환영 화면
+   진입 파라미터: next(가입 후 복귀) · from=test(가입 전 검사 결과 있음)
+   프로토타입은 localStorage 에 가입 상태를 둔다. 실서비스는 약관 동의·닉네임까지 마쳐야 회원으로 저장한다(동의 시각은 서버 시간). 중간에 나간 사람·탈퇴 후 다시 온 사람은 신규로 처음부터.
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing);
+  color: var(--color-content-default);
+  background: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+img { display: block; max-width: 100%; }
+button { font-family: inherit; letter-spacing: inherit; cursor: pointer; background: none; border: 0; color: inherit; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--color-border-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+/* ---------- 레이아웃 (login.html 과 동일 — 흰 배경 + 가운데 폼) ---------- */
+.auth { display: flex; flex-direction: column; min-height: 100vh; padding: 0 var(--space-40) var(--space-40); background: var(--color-background); }
+.auth-top { display: flex; align-items: center; height: 72px; }
+.auth-main { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
+.auth-card { display: flex; flex-direction: column; width: 100%; max-width: 440px; margin: auto; padding: var(--space-40) 0; animation: rise .5s cubic-bezier(.22, .61, .36, 1) both; }
+.auth-card[hidden] { display: none; }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+.auth-step { font-size: 13px; font-weight: 600; color: var(--color-content-subtle); }
+.auth-title { margin-top: var(--space-6); font-size: var(--text-title-28); font-weight: 600; line-height: 1.4; color: var(--color-content-default); }
+.auth-sub { margin-top: var(--space-10); font-size: var(--text-body-16); line-height: 1.6; color: var(--color-content-neutral-muted); }
+
+/* ---------- Google 프로필 (받은 정보는 최소만 노출 — 명세 8) ---------- */
+.g-chip { display: flex; align-items: center; gap: var(--space-12); margin-top: var(--space-24); padding: var(--space-12) var(--space-16); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); background: var(--color-surface-overlay); box-shadow: var(--elevation-xs); }
+.g-id { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
+.g-id b { font-size: var(--text-body-16); font-weight: 600; line-height: 1.4; }
+.g-id span { font-size: var(--text-body-14); line-height: 1.5; color: var(--color-content-neutral-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.g-ok { display: inline-flex; align-items: center; gap: var(--space-6); flex: none; height: 28px; padding: 0 var(--space-10); border-radius: var(--radius-full); background: var(--color-neutral-bg); font-size: var(--text-caption-12); font-weight: 600; color: var(--color-content-neutral-muted); }
+.g-ok svg { width: 14px; height: 14px; }
+
+/* ---------- 섹션 공통 ---------- */
+.field-label { display: block; font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; color: var(--color-content-default); }
+.sec { margin-top: var(--space-32); border: 0; }
+.sec > .field-label { margin-bottom: var(--space-10); }
+
+/* ---------- 약관 동의 ---------- */
+.agree { border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); overflow: hidden; }
+.agree-row { display: flex; align-items: center; gap: var(--space-12); flex: 1 1 auto; min-width: 0; padding: var(--space-12) var(--space-16); cursor: pointer; transition: background .14s ease; }
+.agree-row:hover { background: var(--color-state-hover); }
+.agree-row:has(input:focus-visible) .ck { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
+.agree-all { background: var(--color-neutral-bg); border-bottom: 1px solid var(--color-border-subtle); }
+.agree-all .agree-tx { font-size: var(--text-body-16); font-weight: 600; }
+.agree-item { display: flex; align-items: center; }
+.agree-item + .agree-item { border-top: 1px solid var(--color-neutral-subtle); }
+.agree-tx { font-size: var(--text-body-14); line-height: 1.5; color: var(--color-content-neutral); }
+.agree-tx .req { margin-right: var(--space-4); font-weight: 600; color: var(--color-primary); }
+.agree-view { flex: none; height: 32px; margin-right: var(--space-12); padding: 0 var(--space-12); border-radius: var(--radius-full); font-size: 13px; font-weight: 600; color: var(--color-content-neutral-muted); text-decoration: underline; text-underline-offset: 3px; }
+.agree-view:hover { background: var(--color-state-hover); color: var(--color-content-default); }
+.agree-hint { margin-top: var(--space-8); font-size: 13px; line-height: 1.5; color: var(--color-content-neutral-muted); }
+
+/* ---------- 닉네임 ---------- */
+.field-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--space-10); }
+.nick-count { font-size: var(--text-caption-12); font-weight: 500; color: var(--color-content-neutral-subtle); font-variant-numeric: tabular-nums; }
+.nick-count.is-over { color: var(--color-content-error); }
+.field-input { width: 100%; height: 52px; padding: 0 var(--space-16); border: 1px solid var(--color-neutral-border); border-radius: var(--radius-md); background: var(--color-surface-overlay); font: inherit; letter-spacing: inherit; font-size: var(--text-body-16); color: var(--color-content-default); transition: border-color .14s ease, box-shadow .14s ease; }
+.field-input::placeholder { color: var(--color-content-neutral-subtle); }
+.field-input:hover { border-color: var(--color-border-strong); }
+.field-input:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--color-state-hover-brand); }
+.field-input[aria-invalid="true"] { border-color: var(--color-error-border); }
+.field-input[aria-invalid="true"]:focus { box-shadow: 0 0 0 3px var(--color-error-subtle); }
+/* 오류는 색만으로 구분하지 않는다 — 아이콘 + 문구 (명세 21) */
+.field-msg { display: flex; align-items: center; gap: var(--space-6); min-height: 22px; margin-top: var(--space-8); font-size: 13px; line-height: 1.5; color: var(--color-content-neutral-muted); }
+.field-msg svg { width: 16px; height: 16px; flex: none; }
+.field-msg.is-err { color: var(--color-content-error); }
+.field-msg.is-ok { color: var(--color-content-subtle); }
+
+/* ---------- 오류 안내 ---------- */
+.auth-alert { display: flex; gap: var(--space-10); margin-top: var(--space-16); padding: var(--space-12) var(--space-16); border: 1px solid var(--color-error-border); border-radius: var(--radius-md); background: var(--color-error-subtle); color: var(--color-content-error); animation: rise .3s ease both; }
+.auth-alert[hidden] { display: none; }
+.auth-alert svg { width: 20px; height: 20px; flex: none; margin-top: 1px; }
+.auth-alert b { font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; }
+
+/* ---------- 버튼 ---------- */
+.btn-fill { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-8); height: 44px; padding: 0 var(--space-24); border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-content-on-fill); font-size: var(--text-body-14); font-weight: 600; text-decoration: none; transition: background .16s ease, color .16s ease; }
+.btn-fill:hover { background: var(--color-primary-hover); }
+.btn-fill:disabled { background: var(--color-neutral-subtle); color: var(--color-content-neutral-disabled); cursor: not-allowed; }
+.btn-fill.is-busy { cursor: progress; }
+.btn-block { width: 100%; height: 52px; margin-top: var(--space-24); font-size: var(--text-body-16); }
+.btn-line { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 var(--space-20); border: 1px solid var(--color-neutral-border); border-radius: var(--radius-full); font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-neutral); text-decoration: none; }
+.btn-line:hover { background: var(--color-state-hover); }
+.spinner { width: 18px; height: 18px; flex: none; border: 2px solid currentColor; border-right-color: transparent; border-radius: var(--radius-full); animation: spin .7s linear infinite; }
+.spinner[hidden] { display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- 가입 완료 ---------- */
+.auth-done { align-items: center; text-align: center; }
+.done-mark { position: relative; display: flex; width: 72px; height: 72px; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--color-surface-01); color: var(--color-primary); animation: pop .5s cubic-bezier(.34, 1.56, .64, 1) both; }
+.done-mark::after { content: ""; position: absolute; inset: -8px; border-radius: var(--radius-full); border: 2px solid var(--color-border-default); animation: ring 1.4s ease-out .2s both; }
+.done-mark svg { width: 34px; height: 34px; }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } }
+@keyframes ring { from { transform: scale(.8); opacity: 1; } to { transform: scale(1.25); opacity: 0; } }
+.auth-done .auth-title { margin-top: var(--space-24); }
+.auth-done .auth-title:focus { outline: none; }   /* 스크린리더용으로 포커스만 옮긴다 — 테두리는 그리지 않음 */
+.done-actions { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-8); width: 100%; margin-top: var(--space-32); }
+.done-actions .btn-fill { height: 52px; font-size: var(--text-body-16); }
+.done-actions .btn-line { height: 52px; font-size: var(--text-body-16); }
+
+/* ---------- 약관 전문 모달 ---------- */
+/* 열 때는 visibility 를 즉시 켠다 — 공용 모달은 visibility 도 전환돼서, 전환이 끝나기 전엔 닫기 버튼에 포커스가 안 들어간다 */
+#legalModal { transition: opacity .16s ease, visibility 0s linear .16s; }
+#legalModal.is-open { transition: opacity .16s ease, visibility 0s; }
+.legal-box { --modal-w: 720px; height: min(760px, calc(100vh - 48px)); }
+.legal-frame { flex: 1 1 auto; width: 100%; min-height: 0; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); background: var(--color-background); }
+.modal-foot { display: flex; justify-content: flex-end; gap: var(--space-8); }
+
+/* ---------- 검수용 스위처 (개발 전달 시 제거) ---------- */
+.qa { position: fixed; right: var(--space-16); bottom: var(--space-16); z-index: 200; display: flex; flex-direction: column; gap: var(--space-6); }
+.state-switch { display: flex; align-items: center; justify-content: space-between; gap: var(--space-8); padding: var(--space-8) var(--space-12); border: 1px solid var(--color-border-default); border-radius: var(--radius-full); background: var(--color-surface-overlay); box-shadow: var(--elevation-lg); font-size: var(--text-caption-12); color: var(--color-content-subtle); }
+.state-switch select { border: 0; background: none; font-family: inherit; letter-spacing: inherit; font-size: var(--text-caption-12); font-weight: 600; color: var(--color-content-default); cursor: pointer; }
+
+/* ---------- 반응형 ---------- */
+@media (max-width: 900px) {
+  .auth { padding: 0 var(--space-16) var(--space-24); }
+  .auth-top { height: 56px; }
+}
+@media (max-width: 560px) {
+  .auth-card { padding: var(--space-24) 0 var(--space-48); }
+  .modal-box { padding: var(--space-20); }
+  .g-ok { display: none; }
+  .qa { left: var(--space-16); }
+  .state-switch { border-radius: var(--radius-lg); }
+}
+</style>
+</head>
+<body>
+
+<div class="auth">
+  <main class="auth-main">
+    <div class="auth-top">
+      <a class="brand" href="home.html" aria-label="Scentrip 홈">
+        <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="brand-name">Scentrip</span>
+      </a>
+    </div>
+
+    <!-- ① 약관 동의 + 닉네임 -->
+    <section class="auth-card" id="form" aria-labelledby="formTitle">
+      <p class="auth-step">회원가입</p>
+      <h1 class="auth-title" id="formTitle">가입을 마무리해 주세요</h1>
+      <p class="auth-sub">약관에 동의하고 Scentrip에서 쓸 닉네임을 정해 주세요.</p>
+
+      <!-- Google 에서 받은 정보 (프로토타입 샘플) -->
+      <div class="g-chip">
+        <span class="av av-48" aria-hidden="true"><span class="av-svg"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg></span></span>
+        <span class="g-id"><b>이서연</b><span>example@gmail.com</span></span>
+        <span class="g-ok"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>인증 완료</span>
+      </div>
+
+      <!-- 약관 동의 -->
+      <fieldset class="sec">
+        <legend class="field-label">약관 동의</legend>
+        <div class="agree">
+          <label class="agree-row agree-all">
+            <input class="sr-only" type="checkbox" id="agreeAll">
+            <span class="ck" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/></svg></span>
+            <span class="agree-tx">전체 동의</span>
+          </label>
+          <div class="agree-item">
+            <label class="agree-row">
+              <input class="sr-only" type="checkbox" data-agree="terms">
+              <span class="ck" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/></svg></span>
+              <span class="agree-tx"><span class="req">[필수]</span>이용약관 동의</span>
+            </label>
+            <button class="agree-view" type="button" data-legal="terms" aria-label="이용약관 전문 보기">보기</button>
+          </div>
+          <div class="agree-item">
+            <label class="agree-row">
+              <input class="sr-only" type="checkbox" data-agree="privacy">
+              <span class="ck" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/></svg></span>
+              <span class="agree-tx"><span class="req">[필수]</span>개인정보 수집 및 이용 동의</span>
+            </label>
+            <button class="agree-view" type="button" data-legal="privacy" aria-label="개인정보 수집 및 이용 전문 보기">보기</button>
+          </div>
+          <!-- [선택] 마케팅 정보 수신 동의 — 실제로 마케팅을 진행할 때만 추가 (명세 8) -->
+        </div>
+      </fieldset>
+
+      <!-- 닉네임 -->
+      <div class="sec">
+        <div class="field-top">
+          <label class="field-label" for="nick">닉네임</label>
+          <span class="nick-count" id="nickCount" aria-hidden="true">0/12</span>
+        </div>
+        <input class="field-input" id="nick" type="text" autocomplete="nickname" spellcheck="false" placeholder="2~12자 · 한글, 영문, 숫자" aria-describedby="nickMsg" aria-invalid="false">
+        <p class="field-msg" id="nickMsg" aria-live="polite">프로필과 리뷰에 표시돼요.</p>
+      </div>
+
+      <div class="auth-alert" id="alert" role="alert" hidden>
+        <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-8,56a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm8,104a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z"/></svg>
+        <b>가입 정보를 저장하지 못했어요. 입력한 내용은 그대로 두었으니 다시 시도해 주세요.</b>
+      </div>
+
+      <button class="btn-fill btn-block" id="submitBtn" type="button" disabled>
+        <span class="spinner" id="submitSpin" hidden></span>
+        <span id="submitLabel">가입 완료하기</span>
+      </button>
+    </section>
+
+    <!-- ② 가입 완료 -->
+    <section class="auth-card auth-done" id="done" hidden aria-labelledby="doneTitle">
+      <span class="done-mark" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/></svg></span>
+      <h1 class="auth-title" id="doneTitle" tabindex="-1"></h1>
+      <p class="auth-sub" id="doneSub"></p>
+      <div class="done-actions">
+        <a class="btn-fill" id="donePrimary" href="onboarding-test.html"></a>
+        <a class="btn-line" id="doneLater" href="home.html">나중에 할게요</a>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- 약관 전문 모달 — '동의하기'를 누르면 해당 항목에 체크 -->
+<div class="modal-scrim" id="legalModal" hidden>
+  <div class="modal-box legal-box" role="dialog" aria-modal="true" aria-labelledby="legalTitle">
+    <div class="modal-head">
+      <h2 id="legalTitle">이용약관</h2>
+      <button class="modal-close" type="button" data-legal-close aria-label="닫기"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
+    </div>
+    <iframe class="legal-frame" id="legalFrame" title="약관 전문"></iframe>
+    <div class="modal-foot">
+      <button class="btn-line" type="button" data-legal-close>닫기</button>
+      <button class="btn-fill" type="button" id="legalAgree">동의하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 검수용 스위처 — 개발 전달 시 제거 -->
+<div class="qa">
+  <div class="state-switch">
+    <label for="qaFrom">진입</label>
+    <select id="qaFrom">
+      <option value="">일반 가입</option>
+      <option value="test">검사 후 가입 (결과 있음)</option>
+    </select>
+  </div>
+  <div class="state-switch">
+    <label for="qaSave">가입 저장</label>
+    <select id="qaSave">
+      <option value="ok">성공</option>
+      <option value="fail">실패</option>
+    </select>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+function safeNext(v) {
+  return /^[a-z0-9-]+\.html(\?[^#\s]*)?(#[\w-]*)?$/i.test(v || "") && !/^(login|signup)\.html/i.test(v) ? v : "home.html";
+}
+const next = safeNext(params.get("next"));
+$("qaFrom").value = params.get("from") === "test" ? "test" : "";
+
+/* 동의 문서 버전 — 약관 부칙·방침 버전과 맞춘다. 실서비스는 서버가 버전·동의 시각(서버 시간)을 기록 (명세 9) */
+const TERMS_VERSION = "2026-08-09";
+const PRIVACY_VERSION = "v1.0";
+
+/* ---------- 약관 동의 ---------- */
+const items = [...document.querySelectorAll("[data-agree]")];
+function syncAgree() {
+  $("agreeAll").checked = items.every((c) => c.checked);
+  [$("agreeAll"), ...items].forEach((c) => c.closest(".agree-row").classList.toggle("is-on", c.checked));
+  update();
+}
+$("agreeAll").addEventListener("change", () => { items.forEach((c) => { c.checked = $("agreeAll").checked; }); syncAgree(); });
+items.forEach((c) => c.addEventListener("change", syncAgree));
+
+/* ---------- 닉네임 (명세 10 — 금칙어·중복은 샘플 목록으로 시늉만) ---------- */
+const BANNED = ["운영자", "관리자", "admin", "센트립", "scentrip"];
+const TAKEN = ["향기", "여행자", "나무향"];
+const ICON_ERR = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-8,56a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm8,104a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z"/></svg>';
+const ICON_OK = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></svg>';
+function checkNick(raw) {
+  const v = raw.trim();
+  if (!v) return { ok: false, msg: "닉네임을 입력해 주세요" };
+  if (v.length < 2) return { ok: false, msg: "2자 이상 입력해 주세요" };
+  if (v.length > 12) return { ok: false, msg: "12자 이하로 입력해 주세요" };
+  if (!/^[가-힣a-zA-Z0-9 ]+$/.test(v)) return { ok: false, msg: "한글, 영문, 숫자만 쓸 수 있어요" };
+  if (/ {2,}/.test(v)) return { ok: false, msg: "공백은 한 칸만 쓸 수 있어요" };
+  const low = v.toLowerCase();
+  if (BANNED.some((w) => low.includes(w))) return { ok: false, msg: "사용할 수 없는 단어가 들어 있어요" };
+  if (TAKEN.includes(low)) return { ok: false, msg: "이미 사용 중인 닉네임이에요" };   // TODO(개발): 중복 허용 여부 결정 후 서버 확인
+  return { ok: true, msg: "사용할 수 있는 닉네임이에요" };
+}
+let nickOk = false, touched = false;
+function renderNick() {
+  const v = $("nick").value.trim();
+  $("nickCount").textContent = `${v.length}/12`;
+  $("nickCount").classList.toggle("is-over", v.length > 12);
+  const r = checkNick($("nick").value);
+  nickOk = r.ok;
+  const show = touched || v.length > 0;
+  const m = $("nickMsg");
+  m.classList.toggle("is-err", show && !r.ok);
+  m.classList.toggle("is-ok", r.ok);
+  m.innerHTML = show ? (r.ok ? ICON_OK : ICON_ERR) + `<span>${r.msg}</span>` : "프로필과 리뷰에 표시돼요.";
+  $("nick").setAttribute("aria-invalid", show && !r.ok ? "true" : "false");
+  update();
+}
+$("nick").addEventListener("input", renderNick);
+$("nick").addEventListener("blur", () => { touched = true; renderNick(); });
+$("nick").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) $("submitBtn").click(); });
+
+/* 필수 약관 + 유효한 닉네임이어야 가입 버튼 활성 (명세 10·20) */
+let busy = false;
+function update() { $("submitBtn").disabled = busy || !(items.every((c) => c.checked) && nickOk); }
+
+/* ---------- 가입 완료하기 — 요청 중 비활성, 실패 시 입력 유지 (명세 17·20) ---------- */
+$("submitBtn").addEventListener("click", () => {
+  if ($("submitBtn").disabled) return;
+  busy = true; update();
+  $("submitBtn").classList.add("is-busy");
+  $("submitSpin").hidden = false;
+  $("submitLabel").textContent = "가입하는 중...";
+  $("alert").hidden = true;
+  setTimeout(() => {
+    busy = false;
+    $("submitBtn").classList.remove("is-busy");
+    $("submitSpin").hidden = true;
+    $("submitLabel").textContent = "가입 완료하기";
+    if ($("qaSave").value === "fail") { $("alert").hidden = false; update(); return; }
+    complete($("nick").value.trim());
+  }, 1000);
+});
+
+function complete(nick) {
+  // TODO(개발): 서버에 약관 동의(버전·시각)와 닉네임을 저장하고 회원을 만든다. 같은 요청이 두 번 와도 회원은 하나
+  const at = new Date().toISOString();
+  try {
+    localStorage.setItem("scentrip_auth", "in");
+    localStorage.setItem("scentrip_nickname", nick);
+    localStorage.setItem("scentrip_tour_pending", "true");   // 첫 방문 튜토리얼 켜기 (reference/tour.js)
+    localStorage.removeItem("scentrip_tour_seen");
+    localStorage.setItem("scentrip_consent", JSON.stringify({ terms: { version: TERMS_VERSION, at }, privacy: { version: PRIVACY_VERSION, at } }));
+  } catch (e) {}
+  const withResult = $("qaFrom").value === "test";
+  $("doneTitle").textContent = `${nick}님, 가입을 환영해요`;
+  $("doneSub").textContent = withResult
+    ? "가입 전에 한 향 취향 검사 결과를 계정에 저장했어요. 이제 취향에 맞는 여행지를 둘러보세요."
+    : "12문항 향 취향 검사로 나에게 맞는 향과 여행지를 찾아볼까요?";
+  $("donePrimary").textContent = withResult ? "추천 여행지 보러 가기" : "향 취향 검사 시작하기";
+  $("donePrimary").href = withResult ? "place-recommend.html" : "onboarding-test.html";
+  $("doneLater").href = next;
+  $("form").hidden = true;
+  $("done").hidden = false;
+  $("doneTitle").focus();
+  history.replaceState(null, "", location.pathname);   // 새로고침·뒤로 가기로 가입이 두 번 진행되지 않게
+}
+
+/* ---------- 약관 전문 모달 ---------- */
+let lastTrigger = null, legalKind = "terms";
+function openLegal(kind) {
+  lastTrigger = document.activeElement;
+  legalKind = kind;
+  $("legalTitle").textContent = kind === "privacy" ? "개인정보 수집 및 이용" : "이용약관";
+  $("legalFrame").src = (kind === "privacy" ? "privacy.html" : "terms.html") + "?embed=1";
+  const s = $("legalModal");
+  s.hidden = false;
+  void s.offsetWidth;
+  s.classList.add("is-open");
+  s.querySelector(".modal-close").focus();
+}
+function closeLegal() {
+  const s = $("legalModal");
+  if (s.hidden) return;
+  s.classList.remove("is-open");
+  setTimeout(() => { s.hidden = true; }, 180);
+  if (lastTrigger) lastTrigger.focus();
+}
+document.addEventListener("click", (e) => {
+  const open = e.target.closest("[data-legal]");
+  if (open) { openLegal(open.dataset.legal); return; }
+  if (e.target.closest("[data-legal-close]") || e.target === $("legalModal")) closeLegal();
+});
+$("legalAgree").addEventListener("click", () => {
+  const c = items.find((x) => x.dataset.agree === legalKind);
+  if (c) { c.checked = true; syncAgree(); }
+  closeLegal();
+});
+document.addEventListener("keydown", (e) => {
+  if ($("legalModal").hidden) return;
+  if (e.key === "Escape") { closeLegal(); return; }
+  if (e.key !== "Tab") return;
+  const f = [...$("legalModal").querySelectorAll("button, iframe")];
+  const first = f[0], last = f[f.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
+
+renderNick();
+</script>
+<script src="../reference/lang.js"></script>
+</body>
+</html>

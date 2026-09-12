@@ -199,7 +199,7 @@ html .guest-only { display: none; }
     </a>
     <div class="nav-center">
       <div class="nav-list">
-        <a class="nav-link" href="#">소식</a>
+        <a class="nav-link" href="news.html">소식</a>
         <a class="nav-link is-selected" href="#">탐색</a>
         <a class="nav-link" href="my-trip.html">내 여행</a>
       </div>
@@ -281,15 +281,13 @@ html .guest-only { display: none; }
         </div>
         <nav class="footer-nav">
           <a href="about.html">센트립 소개</a>
-          <a href="#">공지사항</a>
-          <a href="#">FAQ</a>
         </nav>
       </div>
       <div class="footer-bottom">
         <a class="footer-copy" href="mailto:info.scentrip@gmail.com">info.scentrip@gmail.com</a>
         <div class="footer-legal">
-          <a href="#" class="lgl-muted">이용약관</a>
-          <a href="#" class="lgl-strong">개인정보처리방침</a>
+          <a href="terms.html" class="lgl-muted">이용약관</a>
+          <a href="privacy.html" class="lgl-strong">개인정보처리방침</a>
         </div>
       </div>
     </div>
@@ -742,7 +740,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") { pop.clas
 document.addEventListener('click',function(e){
   var lo=e.target.closest('[data-logout]'), li=e.target.closest('[data-login]');
   if(lo){e.preventDefault();try{localStorage.setItem('scentrip_auth','out');}catch(x){}location.href='home.html';}
-  if(li){e.preventDefault();try{localStorage.setItem('scentrip_auth','in');}catch(x){}location.reload();}
+  if(li){e.preventDefault();location.href='login.html?next='+encodeURIComponent((location.pathname.split('/').pop()||'home.html')+location.search+location.hash);}
 });
 </script>
 <script>
@@ -787,6 +785,16 @@ document.addEventListener('click',function(e){
 })();
 </script>
 <script>
+/* 가입 때 정한 닉네임을 헤더 프로필에 반영 (signup.html 에서 저장) */
+(function () {
+  try {
+    const nick = localStorage.getItem("scentrip_nickname");
+    if (!nick) return;
+    document.querySelectorAll(".pill-name, .pop-name").forEach((el) => { el.textContent = nick; });
+  } catch (e) {}
+})();
+</script>
+<script>
 /* 저장된 프로필 사진을 모든 아바타에 반영 (마이페이지에서 변경) */
 (function () {
   try {
@@ -799,5 +807,16 @@ document.addEventListener('click',function(e){
   } catch (e) {}
 })();
 </script>
+<script src="../reference/tour.js"></script>
+<script>
+/* 첫 방문 튜토리얼 — 가입 직후 신규 회원에게 이 화면에서 한 번 (reference/tour.js). 검수: 주소에 ?tour=1 */
+ScentTour.run("explore", [
+  { el: ".tabs", fit: true, title: "장소와 동선 둘러보기", body: "여행 장소와 여행 동선을 탭으로 오가며 탐색할 수 있어요." },
+  { el: "#sortSeg", title: "취향 매칭순으로 보기", body: "기본은 취향 매칭순이에요. 내 취향과 잘 맞는 장소부터 보여드려요." },
+  { el: "#filterChips", title: "필터로 좁혀 보기", body: "지역·특징·취향으로 원하는 장소만 골라 볼 수 있어요." },
+  { el: "#grid > :first-child", title: "장소 카드", body: "AI 매칭 %로 내 취향과 얼마나 맞는지 알려줘요. 카드를 누르면 장소 상세를 볼 수 있어요." },
+]);
+</script>
+<script src="../reference/lang.js"></script>
 </body>
 </html>

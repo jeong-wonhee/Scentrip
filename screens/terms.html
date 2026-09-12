@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scentrip — 이용약관</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="../reference/tokens.css">
+<link rel="stylesheet" href="../reference/components.css">
+<script>(function(){try{if((localStorage.getItem("scentrip_auth")||"in")==="out")document.documentElement.classList.add("is-guest");}catch(e){}})();</script>
+<script>if(/[?&]embed\b/.test(location.search))document.documentElement.classList.add("is-embed");</script>
+<style>
+/* ============================================================
+   Scentrip — 이용약관 · Figma node 748:3122 이식
+   진입: 전 페이지 푸터의 '이용약관' 링크.
+   색/타이포/스페이싱은 tokens.css var() 사용. 헤더/푸터는 공용 크롬(components.css).
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing);
+  color: var(--color-content-default);
+  background: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+img { display: block; max-width: 100%; }
+button { font-family: inherit; letter-spacing: inherit; cursor: pointer; background: none; border: 0; color: inherit; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--color-border-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
+
+.page { display: flex; flex-direction: column; align-items: stretch; width: 100%; min-height: 100vh; }
+
+/* 프로필 칩 + 팝오버 (전 페이지 공용 헤더 컴포넌트) */
+.profile { position: relative; }
+.type-pill { display: flex; align-items: center; gap: var(--space-8); padding: 4px 4px 4px 12px; background: var(--color-surface-01); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-full); transition: background .18s ease, border-color .18s ease; }
+.type-pill:hover, .type-pill[aria-expanded="true"] { background: var(--color-surface-02); border-color: var(--color-border-default); }
+.profile-pop { width: 288px; padding: var(--space-8); }
+/* 로그인/게스트 토글 (공용) */
+html .guest-only { display: none; }
+.is-guest .auth-only { display: none; }
+.btn-login { display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 var(--space-20); border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-content-on-fill); font-size: var(--text-body-14); font-weight: 600; text-decoration: none; border: 0; transition: background .16s ease; }
+.btn-login:hover { background: var(--color-primary-hover); }
+.is-guest .btn-login { display: inline-flex; }
+
+/* ============================================================
+   약관 본문 — 1040px 단일 컬럼, 위아래 80px
+   ============================================================ */
+.nav { border-bottom: 1px solid var(--color-border-subtle); }
+.terms { flex: 1 0 auto; width: 100%; padding: 80px 32px; }
+.terms-inner { display: flex; flex-direction: column; gap: 48px; max-width: 1040px; margin: 0 auto; }
+.terms-title { font-size: var(--text-title-32, 32px); font-weight: 600; line-height: 1.25; color: var(--color-content-default); }
+.terms-body { display: flex; flex-direction: column; gap: var(--space-32); }
+.terms-art { display: flex; flex-direction: column; gap: var(--space-12); }
+.terms-art h2 { font-size: var(--text-heading-20); font-weight: 600; line-height: 1.25; color: var(--color-content-neutral); }
+.terms-art p, .terms-art li { font-size: var(--text-body-16); font-weight: 400; line-height: 1.5; color: var(--color-content-neutral); }
+.terms-art ol { padding-left: var(--space-24); list-style: decimal; }
+.footer-legal a[aria-current="page"] { text-decoration: underline; text-underline-offset: 3px; }
+
+/* 로그인·가입 화면의 '보기' 모달 안에서 열 때 (?embed=1) — 헤더·푸터·제목 없이 본문만 */
+.is-embed .nav, .is-embed .footer, .is-embed .terms-title { display: none; }
+.is-embed .page { min-height: 0; }
+.is-embed .terms { padding: var(--space-16) var(--space-20) var(--space-32); }
+.is-embed .terms-inner { gap: var(--space-24); }
+
+/* ---------- 반응형 ---------- */
+@media (max-width: 1120px) {
+  .nav { padding: 0 20px; }
+  .nav-list { gap: var(--space-24); }
+  .footer-inner { padding: 48px 32px; }
+  .footer-top { flex-direction: column; align-items: flex-start; gap: var(--space-20); }
+  .footer-nav { align-items: flex-start; text-align: left; }
+}
+@media (max-width: 560px) {
+  .nav-center { display: none; }
+  .terms { padding: 56px 20px; }
+  .terms-inner { gap: var(--space-32); }
+  .terms-title { font-size: var(--text-heading-24); }
+  .footer-inner { padding: 40px 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <!-- ======================= Nav ======================= -->
+  <nav class="nav" aria-label="주 메뉴">
+    <a class="brand" href="home.html" aria-label="Scentrip 홈">
+      <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="brand-name">Scentrip</span>
+    </a>
+    <div class="nav-center">
+      <div class="nav-list">
+        <a class="nav-link" href="news.html">소식</a>
+        <a class="nav-link" href="place-recommend.html">탐색</a>
+        <a class="nav-link" href="my-trip.html">내 여행</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <a class="btn-login guest-only" href="#" data-login role="button">로그인</a>
+      <div class="profile auth-only">
+        <button class="type-pill" id="profilePill" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="profilePop">
+          <span class="pill-name">이서연</span>
+          <span class="av av-28" aria-hidden="true"><span class="av-svg"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg></span></span>
+        </button>
+        <div class="popover profile-pop" id="profilePop" role="menu">
+          <div class="pop-profile" aria-hidden="true">
+            <span class="av av-48" aria-hidden="true"><span class="av-svg"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg></span></span>
+            <span class="pop-id">
+              <span class="pop-name">이서연</span>
+              <span class="pop-taste">WHAN · 시간을 수집하는 감성가</span>
+            </span>
+          </div>
+          <div class="pop-divider"></div>
+          <div class="pop-menu">
+            <a class="pop-item" href="mypage.html#account" data-view-link="account" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg> 계정 설정</a>
+            <a class="pop-item" href="mypage.html#reviews" data-view-link="reviews" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,0,0,36.18,176.88L24.83,210.93a16,16,0,0,0,20.24,20.24l34.05-11.35A104,104,0,1,0,128,24Zm0,192a87.87,87.87,0,0,1-44.06-11.81,8,8,0,0,0-6.54-.67L40,216,52.47,178.6a8,8,0,0,0-.66-6.54A88,88,0,1,1,128,216Zm12-88a12,12,0,1,1-12-12A12,12,0,0,1,140,128Zm44,0a12,12,0,1,1-12-12A12,12,0,0,1,184,128Zm-88,0a12,12,0,1,1-12-12A12,12,0,0,1,96,128Z"/></svg> 내 리뷰</a>
+            <a class="pop-item" href="mypage.html#support" data-view-link="support" role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M140,180a12,12,0,1,1-12-12A12,12,0,0,1,140,180ZM128,72c-22.06,0-40,16.15-40,36v4a8,8,0,0,0,16,0v-4c0-11,10.77-20,24-20s24,9,24,20-10.77,20-24,20a8,8,0,0,0-8,8v8a8,8,0,0,0,16,0v-.72c18.24-3.35,32-17.9,32-35.28C168,88.15,150.06,72,128,72Zm104,56A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg> 고객센터</a>
+            <div class="pop-divider"></div>
+            <button class="pop-item" type="button" data-logout role="menuitem"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M124,216a12,12,0,0,1-12,12H48a12,12,0,0,1-12-12V40A12,12,0,0,1,48,28h64a12,12,0,0,1,0,24H60V204h52A12,12,0,0,1,124,216Zm108.49-96.49-40-40a12,12,0,0,0-17,17L195,116H112a12,12,0,0,0,0,24h83l-19.52,19.51a12,12,0,0,0,17,17l40-40A12,12,0,0,0,232.49,119.51Z"/></svg> 로그아웃</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ======================= 이용약관 ======================= -->
+  <main class="terms">
+    <div class="terms-inner">
+      <h1 class="terms-title">센트립 이용약관</h1>
+
+      <div class="terms-body">
+        <section class="terms-art">
+          <h2>제1조(목적)</h2>
+          <p>본 약관은 센트립(이하 “운영자”)이 제공하는 향 취향 기반 여행지 추천 서비스 Scentrip (이하 “서비스”)의 이용과 관련하여 운영자와 이용자 간의 권리, 의무 및 책임사항을 규정하는 것을 목적으로 합니다.</p>
+        </section>
+
+        <section class="terms-art">
+          <h2>제2조(용어의 정의)</h2>
+          <div>
+            <p>“서비스”란 이용자가 향 취향 검사를 통해 16가지 유형 중 하나의 결과를 확인하고, 해당 유형에 맞는 국내 여행지와 여행 콘텐츠를 추천받을 수 있도록 운영자가 제공하는 웹서비스를 의미합니다.</p>
+            <ol>
+              <li>“이용자”란 본 약관에 따라 서비스를 이용하는 회원과 비회원을 의미합니다.</li>
+              <li>“회원”이란 서비스에 회원정보를 등록하고 지속적으로 서비스를 이용하는 사람을 의미합니다.</li>
+              <li>“비회원”이란 회원가입 없이 서비스에서 제공하는 일부 기능을 이용하는 사람을 의미합니다.</li>
+              <li>“콘텐츠”란 검사 문항, 향 취향 유형, 검사 결과, 여행지 추천, 여행 코스, 문구, 이미지, 캐릭터 및 디자인 등 서비스를 통해 제공되는 모든 자료를 의미합니다.</li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="terms-art">
+          <h2>제3조(약관의 게시 및 변경)</h2>
+          <div>
+            <p>운영자는 이용자가 본 약관을 쉽게 확인할 수 있도록 서비스 내에 게시합니다.</p>
+            <ol>
+              <li>운영자는 관계 법령을 위반하지 않는 범위에서 본 약관을 변경할 수 있습니다.</li>
+              <li>약관이 변경되는 경우 변경 내용과 시행일을 시행일 7일 전부터 서비스 내에 공지합니다. 이용자에게 불리하거나 중요한 내용이 변경되는 경우에는 시행일 30일 전부터 공지합니다.</li>
+              <li>이용자가 변경된 약관에 동의하지 않는 경우 서비스 이용을 중단하고 회원탈퇴를 요청할 수 있습니다.</li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="terms-art">
+          <h2>제4조(서비스의 내용)</h2>
+          <div>
+            <p>운영자는 다음과 같은 서비스를 제공합니다.</p>
+            <ol>
+              <li>향 취향 검사</li>
+              <li>16가지 향 취향 유형별 결과 제공</li>
+              <li>유형별 국내 여행지 및 여행 코스 추천</li>
+              <li>검사 결과 저장, 조회 및 공유</li>
+              <li>그 밖에 운영자가 추가로 개발하거나 제휴를 통해 제공하는 서비스</li>
+            </ol>
+            <p>서비스의 구체적인 내용은 운영 상황에 따라 변경될 수 있습니다.</p>
+          </div>
+        </section>
+
+        <section class="terms-art">
+          <h2>제5조(검사 결과 및 여행 정보에 관한 안내)</h2>
+          <div>
+            <p>Scentrip의 향 취향 검사 결과는 이용자가 선택한 답변을 바탕으로 제공되는 콘텐츠입니다.</p>
+            <ol>
+              <li>검사 결과는 의학적·심리학적 진단이나 전문적인 평가를 목적으로 하지 않습니다.</li>
+              <li>추천 여행지는 이용자의 취향 탐색과 여행 계획을 돕기 위한 참고 정보이며, 특정 여행지에 대한 만족도나 적합성을 보장하지 않습니다.</li>
+              <li>여행지의 운영시간, 이용요금, 교통편, 날씨, 휴무일 및 출입 가능 여부 등은 변경될 수 있습니다. 이용자는 방문 전에 해당 시설이나 관계 기관을 통해 최신 정보를 확인해야 합니다.</li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="terms-art">
+          <h2>제6조(회원가입 및 계정 관리)</h2>
+          <div>
+            <p>이용자는 서비스에서 정한 절차에 따라 회원가입을 신청할 수 있습니다.</p>
+            <ol>
+              <li>이용자는 회원가입 시 정확한 정보를 제공해야 하며, 타인의 정보를 이용하거나 허위 정보를 등록해서는 안 됩니다.</li>
+              <li>회원은 자신의 계정과 로그인 정보를 안전하게 관리해야 합니다.</li>
+              <li>계정 도용이나 무단 사용을 발견한 경우 즉시 운영자에게 알려야 합니다.</li>
+              <li>회원의 관리 소홀로 발생한 손해에 대해서는 운영자에게 고의 또는 과실이 없는 한 운영자가 책임을 지지 않습니다.</li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="terms-art">
+          <h2>제7조(회원가입 제한)</h2>
+          <div>
+            <p>운영자는 다음 중 하나에 해당하는 경우 회원가입을 승인하지 않거나 회원자격을 제한할 수 있습니다.</p>
+            <ol>
+              <li>타인의 정보 또는 허위 정보를 사용한 경우</li>
+              <li>필수 정보를 누락하거나 잘못 입력한 경우</li>
+              <li>서비스 운영을 방해할 목적으로 가입한 경우</li>
+              <li>관계 법령이나 본 약관을 위반한 이력이 있는 경우</li>
+              <li>그 밖에 정상적인 서비스 이용이 어렵다고 합리적으로 판단되는 경우</li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="terms-art">
+          <h2>제8조(이용자의 의무)</h2>
+          <div>
+            <p>이용자는 다음 행위를 해서는 안 됩니다.</p>
+            <ol>
+              <li>회원가입 또는 정보 변경 시 허위 내용을 등록하는 행위</li>
+              <li>다른 이용자의 개인정보나 계정을 도용하는 행위</li>
+              <li>서비스의 정상적인 운영을 방해하는 행위</li>
+              <li>비정상적인 방식으로 서버에 접근하거나 과도한 부하를 발생시키는 행위</li>
+              <li>운영자 또는 제3자의 저작권, 상표권, 개인정보, 명예 등 권리를 침해하는 행위</li>
+              <li>운영자의 허락 없이 서비스의 콘텐츠를 영리적으로 복제, 배포, 가공 또는 판매하는 행위</li>
+              <li>자동화된 프로그램 등을 이용하여 서비스의 정보를 대량으로 수집하는 행위</li>
+              <li>관계 법령이나 공공질서에 위반되는 행위</li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="terms-art">
+          <h2>제9조(서비스의 변경 및 중단)</h2>
+          <div>
+            <p>운영자는 서비스 개선이나 운영상·기술상 필요에 따라 서비스의 전부 또는 일부를 변경할 수 있습니다.</p>
+            <ol>
+              <li>시스템 점검, 서버 장애, 통신망 장애, 천재지변 또는 그 밖의 불가피한 사유가 발생한 경우 서비스 제공이 일시적으로 중단될 수 있습니다.</li>
+              <li>중요한 변경이나 중단이 예정된 경우 운영자는 서비스 내 공지를 통해 사전에 안내합니다. 다만 긴급하거나 예측할 수 없는 사유가 있는 경우에는 사후에 안내할 수 있습니다.</li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="terms-art">
+          <h2>제10조(지식재산권)</h2>
+          <div>
+            <p>서비스에서 제공하는 검사 문항, 유형 체계, 유형명, 결과 문구, 여행 콘텐츠, 이미지, 캐릭터, 로고 및 디자인 등에 관한 저작권과 지식재산권은 운영자 또는 정당한 권리자에게 있습니다.</p>
+            <ol>
+              <li>이용자는 서비스가 제공하는 공유 기능을 이용하여 자신의 검사 결과를 개인적이고 비영리적인 목적으로 공유할 수 있습니다.</li>
+              <li>이용자는 운영자의 사전 동의 없이 서비스의 콘텐츠를 복제, 수정, 배포, 판매하거나 상업적으로 이용할 수 없습니다.</li>
+              <li>서비스에 포함된 여행지 명칭, 사진 또는 외부 자료의 권리는 해당 권리자에게 있을 수 있습니다.</li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="terms-art">
+          <h2>제11조(광고 및 외부 서비스)</h2>
+          <div>
+            <p>운영자는 서비스 운영을 위해 광고 또는 제휴 콘텐츠를 표시할 수 있습니다.</p>
+            <ol>
+              <li>경제적 이해관계가 있는 광고나 제휴 콘텐츠는 관계 법령에 따라 이를 표시합니다.</li>
+              <li>서비스에는 외부 웹사이트나 제휴 서비스로 연결되는 링크가 포함될 수 있습니다.</li>
+              <li>외부 사이트에서 제공되는 정보와 서비스에는 해당 운영자의 이용약관 및 개인정보 처리방침이 적용됩니다.</li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="terms-art">
+          <h2>제12조(회원탈퇴 및 이용제한)</h2>
+          <ol>
+            <li>회원은 언제든지 서비스 내 회원탈퇴 기능 또는 고객 문의를 통해 회원탈퇴를 요청할 수 있습니다.</li>
+            <li>회원이 본 약관이나 관계 법령을 위반한 경우 운영자는 서비스 이용을 제한하거나 이용계약을 해지할 수 있습니다.</li>
+            <li>운영자는 이용제한 조치를 하는 경우 가능한 범위에서 그 사유와 이의제기 방법을 안내합니다.</li>
+            <li>회원탈퇴 시 개인정보는 개인정보 처리방침에 따라 처리됩니다.</li>
+          </ol>
+        </section>
+
+        <section class="terms-art">
+          <h2>제13조(책임의 제한)</h2>
+          <div>
+            <p>운영자는 천재지변, 통신망 장애, 외부 서비스의 중단 또는 이용자의 귀책사유 등 운영자가 통제하기 어려운 사유로 서비스를 제공할 수 없는 경우 책임을 지지 않습니다.</p>
+            <ol>
+              <li>운영자는 향 취향 검사와 여행지 추천 결과의 절대적인 정확성, 완전성 또는 특정 목적에 대한 적합성을 보장하지 않습니다.</li>
+              <li>이용자가 서비스에서 제공한 정보를 참고하여 내린 결정과 여행 중 발생한 문제에 대해 운영자는 고의 또는 과실이 없는 한 책임을 지지 않습니다.</li>
+              <li>본 조항은 운영자의 고의 또는 중대한 과실로 발생한 책임이나 관계 법령상 제한할 수 없는 책임을 배제하지 않습니다.</li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="terms-art">
+          <h2>제14조(분쟁 해결)</h2>
+          <div>
+            <p>운영자와 이용자는 서비스 이용과 관련하여 발생한 분쟁을 원만하게 해결하기 위해 성실히 협의합니다.</p>
+            <ol>
+              <li>협의로 해결되지 않는 분쟁에는 대한민국 법령을 적용합니다.</li>
+              <li>소송이 필요한 경우 관할법원은 민사소송법에 따라 정합니다.</li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="terms-art">
+          <h2>제15조(문의처)</h2>
+          <div>
+            <p>서비스 이용과 관련한 문의는 다음 연락처를 통해 접수할 수 있습니다.</p>
+            <ol>
+              <li>운영자명: 센트립</li>
+              <li>이메일: info.scentrip@gmail.com</li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="terms-art">
+          <h2>부칙</h2>
+          <p>본 약관은 2026년 8월 9일부터 시행합니다.</p>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- ======================= Footer ======================= -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-brand-col">
+          <span class="footer-brand">
+            <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="brand-name">Scentrip</span>
+          </span>
+          <p class="footer-desc">나만의 취향을 찾아 떠나는 특별한 여행,<br>센트립이 당신의 여정을 함께합니다.</p>
+        </div>
+        <nav class="footer-nav">
+          <a href="about.html">센트립 소개</a>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <a class="footer-copy" href="mailto:info.scentrip@gmail.com">info.scentrip@gmail.com</a>
+        <div class="footer-legal">
+          <a href="terms.html" class="lgl-muted" aria-current="page">이용약관</a>
+          <a href="privacy.html" class="lgl-strong">개인정보처리방침</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+/* ---------- 프로필 팝오버 ---------- */
+const pill = document.getElementById('profilePill');
+const pop = document.getElementById('profilePop');
+pill.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const open = pop.classList.toggle('is-open');
+  pill.setAttribute('aria-expanded', String(open));
+});
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.profile')) { pop.classList.remove('is-open'); pill.setAttribute('aria-expanded','false'); }
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { pop.classList.remove('is-open'); pill.setAttribute('aria-expanded','false'); } });
+</script>
+<script>
+document.addEventListener('click',function(e){
+  var lo=e.target.closest('[data-logout]'), li=e.target.closest('[data-login]');
+  if(lo){e.preventDefault();try{localStorage.setItem('scentrip_auth','out');}catch(x){}location.href='home.html';}
+  if(li){e.preventDefault();location.href='login.html?next='+encodeURIComponent((location.pathname.split('/').pop()||'home.html')+location.search+location.hash);}
+});
+</script>
+<script>
+/* 가입 때 정한 닉네임을 헤더 프로필에 반영 (signup.html 에서 저장) */
+(function () {
+  try {
+    const nick = localStorage.getItem("scentrip_nickname");
+    if (!nick) return;
+    document.querySelectorAll(".pill-name, .pop-name").forEach((el) => { el.textContent = nick; });
+  } catch (e) {}
+})();
+</script>
+<script>
+/* 저장된 프로필 사진을 모든 아바타에 반영 (마이페이지에서 변경) */
+(function () {
+  try {
+    const src = localStorage.getItem("scentrip_avatar");
+    if (!src) return;
+    document.querySelectorAll(".av").forEach((el) => {
+      el.classList.add("has-photo");
+      el.style.backgroundImage = 'url("' + src + '")';
+    });
+  } catch (e) {}
+})();
+</script>
+<script src="../reference/lang.js"></script>
+</body>
+</html>

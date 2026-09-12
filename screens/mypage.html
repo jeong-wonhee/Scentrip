@@ -343,7 +343,7 @@ html .guest-only { display: none; }
     </a>
     <div class="nav-center">
       <div class="nav-list">
-        <a class="nav-link" href="#">소식</a>
+        <a class="nav-link" href="news.html">소식</a>
         <a class="nav-link" href="place-recommend.html">탐색</a>
         <a class="nav-link" href="my-trip.html">내 여행</a>
       </div>
@@ -513,7 +513,7 @@ html .guest-only { display: none; }
                   <svg class="ic-x" viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>
                 </span>
               </summary>
-              <div class="a">아니요. Scentrip 계정과 서비스 이용 데이터만 삭제되며, Google 계정 자체에는 영향을 주지 않습니다.</div>
+              <div class="a">아니요. Scentrip 계정과 서비스 이용 데이터만 삭제되며, Google 계정 자체에는 영향을 주지 않습니다. 탈퇴 후에도 같은 Google 계정으로 언제든 다시 가입할 수 있습니다.</div>
             </details>
           </div>
         </div>
@@ -576,7 +576,7 @@ html .guest-only { display: none; }
       <section class="view" data-view="withdraw" aria-labelledby="t-withdraw">
         <div class="view-head">
           <h2 class="view-title" id="t-withdraw" tabindex="-1">회원탈퇴</h2>
-          <p>탈퇴하면 Scentrip 계정과 아래 서비스 이용 데이터가 삭제되며 복구할 수 없습니다.</p>
+          <p>탈퇴하면 Scentrip 계정과 아래 서비스 이용 데이터가 삭제되며 복구할 수 없습니다. 같은 Google 계정으로 다시 가입할 수 있지만, 삭제된 정보는 되돌아오지 않습니다.</p>
         </div>
 
         <div class="group">
@@ -632,15 +632,13 @@ html .guest-only { display: none; }
         </div>
         <nav class="footer-nav">
           <a href="about.html">센트립 소개</a>
-          <a href="#">공지사항</a>
-          <a href="#">FAQ</a>
         </nav>
       </div>
       <div class="footer-bottom">
         <a class="footer-copy" href="mailto:info.scentrip@gmail.com">info.scentrip@gmail.com</a>
         <div class="footer-legal">
-          <a href="#" class="lgl-muted">이용약관</a>
-          <a href="#" class="lgl-strong">개인정보처리방침</a>
+          <a href="terms.html" class="lgl-muted">이용약관</a>
+          <a href="privacy.html" class="lgl-strong">개인정보처리방침</a>
         </div>
       </div>
     </div>
@@ -1207,8 +1205,18 @@ renderReviews();
 document.addEventListener('click',function(e){
   var lo=e.target.closest('[data-logout]'), li=e.target.closest('[data-login]');
   if(lo){e.preventDefault();try{localStorage.setItem('scentrip_auth','out');}catch(x){}location.href='home.html';}
-  if(li){e.preventDefault();try{localStorage.setItem('scentrip_auth','in');}catch(x){}location.reload();}
+  if(li){e.preventDefault();location.href='login.html?next='+encodeURIComponent((location.pathname.split('/').pop()||'home.html')+location.search+location.hash);}
 });
+</script>
+<script>
+/* 가입 때 정한 닉네임을 헤더 프로필에 반영 (signup.html 에서 저장) */
+(function () {
+  try {
+    const nick = localStorage.getItem("scentrip_nickname");
+    if (!nick) return;
+    document.querySelectorAll(".pill-name, .pop-name").forEach((el) => { el.textContent = nick; });
+  } catch (e) {}
+})();
 </script>
 <script>
 /* 저장된 프로필 사진을 모든 아바타에 반영 (마이페이지에서 변경) */
@@ -1223,5 +1231,6 @@ document.addEventListener('click',function(e){
   } catch (e) {}
 })();
 </script>
+<script src="../reference/lang.js"></script>
 </body>
 </html>
