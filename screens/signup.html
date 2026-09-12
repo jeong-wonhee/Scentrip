@@ -133,6 +133,9 @@ a { color: inherit; }
 .done-actions .btn-line { height: 52px; font-size: var(--text-body-16); }
 
 /* ---------- 약관 전문 모달 ---------- */
+/* 열 때는 visibility 를 즉시 켠다 — 공용 모달은 visibility 도 전환돼서, 전환이 끝나기 전엔 닫기 버튼에 포커스가 안 들어간다 */
+#legalModal { transition: opacity .16s ease, visibility 0s linear .16s; }
+#legalModal.is-open { transition: opacity .16s ease, visibility 0s; }
 .legal-box { --modal-w: 720px; height: min(760px, calc(100vh - 48px)); }
 .legal-frame { flex: 1 1 auto; width: 100%; min-height: 0; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); background: var(--color-background); }
 .modal-foot { display: flex; justify-content: flex-end; gap: var(--space-8); }
@@ -408,7 +411,7 @@ function openLegal(kind) {
   s.hidden = false;
   void s.offsetWidth;
   s.classList.add("is-open");
-  setTimeout(() => s.querySelector(".modal-close").focus(), 40);   // visibility 전환이 끝난 뒤에야 포커스가 들어간다
+  s.querySelector(".modal-close").focus();
 }
 function closeLegal() {
   const s = $("legalModal");
