@@ -12,8 +12,8 @@
    Scentrip — 회원가입 (Google 인증 후 신규 회원만)
    Figma 프레임 없음 — login.html 과 같은 셸. 기획 초안: SCENTrip_login_signup_spec.md §8~11, 13, 20
    구성: Google 프로필 확인 → 약관 동의(전체 / [필수] 2개) → 닉네임 → 가입 완료하기 → 환영 화면
-   진입 파라미터: next(가입 후 복귀) · from=test(가입 전 검사 결과 있음) · resume=1(가입 중단 후 재진입)
-   프로토타입은 localStorage 에 가입 상태를 둔다. 실서비스는 서버(PENDING → ACTIVE, 동의 시각은 서버 시간).
+   진입 파라미터: next(가입 후 복귀) · from=test(가입 전 검사 결과 있음)
+   프로토타입은 localStorage 에 가입 상태를 둔다. 실서비스는 약관 동의·닉네임까지 마쳐야 회원으로 저장한다(동의 시각은 서버 시간). 중간에 나간 사람·탈퇴 후 다시 온 사람은 신규로 처음부터.
    ============================================================ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -42,9 +42,6 @@ a { color: inherit; }
 .auth-step { font-size: 13px; font-weight: 600; color: var(--color-content-subtle); }
 .auth-title { margin-top: var(--space-6); font-size: var(--text-title-28); font-weight: 600; line-height: 1.4; color: var(--color-content-default); }
 .auth-sub { margin-top: var(--space-10); font-size: var(--text-body-16); line-height: 1.6; color: var(--color-content-neutral-muted); }
-.auth-resume { display: flex; align-items: center; gap: var(--space-8); margin-top: var(--space-16); padding: var(--space-10) var(--space-12); border-radius: var(--radius-md); background: var(--color-primary-subtle); font-size: var(--text-body-14); color: var(--color-content-muted); }
-.auth-resume[hidden] { display: none; }
-.auth-resume svg { width: 16px; height: 16px; flex: none; color: var(--color-primary); }
 
 /* ---------- Google 프로필 (받은 정보는 최소만 노출 — 명세 8) ---------- */
 .g-chip { display: flex; align-items: center; gap: var(--space-12); margin-top: var(--space-24); padding: var(--space-12) var(--space-16); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); background: var(--color-surface-overlay); box-shadow: var(--elevation-xs); }
@@ -164,10 +161,6 @@ a { color: inherit; }
       <p class="auth-step">회원가입</p>
       <h1 class="auth-title" id="formTitle">가입을 마무리해 주세요</h1>
       <p class="auth-sub">약관에 동의하고 Scentrip에서 쓸 닉네임을 정해 주세요.</p>
-      <p class="auth-resume" id="resumeNote" hidden>
-        <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm64-88a8,8,0,0,1-8,8H128a8,8,0,0,1-8-8V72a8,8,0,0,1,16,0v48h48A8,8,0,0,1,192,128Z"/></svg>
-        지난번에 멈춘 단계부터 이어서 진행해요.
-      </p>
 
       <!-- Google 에서 받은 정보 (프로토타입 샘플) -->
       <div class="g-chip">
@@ -280,7 +273,6 @@ function safeNext(v) {
 }
 const next = safeNext(params.get("next"));
 $("qaFrom").value = params.get("from") === "test" ? "test" : "";
-$("resumeNote").hidden = !params.has("resume");
 
 /* 동의 문서 버전 — 약관 부칙·방침 버전과 맞춘다. 실서비스는 서버가 버전·동의 시각(서버 시간)을 기록 (명세 9) */
 const TERMS_VERSION = "2026-08-09";
@@ -355,7 +347,7 @@ $("submitBtn").addEventListener("click", () => {
 });
 
 function complete(nick) {
-  // TODO(개발): 서버에 약관 동의(버전·시각)와 닉네임을 저장하고 PENDING → ACTIVE 로 전환. 같은 요청이 두 번 와도 회원은 하나
+  // TODO(개발): 서버에 약관 동의(버전·시각)와 닉네임을 저장하고 회원을 만든다. 같은 요청이 두 번 와도 회원은 하나
   const at = new Date().toISOString();
   try {
     localStorage.setItem("scentrip_auth", "in");
