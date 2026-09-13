@@ -11,7 +11,7 @@
 /* ============================================================
    Scentrip — 회원가입 (Google 인증 후 신규 회원만)
    Figma 프레임 없음 — login.html 과 같은 셸. 기획 초안: SCENTrip_login_signup_spec.md §8~11, 13, 20
-   구성: Google 프로필 확인 → 약관 동의(전체 / [필수] 2개) → 닉네임 → 가입 완료하기 → 환영 화면
+   구성: Google 프로필 확인 → 약관 동의(전체 / [필수] 만 14세 이상 · 이용약관 · 개인정보 수집·이용) → 닉네임 → 가입 완료하기 → 환영 화면
    진입 파라미터: next(가입 후 복귀) · from=test(가입 전 검사 결과 있음)
    프로토타입은 localStorage 에 가입 상태를 둔다. 실서비스는 약관 동의·닉네임까지 마쳐야 회원으로 저장한다(동의 시각은 서버 시간). 중간에 나간 사람·탈퇴 후 다시 온 사람은 신규로 처음부터.
    ============================================================ */
@@ -178,6 +178,13 @@ a { color: inherit; }
             <span class="ck" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/></svg></span>
             <span class="agree-tx">전체 동의</span>
           </label>
+          <div class="agree-item">
+            <label class="agree-row">
+              <input class="sr-only" type="checkbox" data-agree="age">
+              <span class="ck" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/></svg></span>
+              <span class="agree-tx"><span class="req">[필수]</span>만 14세 이상입니다</span>
+            </label>
+          </div>
           <div class="agree-item">
             <label class="agree-row">
               <input class="sr-only" type="checkbox" data-agree="terms">
@@ -354,7 +361,7 @@ function complete(nick) {
     localStorage.setItem("scentrip_nickname", nick);
     localStorage.setItem("scentrip_tour_pending", "true");   // 첫 방문 튜토리얼 켜기 (reference/tour.js)
     localStorage.removeItem("scentrip_tour_seen");
-    localStorage.setItem("scentrip_consent", JSON.stringify({ terms: { version: TERMS_VERSION, at }, privacy: { version: PRIVACY_VERSION, at } }));
+    localStorage.setItem("scentrip_consent", JSON.stringify({ age14: { confirmed: true, at }, terms: { version: TERMS_VERSION, at }, privacy: { version: PRIVACY_VERSION, at } }));   // 만 14세 확인도 시각과 함께 남긴다 (개인정보처리방침 메모)
   } catch (e) {}
   const withResult = $("qaFrom").value === "test";
   $("doneTitle").textContent = `${nick}님, 가입을 환영해요`;
