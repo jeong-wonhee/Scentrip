@@ -156,7 +156,7 @@ html .guest-only { display: none; }
 .prv-write svg { width: 16px; height: 16px; }
 
 /* 요약 — 평균 + 별점 분포 */
-.prv-sum { display: grid; grid-template-columns: 180px minmax(0, 1fr); align-items: center; gap: var(--space-32); margin-top: 28px; padding: var(--space-24) 28px; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); background: var(--color-surface-01); }
+.prv-sum { display: grid; grid-template-columns: 180px minmax(0, 1fr); align-items: center; gap: var(--space-32); margin-top: 28px; padding: var(--space-24) 28px; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); background: color-mix(in srgb, var(--color-surface-01) 50%, var(--color-surface-overlay)); }   /* surface-01 보다 한 단계 연하게 — 가장 연한 그린 토큰(50)과 흰색을 반반 */
 .prv-avg { display: flex; flex-direction: column; align-items: center; gap: var(--space-6); text-align: center; }
 .prv-avg b { font-size: 44px; font-weight: 700; line-height: 1; color: var(--color-content-neutral); font-variant-numeric: tabular-nums; }
 .prv-avg .pd-rv-stars { margin-top: 0; }
