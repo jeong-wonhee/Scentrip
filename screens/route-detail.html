@@ -371,7 +371,7 @@ html .guest-only { display: none; }
 <div class="page">
 
   <nav class="nav rr-nav">
-    <a class="brand" href="home.html" aria-label="Scentrip 홈">
+    <a class="brand" href="home.html" aria-label="센트립 홈">
       <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i></span>
       <span class="brand-name">Scentrip</span>
     </a>
@@ -612,7 +612,7 @@ function renderHead() {
   $("rdTitle").textContent = route.name;
   $("matchAvg").textContent = `${avg}%`;
   const pace = route.paceLabel || (cond.pace === "빽빽하게" ? "부지런한 코스" : "여유로운 코스");
-  const bits = [route.owner === "mine" ? "내가 만든 동선" : "Scentrip 추천 동선", meta.label, cond.nights, `장소 ${all.length}곳`, pace];
+  const bits = [route.owner === "mine" ? "내가 만든 동선" : "센트립 추천 동선", meta.label, cond.nights, `장소 ${all.length}곳`, pace];
   if (route.pop) bits.push(`찜 ${route.pop.toLocaleString()}`);
   $("rdMeta").textContent = bits.join(" · ");
   const nick = (document.querySelector(".pill-name") || {}).textContent || "회원";
