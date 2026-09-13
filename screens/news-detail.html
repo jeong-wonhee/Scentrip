@@ -354,7 +354,6 @@ function render() {
       <div class="nd-kicker nw-dots"><span class="nw-cat">${esc(m.category)}</span><span class="nw-region">${regions.map((k) => esc(REGION_META[k].label)).join(" · ")}</span><span>${newsFmtDate(m.date)}</span><span>읽는 데 약 ${newsReadMin(m)}분</span></div>
       <h1 class="nd-title">${esc(m.title)}</h1>
       <p class="nd-dek">${esc(m.dek)}</p>
-      <div class="nd-tools"><button class="nd-tool" id="shareBtn" type="button">${share}<span>공유</span></button></div>
     </header>
     ${newsImgHTML(m.heroImageId, "nd-hero")}
     ${caption(m.heroImageId)}
@@ -396,10 +395,6 @@ function render() {
       localStorage.removeItem("scentrip_route_draft");
     } catch (x) {}
     location.href = "route-conditions.html?mode=picked";
-  });
-  $("shareBtn").addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(location.href); say("링크를 복사했어요"); }
-    catch (x) { say("링크를 복사하지 못했어요. 주소창의 링크를 공유해 주세요"); }
   });
 }
 render();

@@ -726,8 +726,8 @@ const state = {
   ],
   ui: { view:'account', region:'all', editingId:null, pendingDeleteId:null, editPhotos:[] }
 };
-const VIEWS = ['account','reviews','support','review-edit','withdraw'];
-const SOLO_VIEWS = ['review-edit','withdraw'];
+const VIEWS = ['account','reviews','support','review-edit','review-write','withdraw'];
+const SOLO_VIEWS = ['review-edit','review-write','withdraw'];
 
 /* ============================================================
    1. 유틸
@@ -962,7 +962,7 @@ function reviewCard(r){
   const top = document.createElement('div'); top.className = 'rv-top';
   const heads = document.createElement('div'); heads.className = 'rv-heads';
   const h3 = document.createElement('h3'); h3.className = 'rv-place'; h3.textContent = r.place;
-  const loc = document.createElement('p'); loc.className = 'rv-loc'; loc.textContent = `${r.loc} · ${r.visitDate} 방문`;
+  const loc = document.createElement('p'); loc.className = 'rv-loc'; loc.textContent = r.visitDate ? `${r.loc} · ${r.visitDate} 방문` : r.loc;
   heads.append(h3, loc);
 
   // 케밥 메뉴
@@ -1045,6 +1045,8 @@ function paintStarInput(){
 /* 방문 날짜 · 사진 첨부 */
 const dotToDash = (d) => d ? d.replace(/\./g, '-') : '';
 const dashToDot = (d) => d ? d.replace(/-/g, '.') : '';
+const visitToDash = (v) => v ? '20' + v.replace(/\./g, '-') : '';        // '26.08.20' → '2026-08-20'
+const dashToVisit = (d) => d ? d.slice(2).replace(/-/g, '.') : '';     // '2026-08-20' → '26.08.20'
 const rePhotoInput = $('#rePhotoInput'), rePhotosEl = $('#rePhotos');
 function renderPhotos(){
   const list = state.ui.editPhotos;
@@ -1091,7 +1093,32 @@ rePhotoInput.addEventListener('change', (e) => {
   e.target.value = '';
 });
 
+/* 리뷰 작성 — 장소 상세의 '리뷰 작성하기'에서 mypage.html?place=…&loc=…#review-write 로 들어온다.
+   수정 화면과 같은 폼을 쓰고 제목·버튼 문구와 저장 동작만 다르다.
+   TODO(개발): 장소 id 로 연결하고 리뷰 등록 API 로 저장 */
+function setReviewMode(mode){
+  state.ui.reviewMode = mode;
+  $('#t-reviewedit').textContent = mode === 'write' ? '리뷰 작성' : '리뷰 수정';
+  $('#reviewForm button[type="submit"]').textContent = mode === 'write' ? '등록하기' : '저장하기';
+}
+function startReviewWrite(place, loc){
+  setReviewMode('write');
+  state.ui.editingId = null;
+  state.ui.writePlace = { place, loc };
+  $('#rePlace').textContent = place;
+  $('#reLoc').textContent = loc;
+  $$('#reStars input').forEach(i => { i.checked = false; });
+  paintStarInput();
+  $('#reText').value = ''; $('#reTextCount').textContent = '0';
+  $('#reText').setAttribute('aria-invalid','false'); $('#reTextErr').classList.remove('show');
+  $('#reStarErr').classList.remove('show');
+  $('#reDate').value = '';
+  state.ui.editPhotos = [];
+  renderPhotos();
+  navigate('review-write');
+}
 function startReviewEdit(id){
+  setReviewMode('edit');
   const r = state.reviews.find(x => x.id === id);
   if (!r) return;
   state.ui.editingId = id;
@@ -1104,7 +1131,7 @@ function startReviewEdit(id){
   $('#reTextCount').textContent = String(charLen(r.text));
   $('#reText').setAttribute('aria-invalid','false'); $('#reTextErr').classList.remove('show');
   $('#reStarErr').classList.remove('show');
-  $('#reDate').value = dotToDash(r.date);
+  $('#reDate').value = visitToDash(r.visitDate);
   state.ui.editPhotos = r.photos ? r.photos.map(url => ({ url })) : [];
   renderPhotos();
   navigate('review-edit');
@@ -1113,11 +1140,15 @@ $('#reText').addEventListener('input', (e) => {
   $('#reTextCount').textContent = String(charLen(e.target.value));
   if (e.target.value.trim()){ e.target.setAttribute('aria-invalid','false'); $('#reTextErr').classList.remove('show'); }
 });
-$('#reCancel').addEventListener('click', () => navigate('reviews'));
+$('#reCancel').addEventListener('click', () => {
+  if (state.ui.reviewMode === 'write' && /place-detail\.html/.test(document.referrer)) { history.go(-1); return; }
+  navigate('reviews');
+});
 $('#reviewForm').addEventListener('submit', (e) => {
   e.preventDefault();
-  const r = state.reviews.find(x => x.id === state.ui.editingId);
-  if (!r){ navigate('reviews'); return; }
+  const writing = state.ui.reviewMode === 'write';
+  const r = writing ? null : state.reviews.find(x => x.id === state.ui.editingId);
+  if (!writing && !r){ navigate('reviews'); return; }
   const rating = Number(($('input[name="reRating"]:checked') || {}).value || 0);
   const text = $('#reText').value.trim();
   let firstBad = null;
@@ -1133,13 +1164,23 @@ $('#reviewForm').addEventListener('submit', (e) => {
 
   if (firstBad){ firstBad.focus(); return; }
 
-  r.rating = rating; r.text = text;
-  if ($('#reDate').value) r.date = dashToDot($('#reDate').value);
-  r.photos = state.ui.editPhotos.map(p => p.url);
+  const photos = state.ui.editPhotos.map(p => p.url);
+  if (writing){
+    const w = state.ui.writePlace || { place: $('#rePlace').textContent, loc: $('#reLoc').textContent };
+    const today = new Date(), pad = (n) => String(n).padStart(2, '0');
+    state.reviews.unshift({ id: 'r' + Date.now(), place: w.place, region: (w.loc.split(' ')[0] || '기타'), loc: w.loc,
+      visitDate: dashToVisit($('#reDate').value), rating, text, photos,
+      date: `${today.getFullYear()}.${pad(today.getMonth() + 1)}.${pad(today.getDate())}` });
+  } else {
+    r.rating = rating; r.text = text;
+    r.visitDate = dashToVisit($('#reDate').value) || r.visitDate;
+    r.photos = photos;
+  }
   state.ui.editingId = null;
+  if (typeof renderRegionMenu === 'function') renderRegionMenu();
   renderReviews();
   navigate('reviews');
-  toast('리뷰가 수정되었습니다');
+  toast(writing ? '리뷰를 등록했어요' : '리뷰가 수정되었습니다');
 });
 
 /* ============================================================
@@ -1159,19 +1200,20 @@ function navigate(view, opts){
   if (!VIEWS.includes(view)) view = 'account';
   state.ui.view = view;
 
-  $$('.view').forEach(v => v.classList.toggle('is-active', v.dataset.view === view));
+  const shown = view === 'review-write' ? 'review-edit' : view;   // 리뷰 작성은 수정 화면을 그대로 쓰고 문구만 바꾼다
+  $$('.view').forEach(v => v.classList.toggle('is-active', v.dataset.view === shown));
   $('#app').classList.toggle('is-solo', SOLO_VIEWS.includes(view));
 
   $$('.side-link').forEach(l => {
     const active = l.dataset.viewLink === view
-      || (view === 'review-edit' && l.dataset.viewLink === 'reviews')
+      || ((view === 'review-edit' || view === 'review-write') && l.dataset.viewLink === 'reviews')
       || (view === 'withdraw' && l.dataset.viewLink === 'account');
     if (active) l.setAttribute('aria-current','page'); else l.removeAttribute('aria-current');
   });
 
   if (location.hash !== '#' + view) history.pushState({ view }, '', '#' + view);
 
-  const active = $(`.view[data-view="${view}"]`);
+  const active = $(`.view[data-view="${shown}"]`);
   const heading = active && active.querySelector('.view-title');
   if (heading && !(opts && opts.silent)) heading.focus({ preventScroll:true });
   const reduce = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1198,7 +1240,9 @@ renderRegionMenu();
 renderReviews();
 (function init(){
   const v = location.hash.replace('#','');
-  navigate(VIEWS.includes(v) ? v : 'account', { silent:true });
+  const q = new URLSearchParams(location.search);
+  if (v === 'review-write' && q.get('place')){ startReviewWrite(q.get('place'), q.get('loc') || ''); return; }
+  navigate(VIEWS.includes(v) && v !== 'review-write' ? v : (v === 'review-write' ? 'reviews' : 'account'), { silent:true });
 })();
 </script>
 <script>
