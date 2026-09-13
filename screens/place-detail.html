@@ -38,6 +38,7 @@ ul, ol { list-style: none; }
 .profile-pop { width: 288px; padding: var(--space-8); }
 html .guest-only { display: none; }
 .is-guest .auth-only { display: none; }
+.is-guest .btn-login { display: inline-flex; }   /* 비회원 헤더 로그인 버튼 */
 .btn-login { display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 var(--space-20); border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-content-on-fill); font-size: var(--text-body-14); font-weight: 600; text-decoration: none; border: 0; transition: background .16s ease; }
 .btn-login:hover { background: var(--color-primary-hover); }
 
@@ -383,7 +384,7 @@ const rvList = document.getElementById('rvList');
 REVIEWS.forEach(r => rvList.appendChild(reviewCard(r)));
 rvList.addEventListener('click', (e) => {
   const h = e.target.closest('[data-help]'); if (!h) return;
-  if (document.documentElement.classList.contains('is-guest')) { location.href = 'login.html?next=' + encodeURIComponent('place-detail.html' + location.search); return; }
+  if (document.documentElement.classList.contains('is-guest')) { ScentLogin.require({ reason: 'helpful', then: () => { helpLiked.add(h.dataset.help); saveHelp(); } }); return; }
   const r = REVIEWS.find(x => x.id === h.dataset.help);
   helpLiked.has(r.id) ? helpLiked.delete(r.id) : helpLiked.add(r.id); saveHelp();
   h.setAttribute('aria-pressed', helpLiked.has(r.id)); h.innerHTML = `${ico(THUMB)}도움돼요 ${helpCount(r)}`;
@@ -399,14 +400,30 @@ rvList.addEventListener('click', (e) => {
   if (btn){ e.stopPropagation(); const m = btn.nextElementSibling; const open = !m.classList.contains('is-open'); m.classList.toggle('is-open', open); btn.setAttribute('aria-expanded', String(open)); }
 });
 
-/* 저장 토글 — 다른 화면의 하트와 같은 규칙(.is-saved) */
-document.getElementById('saveBtn').addEventListener('click', (e) => {
-  if (document.documentElement.classList.contains("is-guest")) { location.href = "login.html?next=" + encodeURIComponent("place-detail.html" + location.search); return; }   // 비회원은 로그인부터
-  const b = e.currentTarget;
-  const on = b.getAttribute('aria-pressed') !== 'true';
+/* 저장 — 탐색·홈 하트와 같은 저장 목록(scentrip_saved_cards)에 'place:<id>' 로. 비회원은 로그인 모달
+   TODO(개발): 장소 id 로 교체 */
+const PLACE_KEY = 'place:cheongwansan';
+const readSavedCards = () => { try { return new Set(JSON.parse(localStorage.getItem('scentrip_saved_cards') || '[]')); } catch (e) { return new Set(); } };
+function setPlaceSaved(on, keep) {
+  const b = document.getElementById('saveBtn');
   b.setAttribute('aria-pressed', String(on));
   b.classList.toggle('is-saved', on);
   b.setAttribute('aria-label', on ? '저장 해제' : '저장');
+  if (!keep) return;
+  const set = readSavedCards(); on ? set.add(PLACE_KEY) : set.delete(PLACE_KEY);
+  try { localStorage.setItem('scentrip_saved_cards', JSON.stringify([...set])); } catch (e) {}
+}
+setPlaceSaved(!document.documentElement.classList.contains('is-guest') && readSavedCards().has(PLACE_KEY), false);
+document.getElementById('saveBtn').addEventListener('click', (e) => {
+  if (document.documentElement.classList.contains('is-guest')) { ScentLogin.require({ reason: 'save', then: () => setPlaceSaved(true, true) }); return; }
+  setPlaceSaved(e.currentTarget.getAttribute('aria-pressed') !== 'true', true);
+});
+/* 리뷰 작성하기 · 첫 리뷰 작성하기 — 비회원은 로그인 모달, 로그인하면 작성 화면으로 */
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('.pd-rv-write, #rvEmpty .btn-outline');
+  if (!a || !document.documentElement.classList.contains('is-guest')) return;
+  e.preventDefault();
+  ScentLogin.require({ reason: 'review', then: () => a.getAttribute('href') });
 });
 
 /* 지도 — 핀 하나 + '카카오맵에서 보기'(카카오맵 검색 주소, 새 창)
@@ -460,6 +477,7 @@ document.addEventListener('click',function(e){
   } catch (e) {}
 })();
 </script>
+<script src="../reference/login-modal.js"></script>
 <script src="../reference/lang.js"></script>
 </body>
 </html>

@@ -260,7 +260,9 @@ label:hover > .ck-radio { border-color: var(--color-border-strong); }
 }
 
 /* ---------- 헤더 ---------- */
-.nav { display: flex; align-items: center; height: 56px; padding: 0 28px; width: 100%; background: var(--color-surface-overlay); position: relative; z-index: 10; justify-content: space-between; }
+/* 헤더는 모든 화면에서 위에 고정 — 스크롤해도 따라온다 (동선 결과·상세의 .rr-nav 와 같은 z-index) */
+.nav { display: flex; align-items: center; height: 56px; padding: 0 28px; width: 100%; background: var(--color-surface-overlay); position: sticky; top: 0; z-index: 800; justify-content: space-between; }
+html { scroll-padding-top: 72px; }   /* 페이지 안 링크(약관 목차 등)로 이동할 때 고정 헤더에 가리지 않게 */
 .nav-center { position: absolute; left: 50%; top: 0; transform: translateX(-50%); height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .nav-list { display: flex; align-items: center; justify-content: center; gap: var(--space-32); }
 .nav-link { display: flex; align-items: center; justify-content: center; height: 56px; font-size: var(--text-body-16); line-height: 1.5; font-weight: 500; color: var(--color-content-nav); text-decoration: none; }
@@ -376,3 +378,33 @@ label:hover > .ck-radio { border-color: var(--color-border-strong); }
 .lang .menu { left: auto; right: 0; min-width: 200px; }
 .lang .menu-item em { margin-left: var(--space-6); font-style: normal; font-size: var(--text-caption-12); font-weight: 400; color: var(--color-content-neutral-subtle); }
 .lang-toast svg { color: var(--color-content-on-fill); opacity: .8; }
+
+/* ============================================================
+   로그인 모달 — reference/login-modal.js 가 만든다 (공용 .modal-scrim 위에)
+   비회원이 저장·찜·도움돼요·리뷰 작성 등을 누르면 페이지 이동 대신 이 모달.
+   헤더·배너의 '로그인' 버튼은 그대로 login.html 로 이동한다.
+   Google 버튼 모양은 login.html 의 .btn-google 과 같다.
+   ============================================================ */
+.lm-box { --modal-w: 420px; gap: var(--space-16); }
+.lm-box .modal-head h2 { font-size: var(--text-heading-20); }
+.lm-box .modal-head p { margin-top: var(--space-6); }
+.lm-alert { display: flex; gap: var(--space-10); padding: var(--space-12) var(--space-16); border: 1px solid var(--color-error-border); border-radius: var(--radius-md); background: var(--color-error-subtle); color: var(--color-content-error); }
+.lm-alert[hidden] { display: none; }
+.lm-alert svg { width: 18px; height: 18px; flex: none; margin-top: 2px; }
+.lm-alert b { display: block; font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; }
+.lm-alert p { margin-top: 2px; font-size: var(--text-body-14); line-height: 1.6; color: var(--color-content-neutral); }
+.lm-google { display: flex; align-items: center; justify-content: center; gap: var(--space-12); width: 100%; height: 52px; margin-top: var(--space-8); border: 1px solid var(--color-neutral-border); border-radius: var(--radius-full); background: var(--color-surface-overlay); font-family: inherit; letter-spacing: inherit; font-size: var(--text-body-16); font-weight: 600; color: var(--color-content-neutral); box-shadow: var(--elevation-xs); cursor: pointer; transition: box-shadow .18s ease, background .18s ease, border-color .18s ease; }
+.lm-google:hover { background: linear-gradient(var(--color-state-hover), var(--color-state-hover)), var(--color-surface-overlay); border-color: var(--color-border-strong); box-shadow: var(--elevation-sm); }
+.lm-google:active { background: linear-gradient(var(--color-state-pressed), var(--color-state-pressed)), var(--color-surface-overlay); }
+.lm-google:disabled { cursor: progress; box-shadow: none; background: var(--color-neutral-bg); color: var(--color-content-neutral-muted); }
+.lm-g { width: 20px; height: 20px; flex: none; }
+.lm-spin { width: 18px; height: 18px; flex: none; border: 2px solid currentColor; border-right-color: transparent; border-radius: var(--radius-full); animation: lmSpin .7s linear infinite; }
+.lm-spin[hidden] { display: none; }
+@keyframes lmSpin { to { transform: rotate(360deg); } }
+.lm-note { font-size: 13px; line-height: 1.6; color: var(--color-content-neutral-muted); text-align: center; }
+.lm-later { align-self: center; height: 36px; padding: 0 var(--space-12); border: 0; border-radius: var(--radius-full); background: none; font-family: inherit; letter-spacing: inherit; font-size: var(--text-body-14); font-weight: 600; color: var(--color-content-neutral-muted); cursor: pointer; }
+.lm-later:hover { background: var(--color-state-hover); color: var(--color-content-default); }
+/* 검수용 — 개발 전달 시 제거 */
+.lm-qa { display: flex; align-items: center; justify-content: space-between; gap: var(--space-8); padding: var(--space-8) var(--space-12); border: 1px dashed var(--color-border-default); border-radius: var(--radius-md); font-size: var(--text-caption-12); color: var(--color-content-subtle); }
+.lm-qa select { min-width: 0; max-width: 62%; border: 0; background: none; font-family: inherit; letter-spacing: inherit; font-size: var(--text-caption-12); font-weight: 600; color: var(--color-content-default); cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .lm-spin { animation: none; } }

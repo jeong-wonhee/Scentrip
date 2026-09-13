@@ -703,7 +703,7 @@ document.addEventListener('click',function(e){
     const btn = e.target.closest(".heart-btn"); if (!btn) return;
     const card = btn.closest("[data-save]"); if (!card) return;
     e.preventDefault(); e.stopPropagation();                   // 카드 링크로 이동하지 않게
-    if (document.documentElement.classList.contains("is-guest")) { location.href = "login.html?next=" + encodeURIComponent(location.pathname.split("/").pop() + location.search); return; }   // 비회원은 로그인부터
+    if (document.documentElement.classList.contains("is-guest")) { ScentLogin.require({ reason: "save", then: () => { saved.add(card.dataset.save); persist(); } }); return; }   // 비회원은 로그인 모달 — 로그인하면 저장까지 해 두고 새로고침
     const on = !card.classList.contains("is-saved");
     card.classList.toggle("is-saved", on);
     btn.setAttribute("aria-pressed", on ? "true" : "false");
@@ -746,6 +746,7 @@ ScentTour.run("home", [
   { el: ".ai-banner", title: "AI로 나만의 동선 만들기", body: "AI 추천, 원하는 지역, 찜한 장소 중 편한 방식을 골라 취향에 맞는 여행 동선을 만들 수 있어요." },
 ]);
 </script>
+<script src="../reference/login-modal.js"></script>
 <script src="../reference/lang.js"></script>
 </body>
 </html>
