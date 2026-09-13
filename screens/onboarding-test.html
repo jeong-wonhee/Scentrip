@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Scentrip — 취향 테스트 (진행 · 로딩 · 결과)</title>
+<link rel="icon" href="../assets/logo/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="../assets/logo/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/logo/apple-touch-icon.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/MaruBuri/MaruBuri.css">
 <link rel="stylesheet" href="../reference/tokens.css">
@@ -69,16 +72,13 @@ body {
 body:has(#stage-intro.is-active) .brand,
 body:has(#stage-loading.is-active) .brand,
 body:has(#stage-result.is-active) .brand { color: var(--color-content-on-fill); }
-.brand-mark { display: flex; align-items: flex-end; gap: 2px; height: 16px; }
-.brand-mark i {
-  display: block;
-  width: 3px;
-  border-radius: var(--radius-full);
-  background: currentColor;
-}
-.brand-mark i:nth-child(1) { height: 10px; opacity: .55; }
-.brand-mark i:nth-child(2) { height: 16px; }
-.brand-mark i:nth-child(3) { height: 7px; opacity: .35; }
+/* 꽃잎 나침반 심볼(assets/logo/scentrip-symbol.svg)을 인라인으로 — 어두운 스테이지에서 흰색으로 뒤집기 위해 */
+.brand-mark { display: block; width: 26px; height: 26px; flex: none; }
+.brand-mark .bm-petals { fill: currentColor; }
+.brand-mark .bm-north { fill: var(--scent-teal-500); }
+body:has(#stage-intro.is-active) .brand-mark .bm-north,
+body:has(#stage-loading.is-active) .brand-mark .bm-north,
+body:has(#stage-result.is-active) .brand-mark .bm-north { fill: var(--scent-teal-200); }
 
 /* ---------- 스테이지 전환 ----------
    각 스테이지가 #id로 display(grid/block)를 지정하므로,
@@ -1215,7 +1215,7 @@ body:has(#stage-result.is-active) .brand { color: var(--color-content-on-fill); 
 <body>
 
 <a class="brand" href="home.html" aria-label="센트립 홈으로 이동">
-  <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+  <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><g class="bm-petals"><path transform="rotate(90 24 24)" d="M24 21C15.5 17 16 7.5 24 4.5 32 7.5 32.5 17 24 21Z"/><path transform="rotate(180 24 24)" d="M24 21C15.5 17 16 7.5 24 4.5 32 7.5 32.5 17 24 21Z"/><path transform="rotate(270 24 24)" d="M24 21C15.5 17 16 7.5 24 4.5 32 7.5 32.5 17 24 21Z"/><circle cx="24" cy="24" r="2"/></g><path class="bm-north" d="M24 21C15.5 17 16 7.5 24 4.5 32 7.5 32.5 17 24 21Z"/></svg>
   <span>Scentrip</span>
 </a>
 
