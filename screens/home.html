@@ -188,7 +188,8 @@ a.news-item:hover .news-title { color: var(--color-primary); }
 .route-photo { position: relative; aspect-ratio: 371 / 200; overflow: hidden; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); }
 .route-map { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .route-photo .badge { position: absolute; top: 12px; left: 12px; z-index: 3; }
-.route-photo .heart { position: absolute; top: 12px; right: 12px; z-index: 3; }
+/* 위치는 하트 버튼에 준다 — 아이콘(svg)에 주면 호버 때 버튼의 scale(transform)이 기준 상자가 되어 하트가 튀어 클릭이 카드 링크로 빠진다 */
+.route-photo .heart-btn, .route-photo > .heart { position: absolute; top: 12px; right: 12px; z-index: 3; }
 .route-inset { position: absolute; left: 3.2%; top: 28%; width: 33.4%; bottom: 6%; border: 2px solid #fff; border-radius: var(--radius-lg); overflow: hidden; z-index: 2; }
 .route-inset img { width: 100%; height: 100%; object-fit: cover; }
 .route-lines { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
