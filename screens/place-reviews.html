@@ -188,8 +188,8 @@ html .guest-only { display: none; }
 .pd-rv-photos button:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
 .prv-mine { display: inline-flex; align-items: center; height: 20px; margin-left: var(--space-6); padding: 0 var(--space-6); border-radius: var(--radius-sm); background: var(--color-primary-subtle); font-size: var(--text-caption-11); font-weight: 600; color: var(--color-primary); vertical-align: 2px; }
 .pd-rv.is-mine { border-color: var(--color-border-default); }
-.prv-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-12); margin-top: var(--space-16); }
-.prv-foot .pd-rv-date { margin-top: 0; }
+.pd-rv-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-12); margin-top: var(--space-16); }
+.pd-rv-foot .pd-rv-date { margin-top: 0; }
 .helpful { display: inline-flex; align-items: center; gap: var(--space-6); height: 32px; padding: 0 var(--space-12); border: 1px solid var(--color-neutral-border); border-radius: var(--radius-full); background: var(--color-surface-overlay); font-size: 13px; font-weight: 600; color: var(--color-content-neutral-muted); cursor: pointer; transition: background .14s ease, border-color .14s ease, color .14s ease; }
 .helpful svg { width: 14px; height: 14px; }
 .helpful:hover { background: var(--color-neutral-subtle); }
@@ -351,8 +351,10 @@ const PLACE = { name: qs.get("place") || "천관산 억새 언덕", loc: qs.get(
 const IS_GUEST = document.documentElement.classList.contains("is-guest");
 const toLogin = () => { location.href = "login.html?next=" + encodeURIComponent("place-reviews.html" + location.search); };
 const PAGE = 10;
+const HELPFUL_KEY = "scentrip_review_helpful";   // 도움돼요 누른 리뷰 id — 장소 상세와 공용
 let list = qs.get("reviews") === "0" ? [] : PLACE_REVIEWS.slice();   // ?reviews=0 → 리뷰 0개 미리보기
-const st = { sort: "best", star: 0, photo: false, shown: PAGE, open: new Set(), liked: new Set() };
+const st = { sort: "best", star: 0, photo: false, shown: PAGE, open: new Set(), liked: new Set((() => { try { return JSON.parse(localStorage.getItem(HELPFUL_KEY) || "[]"); } catch (e) { return []; } })()) };
+const saveHelp = () => { try { localStorage.setItem(HELPFUL_KEY, JSON.stringify([...st.liked])); } catch (e) {} };
 
 $("backName").textContent = PLACE.name;
 $("placeLine").textContent = `${PLACE.name} · ${PLACE.loc}`;
@@ -404,7 +406,7 @@ function card(r) {
     <p class="pd-rv-text${long && !open ? " is-clamp" : ""}">${esc(r.text)}</p>
     ${long ? `<button class="prv-more-text" type="button" data-toggle="${r.id}">${open ? "접기" : "더보기"}</button>` : ""}
     ${r.photos.length ? `<div class="pd-rv-photos">${r.photos.map((p, i) => `<button type="button" data-photo="${p}" aria-label="리뷰 사진 ${i + 1} 크게 보기"><img src="${p}" alt=""></button>`).join("")}</div>` : ""}
-    <div class="prv-foot">
+    <div class="pd-rv-foot">
       <p class="pd-rv-date">${r.date}</p>
       ${r.mine ? "" : `<button class="helpful" type="button" data-help="${r.id}" aria-pressed="${st.liked.has(r.id)}">${ico(THUMB)}도움돼요 ${helpCount(r)}</button>`}
     </div>
@@ -449,7 +451,7 @@ $("rvList").addEventListener("click", (e) => {
   const t = e.target.closest("[data-toggle]");
   if (t) { const id = t.dataset.toggle; st.open.has(id) ? st.open.delete(id) : st.open.add(id); render(); return; }
   const h = e.target.closest("[data-help]");
-  if (h) { if (IS_GUEST) { toLogin(); return; } const id = h.dataset.help; st.liked.has(id) ? st.liked.delete(id) : st.liked.add(id); render(); return; }
+  if (h) { if (IS_GUEST) { toLogin(); return; } const id = h.dataset.help; st.liked.has(id) ? st.liked.delete(id) : st.liked.add(id); saveHelp(); render(); return; }
   const ph = e.target.closest("[data-photo]");
   if (ph) { $("lbImg").src = ph.dataset.photo; $("lb").hidden = false; $("lbClose").focus(); lbOpener = ph; return; }
   const del = e.target.closest("[data-del]");

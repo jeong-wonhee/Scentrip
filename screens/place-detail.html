@@ -95,6 +95,13 @@ html .guest-only { display: none; }
 .pd-rv-photos { margin-top: var(--space-16); display: flex; gap: var(--space-6); }
 .pd-rv-photos img { width: 80px; height: 80px; object-fit: cover; border-radius: var(--radius-md); background: var(--color-surface-02); }
 .pd-rv-date { margin-top: var(--space-16); font-size: var(--text-caption-12); color: var(--color-content-neutral-subtle); }
+/* 리뷰 카드 하단 — 날짜 왼쪽 · 도움돼요 오른쪽 (전체 리뷰 place-reviews.html 과 같은 모양) */
+.pd-rv-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-12); margin-top: var(--space-16); }
+.pd-rv-foot .pd-rv-date { margin-top: 0; }
+.helpful { display: inline-flex; align-items: center; gap: var(--space-6); height: 32px; padding: 0 var(--space-12); border: 1px solid var(--color-neutral-border); border-radius: var(--radius-full); background: var(--color-surface-overlay); font-size: 13px; font-weight: 600; color: var(--color-content-neutral-muted); cursor: pointer; transition: background .14s ease, border-color .14s ease, color .14s ease; }
+.helpful svg { width: 14px; height: 14px; }
+.helpful:hover { background: var(--color-neutral-subtle); }
+.helpful[aria-pressed="true"] { border-color: var(--color-primary); background: var(--color-primary-subtle); color: var(--color-primary); }
 .kebab-wrap { position: relative; flex: none; }
 .icon-btn { width: 36px; height: 36px; border-radius: var(--radius-full); display: inline-flex; align-items: center; justify-content: center; color: var(--color-content-neutral-muted); transition: background .14s ease, color .14s ease; }
 .icon-btn:hover, .icon-btn[aria-expanded="true"] { background: var(--color-surface-01); color: var(--color-content-neutral); }
@@ -323,6 +330,14 @@ const stars = (n) => '<span class="pd-rv-stars" role="img" aria-label="5점 만�
 const NO_REVIEWS = new URLSearchParams(location.search).get('reviews') === '0';   // 리뷰 0개 미리보기
 const REVIEWS = NO_REVIEWS ? [] : PLACE_REVIEWS.slice(0, 3);   // 앞의 3개만 — 전체는 place-reviews.html (데이터: reference/place-reviews.js)
 
+/* 도움돼요 — 내가 누른 리뷰 id 를 전체 리뷰 화면과 같은 키에 저장 (비회원은 로그인으로)
+   TODO(개발): 계정 기준 도움돼요 API */
+const THUMB = 'M234,80.12A24,24,0,0,0,216,72H160V56a40,40,0,0,0-40-40,8,8,0,0,0-7.16,4.42L75.06,96H32a16,16,0,0,0-16,16v88a16,16,0,0,0,16,16H204a24,24,0,0,0,23.82-21l12-96A24,24,0,0,0,234,80.12ZM32,112H72v88H32ZM223.94,97l-12,96a8,8,0,0,1-7.94,7H88V105.89l36.71-73.43A24,24,0,0,1,144,56V80a8,8,0,0,0,8,8h64a8,8,0,0,1,7.94,9Z';
+const HELPFUL_KEY = 'scentrip_review_helpful';
+const helpLiked = new Set((() => { try { return JSON.parse(localStorage.getItem(HELPFUL_KEY) || '[]'); } catch (e) { return []; } })());
+const saveHelp = () => { try { localStorage.setItem(HELPFUL_KEY, JSON.stringify([...helpLiked])); } catch (e) {} };
+const helpCount = (r) => r.helpful + (helpLiked.has(r.id) ? 1 : 0);
+const helpBtn = (r) => r.mine ? '' : `<button class="helpful" type="button" data-help="${r.id}" aria-pressed="${helpLiked.has(r.id)}">${ico(THUMB)}도움돼요 ${helpCount(r)}</button>`;
 function reviewCard(r){
   const art = document.createElement('article'); art.className = 'pd-rv';
   const kebab = r.mine ? `
@@ -345,11 +360,18 @@ function reviewCard(r){
     ${stars(r.rating)}
     <p class="pd-rv-text">${r.text}</p>
     <div class="pd-rv-photos">${r.photos.map((p,i)=>`<img src="${p}" alt="리뷰 사진 ${i+1}">`).join('')}</div>
-    <p class="pd-rv-date">${r.date}</p>`;
+    <div class="pd-rv-foot"><p class="pd-rv-date">${r.date}</p>${helpBtn(r)}</div>`;
   return art;
 }
 const rvList = document.getElementById('rvList');
 REVIEWS.forEach(r => rvList.appendChild(reviewCard(r)));
+rvList.addEventListener('click', (e) => {
+  const h = e.target.closest('[data-help]'); if (!h) return;
+  if (document.documentElement.classList.contains('is-guest')) { location.href = 'login.html?next=' + encodeURIComponent('place-detail.html' + location.search); return; }
+  const r = REVIEWS.find(x => x.id === h.dataset.help);
+  helpLiked.has(r.id) ? helpLiked.delete(r.id) : helpLiked.add(r.id); saveHelp();
+  h.setAttribute('aria-pressed', helpLiked.has(r.id)); h.innerHTML = `${ico(THUMB)}도움돼요 ${helpCount(r)}`;
+});
 document.getElementById('rvCount').textContent = String(NO_REVIEWS ? 0 : PLACE_REVIEWS.length);
 document.getElementById('rvEmpty').hidden = REVIEWS.length > 0;
 document.getElementById('rvMore').hidden = !REVIEWS.length;
