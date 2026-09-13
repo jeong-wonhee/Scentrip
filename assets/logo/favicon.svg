@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- 파비콘 · 그린 타일(gradient-depth) 위 흰 심볼 — 라이트/다크 브라우저 탭 모두에서 보이도록 -->
+  <defs>
+    <linearGradient id="depth" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f4d40"/>
+      <stop offset="1" stop-color="#3a5e4e"/>
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="10.5" fill="url(#depth)"/>
+  <g transform="translate(6 6) scale(0.75)">
+    <g fill="#ffffff">
+      <path transform="rotate(90 24 24)" d="M24 21C15.5 17 16 7.5 24 4.5 32 7.5 32.5 17 24 21Z"/>
+      <path transform="rotate(180 24 24)" d="M24 21C15.5 17 16 7.5 24 4.5 32 7.5 32.5 17 24 21Z"/>
+      <path transform="rotate(270 24 24)" d="M24 21C15.5 17 16 7.5 24 4.5 32 7.5 32.5 17 24 21Z"/>
+      <circle cx="24" cy="24" r="2"/>
+    </g>
+    <path fill="#b5dad3" d="M24 21C15.5 17 16 7.5 24 4.5 32 7.5 32.5 17 24 21Z"/>
+  </g>
+</svg>
