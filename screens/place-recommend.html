@@ -775,6 +775,7 @@ document.addEventListener('click',function(e){
     const btn = e.target.closest(".heart-btn"); if (!btn) return;
     const card = btn.closest("[data-save]"); if (!card) return;
     e.preventDefault(); e.stopPropagation();                   // 카드 링크로 이동하지 않게
+    if (document.documentElement.classList.contains("is-guest")) { location.href = "login.html?next=" + encodeURIComponent(location.pathname.split("/").pop() + location.search); return; }   // 비회원은 로그인부터
     const on = !card.classList.contains("is-saved");
     card.classList.toggle("is-saved", on);
     btn.setAttribute("aria-pressed", on ? "true" : "false");

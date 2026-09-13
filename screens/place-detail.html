@@ -7,6 +7,9 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="../reference/tokens.css">
 <link rel="stylesheet" href="../reference/components.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="../reference/map-adapter.js"></script>
 <script>(function(){try{if((localStorage.getItem("scentrip_auth")||"in")==="out")document.documentElement.classList.add("is-guest");}catch(e){}})();</script>
 <style>
 /* ============================================================
@@ -71,10 +74,21 @@ html .guest-only { display: none; }
 .pd-gallery img { width: 100%; height: 240px; object-fit: cover; border-radius: var(--radius-lg); background: var(--color-surface-02); }
 
 /* 지도 */
-.pd-map { margin-top: var(--space-20); height: 320px; border-radius: var(--radius-xl); background: color-mix(in srgb, var(--scent-green-100) 55%, var(--color-background)); border: 1px solid var(--color-border-subtle); display: flex; align-items: center; justify-content: center; }
-.pd-map-btn { display: flex; flex-direction: column; align-items: center; gap: var(--space-8); color: var(--color-primary); font-size: var(--text-body-14); font-weight: 600; }
-.pd-map-btn .pin { width: 44px; height: 44px; border-radius: var(--radius-full); background: var(--color-surface-overlay); box-shadow: var(--elevation-md); display: flex; align-items: center; justify-content: center; }
-.pd-map-btn .pin svg { width: 22px; height: 22px; }
+/* 지도 — 동선 결과와 같은 지도(ScentMap 어댑터 · 지금은 OSM 타일) 위에 핀 하나, 오른쪽 아래 '카카오맵에서 보기' */
+.pd-map { position: relative; isolation: isolate; margin-top: var(--space-20); height: 320px; overflow: hidden; border-radius: var(--radius-xl); background: color-mix(in srgb, var(--scent-green-100) 55%, var(--color-background)); border: 1px solid var(--color-border-subtle); }
+.pd-map-canvas { position: absolute; inset: 0; }
+.pd-map .leaflet-container { background: var(--color-neutral-bg); font-family: var(--font-family); }
+.pd-map .leaflet-tile { filter: saturate(.72) brightness(1.03); }
+.pd-map .leaflet-control-attribution { font-size: 10px; background: var(--alpha-white-70); }
+.pd-map .leaflet-control-zoom a { color: var(--color-content-neutral); }
+.pd-pin { display: block; width: 40px; height: 40px; color: var(--color-primary); filter: drop-shadow(0 4px 6px rgba(27, 35, 29, .28)); }
+.pd-pin svg { width: 100%; height: 100%; }
+.pd-map-kakao { position: absolute; z-index: 500; right: var(--space-12); bottom: var(--space-12); display: inline-flex; align-items: center; gap: var(--space-6); height: 40px; padding: 0 var(--space-16); border-radius: var(--radius-full); background: var(--color-surface-overlay); box-shadow: var(--elevation-md); font-size: var(--text-body-14); font-weight: 600; color: var(--color-primary); text-decoration: none; transition: background .14s ease; }
+.pd-map-kakao:hover { background: var(--color-surface-01); }
+.pd-map-kakao svg { width: 16px; height: 16px; }
+.pd-map-fail { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: var(--space-24); text-align: center; font-size: var(--text-body-14); color: var(--color-content-neutral-muted); }
+.pd-map-fail[hidden] { display: none; }
+@media (max-width: 640px) { .pd-map { height: 260px; } }
 
 /* 리뷰 */
 .pd-rv-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-16); }
@@ -246,10 +260,9 @@ html .guest-only { display: none; }
       <section class="pd-sec">
         <h2 class="pd-h2">지도</h2>
         <div class="pd-map">
-          <a class="pd-map-btn" href="#" aria-label="지도 보기">
-            <span class="pin" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M128,16a88.1,88.1,0,0,0-88,88c0,75.3,80,132.17,83.41,134.55a8,8,0,0,0,9.18,0C136,236.17,216,179.3,216,104A88.1,88.1,0,0,0,128,16Zm0,56a32,32,0,1,1-32,32A32,32,0,0,1,128,72Z"/></svg></span>
-            지도 보기
-          </a>
+          <div class="pd-map-canvas" id="pdMap" role="img" aria-label="천관산 억새 언덕 위치 지도"></div>
+          <p class="pd-map-fail" id="pdMapFail" hidden>지도를 불러오지 못했어요. 카카오맵에서 위치를 확인해 주세요.</p>
+          <a class="pd-map-kakao" id="pdMapKakao" href="https://map.kakao.com/" target="_blank" rel="noopener"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224,104a8,8,0,0,1-16,0V59.32l-66.33,66.34a8,8,0,0,1-11.32-11.32L196.68,48H152a8,8,0,0,1,0-16h64a8,8,0,0,1,8,8Zm-40,24a8,8,0,0,0-8,8v72H48V80h72a8,8,0,0,0,0-16H48A16,16,0,0,0,32,80V208a16,16,0,0,0,16,16H176a16,16,0,0,0,16-16V136A8,8,0,0,0,184,128Z"/></svg>카카오맵에서 보기</a>
         </div>
       </section>
 
@@ -385,12 +398,25 @@ rvList.addEventListener('click', (e) => {
 
 /* 저장 토글 — 다른 화면의 하트와 같은 규칙(.is-saved) */
 document.getElementById('saveBtn').addEventListener('click', (e) => {
+  if (document.documentElement.classList.contains("is-guest")) { location.href = "login.html?next=" + encodeURIComponent("place-detail.html" + location.search); return; }   // 비회원은 로그인부터
   const b = e.currentTarget;
   const on = b.getAttribute('aria-pressed') !== 'true';
   b.setAttribute('aria-pressed', String(on));
   b.classList.toggle('is-saved', on);
   b.setAttribute('aria-label', on ? '저장 해제' : '저장');
 });
+
+/* 지도 — 핀 하나 + '카카오맵에서 보기'(카카오맵 검색 주소, 새 창)
+   TODO(개발): 장소 id 의 좌표·주소로 교체. 지도 SDK 를 바꿀 때는 reference/map-adapter.js 만 고친다 */
+const PLACE_GEO = { name: '천관산 억새 언덕', addr: '전남 장흥군 관산읍 천관산로 12', lat: 34.5280, lng: 126.9150 };   // 천관산 연대봉~환희대 억새 능선 부근
+document.getElementById('pdMapKakao').href = 'https://map.kakao.com/link/search/' + encodeURIComponent(PLACE_GEO.addr);
+if (ScentMap.create(document.getElementById('pdMap'), [PLACE_GEO.lat, PLACE_GEO.lng], 13)) {
+  ScentMap.addMarker('place', [PLACE_GEO.lat, PLACE_GEO.lng],
+    '<span class="pd-pin"><svg viewBox="0 0 256 256" aria-hidden="true"><circle cx="128" cy="104" r="44" fill="#fff"/><path fill="currentColor" d="M128,16a88.1,88.1,0,0,0-88,88c0,75.3,80,132.17,83.41,134.55a8,8,0,0,0,9.18,0C136,236.17,216,179.3,216,104A88.1,88.1,0,0,0,128,16Zm0,56a32,32,0,1,1-32,32A32,32,0,0,1,128,72Z"/></svg></span>',
+    [40, 40], [20, 40]);
+} else {
+  document.getElementById('pdMapFail').hidden = false;
+}
 
 /* 프로필 팝오버 */
 const pill = document.getElementById('profilePill'), pop = document.getElementById('profilePop');

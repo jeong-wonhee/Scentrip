@@ -2186,7 +2186,7 @@ function retryTest() {
   $("stateSwitch").style.display = "none";
 }
 
-// 버튼 동작 위임 — 프로토타입이라 실제 이동/저장은 alert로 시늉만 낸다
+// 버튼 동작 위임 — 다시 검사 · 장소 추천으로 이동 · 가입(로그인)
 $("ctaSection").addEventListener("click", (e) => {
   const btn = e.target.closest("[data-action]");
   if (!btn) return;
@@ -2195,11 +2195,7 @@ $("ctaSection").addEventListener("click", (e) => {
   // 여행지 둘러보기 · 업데이트하고 추천받기 → 장소 추천 화면으로 이동
   if (action === "explore" || action === "update-explore") { location.href = "place-recommend.html"; return; }
   // 가입하고 여행지 추천받기 → 로그인. 신규 회원은 가입 완료 화면에서 '검사 결과를 계정에 저장' 안내 (from=test)
-  if (action === "signup") { location.href = "login.html?next=place-recommend.html&from=test"; return; }
-  const msg = {
-    share: "결과 공유 시트를 엽니다. (프로토타입)",
-  };
-  alert(msg[action] || "(프로토타입)");
+  if (action === "signup") { location.href = "login.html?next=place-recommend.html&from=test"; }
 });
 
 /* ---------- 검수용 진입 상태 스위처 ---------- */

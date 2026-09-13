@@ -65,7 +65,12 @@ html .guest-only { display: none; }
 .carousel-arrows { display: flex; gap: var(--space-8); flex: none; }
 .arrow-btn { width: 36px; height: 36px; border-radius: var(--radius-full); border: 1px solid var(--color-neutral-border); background: var(--color-surface-overlay); display: flex; align-items: center; justify-content: center; color: var(--color-content-neutral-muted); }
 .arrow-btn svg { width: 16px; height: 16px; }
-.featured-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-24); }
+/* 추천 동선 캐러셀 — 가로 스크롤 트랙(한 화면 2장 · 820px 이하 1장), 화살표는 한 페이지씩 · 점은 현재 페이지.
+   카드 그림자가 잘리지 않게 위아래 여백을 두고 같은 만큼 되돌린다 */
+.featured-row { display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - var(--space-24)) / 2); gap: var(--space-24); overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-block: 6px 28px; margin-block: -6px -12px; }
+.featured-row::-webkit-scrollbar { display: none; }
+.featured-row > * { scroll-snap-align: start; }
+.arrow-btn:disabled { opacity: .4; cursor: default; }
 .featured-card { border: 1px solid var(--color-neutral-border); border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--elevation-lg); display: flex; flex-direction: column; background: var(--color-surface-overlay); }
 .fc-head { padding: var(--space-20); display: flex; flex-direction: column; gap: var(--space-12); }
 .fc-badgerow { display: flex; align-items: center; justify-content: space-between; }
@@ -80,7 +85,7 @@ html .guest-only { display: none; }
 .fc-grid { flex: 1 1 50%; min-width: 0; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; }
 .fc-grid img { width: 100%; height: 100%; object-fit: cover; }
 .carousel-dots { display: flex; gap: var(--space-6); justify-content: center; align-items: center; width: 100%; }
-.carousel-dots i { width: 8px; height: 8px; border-radius: var(--radius-full); background: var(--color-neutral-border); }
+.carousel-dots i { width: 8px; height: 8px; border-radius: var(--radius-full); background: var(--color-neutral-border); cursor: pointer; transition: width .2s ease, background .2s ease; }
 .carousel-dots i.active { width: 22px; background: var(--color-primary); }
 
 /* ---------- AI 동선 제작 배너 ---------- */
@@ -169,6 +174,13 @@ html .guest-only { display: none; }
 }
 
 /* ---------- 동선 카드 그리드 ---------- */
+/* 무한 스크롤 — 목록 끝(보이지 않는 표식)이 화면에 가까워지면 다음 줄을 불러온다 */
+.grid-sentinel { height: 1px; }
+.grid-loading { display: flex; align-items: center; justify-content: center; gap: var(--space-8); padding-top: var(--space-24); font-size: var(--text-body-14); color: var(--color-content-neutral-muted); }
+.grid-loading[hidden] { display: none; }
+.grid-loading .spin { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--color-neutral-border); border-top-color: var(--color-primary); animation: feedSpin .8s linear infinite; }
+@keyframes feedSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .grid-loading .spin { animation: none; } }
 .row3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--space-24); row-gap: var(--space-48); align-items: start; transition: opacity .18s ease; }
 .route-card { display: flex; flex-direction: column; gap: var(--space-24); }
 .route-photo { position: relative; aspect-ratio: 371 / 200; overflow: hidden; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); }
@@ -197,8 +209,6 @@ html .guest-only { display: none; }
 .badge span { font-size: var(--text-body-14); font-weight: 600; line-height: 1.5; color: var(--color-content-subtle); white-space: nowrap; }
 
 /* ---------- 더보기 ---------- */
-.more-wrap { display: flex; justify-content: center; padding-top: var(--space-8); }
-.more-btn { height: 44px; padding: 0 var(--space-24); border-radius: var(--radius-full); border: 1px solid var(--color-neutral-border); background: var(--color-surface-overlay); font-size: var(--text-body-16); font-weight: 600; color: var(--color-content-neutral-muted); }
 
 /* ---------- 반응형 ---------- */
 @media (max-width: 1120px) {
@@ -207,7 +217,7 @@ html .guest-only { display: none; }
 }
 @media (max-width: 820px) {
   .nav { padding: 0 20px; }
-  .featured-row { grid-template-columns: 1fr; }
+  .featured-row { grid-auto-columns: 100%; }
 }
 @media (max-width: 560px) {
   .nav-center { display: none; }
@@ -299,12 +309,12 @@ html .guest-only { display: none; }
         <h2>이서연님을 위한 AI 맞춤 동선</h2>
       </div>
       <div class="carousel-arrows">
-        <button class="arrow-btn" type="button" aria-label="이전"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/></svg></button>
-        <button class="arrow-btn" type="button" aria-label="다음"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></button>
+        <button class="arrow-btn" id="featPrev" type="button" aria-label="이전 추천 동선" disabled><svg viewBox="0 0 256 256" fill="currentColor"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/></svg></button>
+        <button class="arrow-btn" id="featNext" type="button" aria-label="다음 추천 동선"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></button>
       </div>
     </div>
     <div class="featured-row" id="featuredRow"></div>
-    <div class="carousel-dots" aria-hidden="true"><i class="active"></i><i></i><i></i></div>
+    <div class="carousel-dots" id="featDots" aria-hidden="true"></div>
   </section>
 
   <!-- ============ AI 동선 제작 배너 ============ -->
@@ -339,7 +349,8 @@ html .guest-only { display: none; }
       <p class="count" id="count">총 24개 동선</p>
     </div>
     <div class="row3" id="routeGrid"></div>
-    <div class="more-wrap"><button class="more-btn" type="button">더보기</button></div>
+    <div class="grid-sentinel" id="gridSentinel" aria-hidden="true"></div>
+    <p class="grid-loading" id="gridLoading" role="status" hidden><span class="spin" aria-hidden="true"></span>동선을 더 불러오는 중</p>
   </section>
 
   <!-- ============ Footer ============ -->
@@ -378,33 +389,69 @@ const xCircle = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="tru
 
 const check = '<svg class="check" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/></svg>';
 
-/* ---------- 추천 동선(featured) 카드 ---------- */
-function featuredCard() {
+/* ---------- 추천 동선(featured) 카드 ----------
+   TODO(개발): 로그인 사용자의 AI 맞춤 동선 목록으로 교체 (사진은 동선 속 장소 사진) */
+const FEATURED = [
+  { name: "운치있는 담양 당일치기 코스", place: "[죽녹원]", region: "전남 담양", count: 5, period: "당일치기", pace: "여유로운 코스", match: 88, pop: 1720 },
+  { name: "안동 고택과 서원 산책", place: "[병산서원]", region: "경북 안동", count: 5, period: "1박2일", pace: "여유로운 코스", match: 92, pop: 1380 },
+  { name: "강릉 바다 향 따라 1박 2일", place: "[안목해변]", region: "강원 강릉", count: 6, period: "1박2일", pace: "보통", match: 90, pop: 2640 },
+  { name: "제주 숲길 힐링 코스", place: "[사려니숲길]", region: "제주 제주시", count: 4, period: "2박3일", pace: "여유로운 코스", match: 86, pop: 3050 },
+  { name: "경주 한옥 감성 산책", place: "[황리단길]", region: "경북 경주", count: 5, period: "당일치기", pace: "보통", match: 85, pop: 2210 },
+  { name: "전주 한옥마을 느린 여행", place: "[전주 한옥마을]", region: "전북 전주", count: 4, period: "1박2일", pace: "여유로운 코스", match: 84, pop: 1960 },
+];
+const FC_PHOTOS = ["big", "g1", "g2", "g3", "g4"];
+function featuredCard(f, i) {
+  const ph = (k) => `../assets/route/${FC_PHOTOS[(i + k) % FC_PHOTOS.length]}.jpg`;
+  const href = detailHref({ name: f.name, place: f.place, desc: `이서연님의 취향을 만족시켜줄 ${f.name}`, meta: `${f.count}개 장소 · ${f.period} · ${f.pace}`, match: f.match, pop: f.pop });
   return `
     <article class="featured-card">
       <div class="fc-head">
         <div class="fc-badgerow">
-          <span class="badge">${starFour}<span>AI 매칭 88%</span></span>
+          <span class="badge">${starFour}<span>AI 매칭 ${f.match}%</span></span>
           ${heartDark}
         </div>
         <div class="fc-title">
           <p class="t1">이서연님의 취향을 만족시켜줄</p>
-          <p class="t2"><a class="rd-link" href="route-detail.html?from=explore&amp;name=%EC%9A%B4%EC%B9%98%EC%9E%88%EB%8A%94+%EB%8B%B4%EC%96%91+%EB%8B%B9%EC%9D%BC%EC%B9%98%EA%B8%B0+%EC%BD%94%EC%8A%A4&amp;place=%5B%EC%A3%BD%EB%85%B9%EC%9B%90%5D&amp;desc=%EC%9D%B4%EC%84%9C%EC%97%B0%EB%8B%98%EC%9D%98+%EC%B7%A8%ED%96%A5%EC%9D%84+%EB%A7%8C%EC%A1%B1%EC%8B%9C%EC%BC%9C%EC%A4%84+%EC%9A%B4%EC%B9%98%EC%9E%88%EB%8A%94+%EB%8B%B4%EC%96%91+%EB%8B%B9%EC%9D%BC%EC%B9%98%EA%B8%B0+%EC%BD%94%EC%8A%A4&amp;meta=5%EA%B0%9C+%EC%9E%A5%EC%86%8C+%C2%B7+%EB%8B%B9%EC%9D%BC%EC%B9%98%EA%B8%B0+%C2%B7+%EC%97%AC%EC%9C%A0%EB%A1%9C%EC%9A%B4+%EC%BD%94%EC%8A%A4&amp;match=88">운치있는 담양 당일치기 코스</a></p>
+          <p class="t2"><a class="rd-link" href="${href.replace(/&/g, "&amp;")}">${f.name}</a></p>
         </div>
-        <div class="fc-meta"><span>5개 장소</span><span>·</span><span>경북 안동</span><span>·</span><span>여유로운 코스</span></div>
+        <div class="fc-meta"><span>${f.count}개 장소</span><span>·</span><span>${f.region}</span><span>·</span><span>${f.pace}</span></div>
       </div>
       <div class="fc-photos">
-        <div class="fc-big"><img src="../assets/route/big.jpg" alt=""></div>
+        <div class="fc-big"><img src="${ph(0)}" alt=""></div>
         <div class="fc-grid">
-          <div><img src="../assets/route/g1.jpg" alt=""></div>
-          <div><img src="../assets/route/g2.jpg" alt=""></div>
-          <div><img src="../assets/route/g3.jpg" alt=""></div>
-          <div><img src="../assets/route/g4.jpg" alt=""></div>
+          <div><img src="${ph(1)}" alt=""></div>
+          <div><img src="${ph(2)}" alt=""></div>
+          <div><img src="${ph(3)}" alt=""></div>
+          <div><img src="${ph(4)}" alt=""></div>
         </div>
       </div>
     </article>`;
 }
-document.getElementById("featuredRow").innerHTML = featuredCard() + featuredCard();
+document.getElementById("featuredRow").innerHTML = FEATURED.map(featuredCard).join("");
+
+/* 캐러셀 — 한 페이지 = 트랙 너비 + 간격(카드 2장 또는 1장). 스크롤·화면 크기가 바뀌면 점과 화살표를 다시 맞춘다 */
+(() => {
+  const row = document.getElementById("featuredRow"), dots = document.getElementById("featDots");
+  const prev = document.getElementById("featPrev"), next = document.getElementById("featNext");
+  const step = () => row.clientWidth + (parseFloat(getComputedStyle(row).columnGap) || 0);
+  const pages = () => Math.max(1, Math.ceil(FEATURED.length / (innerWidth <= 820 ? 1 : 2)));
+  const page = () => Math.min(pages() - 1, Math.round(row.scrollLeft / step()));
+  const smooth = () => (matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth");
+  function sync() {
+    const n = pages(), p = page();
+    if (dots.children.length !== n) dots.innerHTML = "<i></i>".repeat(n);
+    [...dots.children].forEach((d, i) => d.classList.toggle("active", i === p));
+    prev.disabled = p <= 0; next.disabled = p >= n - 1;
+  }
+  const go = (p) => { row.scrollTo({ left: Math.max(0, Math.min(pages() - 1, p)) * step(), behavior: smooth() }); setTimeout(sync, 450); };   // 부드러운 스크롤이 끝난 뒤에도 한 번 더 맞춘다
+  prev.addEventListener("click", () => go(page() - 1));
+  next.addEventListener("click", () => go(page() + 1));
+  dots.addEventListener("click", (e) => { const i = [...dots.children].indexOf(e.target); if (i >= 0) go(i); });
+  row.addEventListener("scroll", sync, { passive: true });
+  row.addEventListener("scrollend", sync);
+  addEventListener("resize", sync);
+  sync();
+})();
 
 /* ---------- 동선 카드 (지도+마커) ---------- */
 /* 동선 상세로 — 카드 정보를 넘겨 상세에서 코스를 채운다 (TODO(개발): 동선 id 로 교체) */
@@ -447,6 +494,25 @@ const ROUTES = [
 ];
 const grid = document.getElementById("routeGrid");
 grid.innerHTML = ROUTES.map(routeCard).join("");
+
+/* 무한 스크롤 — 처음 6개, 목록 끝이 화면에 가까워지면 3개씩 더 (더보기 버튼 없음)
+   TODO(개발): 다음 페이지를 커서로 요청해 받은 만큼 카드를 붙인다 */
+const FEED_FIRST = 6, FEED_NEXT = 3;
+const feed = { total: grid.children.length, limit: FEED_FIRST, loading: false };
+const feedSentinel = document.getElementById("gridSentinel"), feedLoading = document.getElementById("gridLoading");
+function paintFeed() {
+  const n = Math.min(feed.total, feed.limit);
+  [...grid.children].forEach((c, i) => { c.style.display = i < n ? "" : "none"; });
+  setTimeout(feedCheck, 50);
+}
+function feedMore() {
+  if (feed.loading || feed.limit >= feed.total) return;
+  feed.loading = true; feedLoading.hidden = false;
+  setTimeout(() => { feed.limit += FEED_NEXT; feed.loading = false; feedLoading.hidden = true; paintFeed(); }, 500);
+}
+function feedCheck() { if (feedSentinel.getBoundingClientRect().top < innerHeight + 200) feedMore(); }   // 불러온 뒤에도 끝이 보이면 이어서
+new IntersectionObserver((ents) => { if (ents[0].isIntersecting) feedMore(); }, { rootMargin: "0px 0px 200px 0px" }).observe(feedSentinel);
+paintFeed();
 
 /* ---------- 필터 칩 (다중선택 드롭다운) ----------
    모든 필터는 여러 개 선택 가능. 취향타입은 기본적으로 본인 타입(나무 향)이 선택된 상태이고,
@@ -725,7 +791,8 @@ function applyView() {
     let n = applied.region.length ? rgSum() : (active ? hashCount(active) : rgTotal());
     if (applied.region.length && others) n = Math.max(2, Math.round(n * 0.55));
     const shown = Math.min(n, cards.length);
-    cards.forEach((c, i) => { c.style.display = i < shown ? "" : "none"; grid.appendChild(c); });
+    cards.forEach((c) => grid.appendChild(c));
+    feed.total = shown; feed.limit = FEED_FIRST; paintFeed();   // 조건이 바뀌면 처음 6개부터 다시
     countEl.textContent = rgCountText(n);
     grid.style.opacity = "1";
   }, 180);
@@ -916,6 +983,7 @@ document.addEventListener('click',function(e){
     const btn = e.target.closest(".heart-btn"); if (!btn) return;
     const card = btn.closest("[data-save]"); if (!card) return;
     e.preventDefault(); e.stopPropagation();                   // 카드 링크로 이동하지 않게
+    if (document.documentElement.classList.contains("is-guest")) { location.href = "login.html?next=" + encodeURIComponent(location.pathname.split("/").pop() + location.search); return; }   // 비회원은 로그인부터
     const on = !card.classList.contains("is-saved");
     card.classList.toggle("is-saved", on);
     btn.setAttribute("aria-pressed", on ? "true" : "false");
