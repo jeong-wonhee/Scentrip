@@ -1,0 +1,48 @@
+import fs from 'node:fs';
+import { chromium } from 'playwright';
+import { capture, root } from './lib.mjs';
+const browser = await chromium.launch();
+const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+await ctx.addInitScript(() => { if (!sessionStorage.getItem('__qa')) { sessionStorage.setItem('__qa', 1); localStorage.clear(); localStorage.setItem('scentrip_auth', 'out'); } });
+const page = await ctx.newPage();
+await page.goto('http://localhost:5500/screens/signup.html', { waitUntil: 'networkidle' }); await page.waitForTimeout(800);
+await capture(page, 'signup-A-01-initial', 'design');
+const nick = page.locator('#nick');
+const read = () => page.evaluate(() => ({ msg: document.getElementById('nickMsg').innerText, count: document.getElementById('nickCount').innerText, invalid: document.getElementById('nick').getAttribute('aria-invalid'), btnDisabled: document.getElementById('submitBtn').disabled }));
+const cases = [['02-blur-empty', ''], ['03-one-char', '가'], ['04-13chars', '가나다라마바사아자차카타파'], ['05-special', 'ab!'], ['06-double-space', 'ab  cd'], ['07-banned', 'admin'], ['08-banned-ko', '센트립'], ['09-taken', '향기'], ['10-valid', 'qa검수A']];
+const res = {};
+for (const [k, v] of cases) {
+  await nick.click(); await nick.fill(''); if (v) await nick.pressSequentially(v, { delay: 15 });
+  await page.locator('h1').first().click(); await page.waitForTimeout(400);
+  res[k] = { input: v, ...(await read()) };
+  await capture(page, `signup-A-${k}`, 'design', [1440]);
+}
+await page.locator('#agreeAll').check({ force: true }); await page.waitForTimeout(300);
+res.allOn = await read();
+await capture(page, 'signup-A-11-all-agreed', 'design');
+await page.locator('[data-agree="age"]').uncheck({ force: true }); await page.waitForTimeout(300);
+await capture(page, 'signup-A-12-one-unchecked', 'design', [1440]);
+await page.locator('[data-agree="age"]').check({ force: true });
+await page.locator('[data-legal="terms"]').click(); await page.waitForTimeout(1200);
+res.legalTitle = await page.locator('#legalTitle').innerText();
+res.legalButtons = await page.locator('#legalModal button').allInnerTexts();
+await capture(page, 'signup-legal-terms', 'design', [1440]);
+await page.locator('.modal-close[data-legal-close]').click(); await page.waitForTimeout(400);
+await page.locator('[data-legal="privacy"]').click(); await page.waitForTimeout(1200);
+res.legalTitle2 = await page.locator('#legalTitle').innerText();
+await page.locator('.modal-close[data-legal-close]').click(); await page.waitForTimeout(400);
+await page.locator('#submitBtn').click(); await page.waitForTimeout(200);
+res.busyLabel = await page.locator('#submitLabel').innerText();
+await page.waitForTimeout(1500);
+res.done = await page.locator('#done').innerText();
+await capture(page, 'signup-done-no-result', 'design');
+// 검사 후 가입 분기
+const p2 = await ctx.newPage();
+await p2.goto('http://localhost:5500/screens/signup.html?from=test', { waitUntil: 'networkidle' }); await p2.waitForTimeout(600);
+await p2.locator('#agreeAll').check({ force: true }); await p2.locator('#nick').fill('qa검수B'); await p2.locator('h1').first().click();
+await p2.locator('#submitBtn').click(); await p2.waitForTimeout(1800);
+res.doneWithResult = await p2.locator('#done').innerText();
+await capture(p2, 'signup-done-with-result', 'design');
+fs.writeFileSync(`${root}/raw/signup-design-states.json`, JSON.stringify(res, null, 1));
+console.log(JSON.stringify(res, null, 1));
+await browser.close();
