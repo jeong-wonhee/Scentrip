@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scentrip 16유형 아바타 — 필터용</title>
+<link rel="icon" href="../assets/logo/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="tokens.css">
+<style>
+/* ============================================================
+   16유형 아바타 — 필터 메뉴에 쓰는 작은 원형 아바타 정리
+   서비스 화면이 아니라 디자인·개발 대조용 문서다 (palette-compare.html 과 같은 성격).
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-family); letter-spacing: var(--letter-spacing);
+  color: var(--color-content-default); background: var(--color-background);
+  -webkit-font-smoothing: antialiased; word-break: keep-all;
+  max-width: 1120px; margin: 0 auto; padding: var(--space-48) var(--space-24) var(--space-96);
+}
+img { display: block; max-width: 100%; }
+h1 { font-size: var(--text-title-28); font-weight: 600; line-height: 1.35; }
+h2 { font-size: var(--text-heading-20); font-weight: 600; line-height: 1.4; margin-bottom: var(--space-6); }
+.lead { margin-top: var(--space-8); font-size: var(--text-body-16); line-height: 1.6; color: var(--color-content-neutral-muted); }
+.note { font-size: var(--text-caption-12); line-height: 1.6; color: var(--color-content-neutral-subtle); }
+section { margin-top: var(--space-48); }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* ---------- 아바타 컴포넌트 (screens/*.html 의 .opt-avatar 와 같은 값) ---------- */
+.avatar {
+  --size: 36px;
+  display: inline-flex; width: var(--size); height: var(--size); flex: none;
+  border-radius: var(--radius-full); overflow: hidden;
+  background: radial-gradient(120% 120% at 28% 20%,
+    color-mix(in srgb, var(--taste) 8%, #fff) 0%,
+    color-mix(in srgb, var(--taste) 28%, #fff) 100%);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--taste) 22%, transparent);
+}
+.avatar img { width: 100%; height: 100%; object-fit: contain; }
+
+/* ---------- 한 줄 실제 크기 ---------- */
+.strip { display: flex; flex-wrap: wrap; gap: var(--space-8); margin-top: var(--space-16); }
+
+/* ---------- 크기 사다리 ---------- */
+.ladder { display: flex; align-items: flex-end; gap: var(--space-24); margin-top: var(--space-16); }
+.ladder figure { display: flex; flex-direction: column; align-items: center; gap: var(--space-8); }
+.ladder figcaption { font-size: var(--text-caption-11); color: var(--color-content-neutral-subtle); }
+
+/* ---------- 16유형 카드 ---------- */
+.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-16); margin-top: var(--space-16); }
+.card {
+  display: flex; flex-direction: column; gap: var(--space-12);
+  padding: var(--space-16);
+  border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl);
+  background: var(--color-surface-overlay); box-shadow: var(--elevation-xs);
+}
+.card .big { --size: 72px; margin: 0 auto; }
+.card .meta { display: flex; flex-direction: column; gap: var(--space-2); text-align: center; }
+.card .name { font-size: var(--text-body-14); font-weight: 600; }
+.card .code { font-size: var(--text-caption-11); color: var(--color-content-neutral-subtle); }
+.card .hex { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-6); font-size: var(--text-caption-11); color: var(--color-content-neutral-muted); }
+.card .hex i { width: 10px; height: 10px; border-radius: var(--radius-full); background: var(--taste); }
+.card .erased {
+  align-self: center; margin-top: var(--space-2);
+  padding: 1px var(--space-6); border-radius: var(--radius-xs);
+  background: var(--color-surface-02); font-size: var(--text-caption-11); color: var(--color-content-muted);
+}
+
+/* ---------- 필터 메뉴 그대로 ---------- */
+.menu-demo {
+  width: 480px; max-width: 100%; margin-top: var(--space-16);
+  padding: var(--space-6);
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4);
+  border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg);
+  background: var(--color-surface-overlay); box-shadow: var(--elevation-lg);
+}
+.opt {
+  display: flex; align-items: center; gap: var(--space-10);
+  padding: var(--space-10) var(--space-12);
+  border-radius: var(--radius-md);
+}
+.opt:hover { background: var(--color-neutral-subtle); }
+.opt .t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.opt .t b { font-size: var(--text-body-14); font-weight: 500; }
+.opt .t span { font-size: var(--text-caption-11); color: var(--color-content-neutral-muted); white-space: nowrap; }
+
+/* ---------- 전/후 ---------- */
+.ba { display: flex; gap: var(--space-32); margin-top: var(--space-16); flex-wrap: wrap; }
+.ba figure { display: flex; flex-direction: column; gap: var(--space-8); }
+.ba .row { display: flex; gap: var(--space-8); }
+.ba figcaption { font-size: var(--text-caption-12); color: var(--color-content-neutral-muted); }
+.old { width: 36px; height: 36px; flex: none; border-radius: var(--radius-full); overflow: hidden; background: color-mix(in srgb, var(--taste) 22%, #fff); }
+.old img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.5); transform-origin: 50% 46%; }
+
+table { width: 100%; border-collapse: collapse; margin-top: var(--space-16); font-size: var(--text-body-14); }
+th, td { padding: var(--space-8) var(--space-10); text-align: left; border-bottom: 1px solid var(--color-border-subtle); }
+th { font-size: var(--text-caption-11); font-weight: 600; color: var(--color-content-neutral-subtle); }
+
+@media (max-width: 860px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+</style>
+</head>
+<body>
+
+<h1>16유형 아바타 — 필터용</h1>
+<p class="lead">
+  탐색 · 내 여행 · 동선 만들기의 <b>취향 필터</b> 메뉴에 쓰는 원형 아바타입니다.
+  온보딩 결과의 전신 캐릭터(<span class="mono">assets/character/{코드}.png</span>)를
+  받침·소품까지 그대로 두고, 빈 여백만 털어 정사각으로 다시 잡았습니다 —
+  <span class="mono">assets/character/avatar/{코드}.png</span> · 160×160.
+  소품이 새보다 커서 작은 원판에서 새가 묻히던 <b>다섯 유형</b>(큐레이터 · 개척자 · 낭만가 · 미학가 · 노마드)만
+  소품을 빼고 새만 남겼습니다.
+</p>
+
+<section>
+  <h2>실제 크기 (36px)</h2>
+  <p class="note">필터 메뉴에서 보이는 크기 그대로입니다.</p>
+  <div class="strip" id="strip"></div>
+</section>
+
+<section>
+  <h2>크기 사다리</h2>
+  <p class="note">원본이 160px이라 80px까지는 @2x로 선명합니다. 그보다 크게 쓸 자리에는 전신 캐릭터 원본을 쓰세요.</p>
+  <div class="ladder" id="ladder"></div>
+</section>
+
+<section>
+  <h2>바뀐 점</h2>
+  <p class="note">전: 전신 그림(<span class="mono">character/thumb/</span>)을 1.5배 확대해 얼굴 근처를 잘라 쓰던 방식 — 캐릭터마다 얼굴 위치가 달라 받침(책·찻주전자·바구니)이 어정쩡하게 잘리거나 얼굴이 밀려났습니다. 후: 그림은 그대로 두고 프레이밍만 바꿨습니다 — 빈 여백을 털어낸 뒤 원판 가운데에 같은 여백으로 앉혀, 받침까지 그림 전체가 들어옵니다. 다섯 유형만 예외로 소품을 뺐습니다.</p>
+  <div class="ba" id="ba"></div>
+</section>
+
+<section>
+  <h2>필터 메뉴</h2>
+  <p class="note">아바타 36px · 간격 10px · 제목 14px Medium · 설명 11px. 고른 항목은 원판 안쪽 링이 진해집니다(22% → 52%).</p>
+  <div class="menu-demo" id="menu"></div>
+</section>
+
+<section>
+  <h2>16유형</h2>
+  <div class="grid" id="grid"></div>
+</section>
+
+<section>
+  <h2>만드는 규칙</h2>
+  <table>
+    <tr><th>항목</th><th>값</th></tr>
+    <tr><td>원본</td><td class="mono">assets/character/{코드}.png</td></tr>
+    <tr><td>출력</td><td class="mono">assets/character/avatar/{코드}.png · 160×160 · 투명 PNG</td></tr>
+    <tr><td>그림</td><td>받침·소품까지 원본 그대로 — 지우거나 덧그리지 않음.<br>
+      예외 5종만 소품을 지우고 새만 남김: <b>큐레이터</b>(찻주전자·김) · <b>개척자</b>(배낭) · <b>낭만가</b>(바구니) · <b>미학가</b>(도자기) · <b>노마드</b>(등대·바다).<br>
+      소품이 새보다 커서 36px 원판에서 새가 묻히던 유형들입니다. 지우는 좌표는 <span class="mono">tools/make-avatars.py</span> 의 <span class="mono">ERASE</span> 에 있습니다</td></tr>
+    <tr><td>미학가 예외</td><td>학은 세로로 길어 그림을 다 넣으면 몸통이 작아집니다. 그림을 고치는 대신 <b>맞춤 크기의 1.7배로 키워</b> 담고, 원판 밖으로 나가는 다리 끝·꼬리 깃은 원판이 잘라 냅니다(<span class="mono">ZOOM</span> — 배율과 원판 한가운데에 놓을 지점). 다리는 그림에서 지우지 않았습니다</td></tr>
+    <tr><td>크롭</td><td>알파 바운딩 박스(알파 14 이하는 여백으로 봄). 얼굴 위치 보정 없음</td></tr>
+    <tr><td>여백</td><td>캔버스 한 변의 10% — 160px 기준 사방 16px.<br>
+      원판이 원형이라 네 귀퉁이가 잘리는데, 이 여백으로 잘리는 양을 알파 기준 1% 아래로 눌렀습니다.<br>
+      <b>큐레이터 · 사색가 · 개척자 · 낭만가 · 몽상가</b>는 새 한 마리가 통째로 들어와 원판이 꽉 차 보여 여백을 16%로 더 줬습니다(<span class="mono">PAD_MORE</span>)</td></tr>
+    <tr><td>그림자</td><td>유형 색을 45%로 어둡게 · 투명도 40% · 아래로 4px · 블러 6px<br>— 백조·갈매기·구름처럼 옅은 캐릭터가 밝은 원판에서 사라지지 않게 하는 용도</td></tr>
+    <tr><td>원판</td><td>유형 색 8% → 28% 라디얼 그라디언트(28% 20% 기준) + 안쪽 1px 링 22%</td></tr>
+  </table>
+  <p class="note" style="margin-top: var(--space-12)">
+    다시 뽑을 때는 <span class="mono">tools/make-avatars.py</span> 를 돌리면 됩니다
+    (<span class="mono">python3 -m pip install Pillow</span> 후 <span class="mono">python3 tools/make-avatars.py</span>).
+    원본 캐릭터 그림이 바뀌면 예외 5종의 <span class="mono">ERASE</span> 좌표만 다시 잡으면 됩니다.
+  </p>
+</section>
+
+<script>
+// 필터 이름 · 코드 · 액센트 · 설명 — screens/place-recommend.html 의 TASTE_CODE / TASTE_INFO 와 같은 값
+const TYPES = [
+  ["감성가 타입", "WHAN", "#a66c3a", "한옥·고택·전통시장 선호"],
+  ["큐레이터 타입", "WHAR", "#a88124", "클래식 호텔·헤리티지 숙소 선호"],
+  ["개척자 타입", "WHDN", "#895143", "산속 오두막·캠핑 선호"],
+  ["사색가 타입", "WHDR", "#5e2c26", "박물관·독립서점 탐방 선호"],
+  ["낭만가 타입", "WLAN", "#57723b", "숲길·자연 산책 선호"],
+  ["스타일리스트 타입", "WLAR", "#dbb976", "온실·플라워 카페 선호"],
+  ["발견가 타입", "WLDN", "#93a343", "오일장·시골 포구 선호"],
+  ["디자이너 타입", "WLDR", "#c6b495", "북카페·편집숍 선호"],
+  ["몽상가 타입", "CHAN", "#306a7e", "호숫가·전망데크 선호"],
+  ["미학가 타입", "CHAR", "#6b4ca9", "미술관·공연 관람 선호"],
+  ["방랑자 타입", "CHDN", "#589375", "고원·자연 풍경 선호"],
+  ["관찰자 타입", "CHDR", "#2d3b58", "간이역·근대역사관 선호"],
+  ["모험가 타입", "CLAN", "#6cb946", "계곡·폭포 전망 선호"],
+  ["연출가 타입", "CLAR", "#e78940", "해안 산책로·오션뷰 선호"],
+  ["노마드 타입", "CLDN", "#3d85b8", "섬·해안 자유여행 선호"],
+  ["미니멀리스트 타입", "CLDR", "#9fc9db", "북스테이·디자인 호텔 선호"],
+];
+const src = (code) => `../assets/character/avatar/${code}.png`;
+const av = (code, accent, size) =>
+  `<span class="avatar" style="--taste:${accent}${size ? `;--size:${size}px` : ""}"><img src="${src(code)}" alt=""></span>`;
+
+strip.innerHTML = TYPES.map(([n, c, a]) => `<span title="${n} · ${c}">${av(c, a)}</span>`).join("");
+
+ladder.innerHTML = [24, 28, 32, 36, 48, 72]
+  .map((s) => `<figure>${av("WHDR", "#5e2c26", s)}<figcaption>${s}px</figcaption></figure>`).join("");
+
+// 전/후 — 얼굴 위치가 특히 어긋났던 네 유형
+// "전"은 지워진 thumb/ 대신 같은 원본에 같은 크롭(cover · scale 1.5 · origin 50% 46%)을 먹여 재현했다
+const BA = ["WHAN", "WHDN", "CHAR", "CLDN"];
+ba.innerHTML = [["전 — 전신 그림 확대 크롭", "old"], ["후 — avatar", "new"]].map(([cap, kind]) => `
+  <figure>
+    <div class="row">${BA.map((code) => {
+      const t = TYPES.find((x) => x[1] === code);
+      return kind === "old"
+        ? `<span class="old" style="--taste:${t[2]}"><img src="../assets/character/${code}.png" alt=""></span>`
+        : av(code, t[2]);
+    }).join("")}</div>
+    <figcaption>${cap}</figcaption>
+  </figure>`).join("");
+
+menu.innerHTML = TYPES.slice(0, 8).map(([n, c, a, sub]) =>
+  `<div class="opt">${av(c, a)}<span class="t"><b>${n}</b><span>${sub}</span></span></div>`).join("");
+
+// 소품을 뺀 다섯 유형 (tools/make-avatars.py 의 ERASE 와 같은 목록)
+const ERASED = { WHAR: "찻주전자 · 김", WHDN: "배낭", WLAN: "바구니", CHAR: "도자기", CLDN: "등대 · 바다" };
+// 원판이 꽉 차 보여 여백을 10% → 16% 로 늘린 유형
+const ROOMY = ["WHAR", "WHDR", "WHDN", "WLAN", "CHAN"];
+grid.innerHTML = TYPES.map(([n, c, a]) => `
+  <div class="card" style="--taste:${a}">
+    <span class="avatar big" style="--taste:${a}"><img src="${src(c)}" alt="${n} 아바타"></span>
+    <div class="meta">
+      <span class="name">${n}</span>
+      <span class="code mono">${c}</span>
+      <span class="hex mono"><i></i>${a}</span>
+      ${ERASED[c] ? `<span class="erased">소품 뺌 · ${ERASED[c]}</span>` : ""}
+      ${ROOMY.includes(c) ? `<span class="erased">여백 16%</span>` : ""}
+    </div>
+  </div>`).join("");
+</script>
+</body>
+</html>
