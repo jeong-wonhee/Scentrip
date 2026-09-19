@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scentrip 공유 미리보기 (OG)</title>
+<link rel="icon" href="../assets/logo/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="tokens.css">
+<style>
+/* ============================================================
+   공유 미리보기(OG) 정리 — 링크를 펼쳤을 때 보이는 카드
+   서비스 화면이 아니라 디자인·개발 대조용 문서다.
+   카톡·슬랙·X 카드는 각 서비스의 실제 렌더를 흉내 낸 근사치다 (픽셀 단위로 같지는 않다).
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-family); letter-spacing: var(--letter-spacing);
+  color: var(--color-content-default); background: var(--color-background);
+  -webkit-font-smoothing: antialiased; word-break: keep-all;
+  max-width: 1120px; margin: 0 auto; padding: var(--space-48) var(--space-24) var(--space-96);
+}
+img { display: block; max-width: 100%; }
+h1 { font-size: var(--text-title-28); font-weight: 600; line-height: 1.35; }
+h2 { font-size: var(--text-heading-20); font-weight: 600; line-height: 1.4; }
+.lead { margin-top: var(--space-8); font-size: var(--text-body-16); line-height: 1.6; color: var(--color-content-neutral-muted); }
+.note { font-size: var(--text-caption-12); line-height: 1.6; color: var(--color-content-neutral-subtle); }
+section { margin-top: var(--space-48); }
+section > .note { margin-top: var(--space-6); }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* ---------- 페이지 고르기 ---------- */
+.tabs { display: flex; flex-wrap: wrap; gap: var(--space-6); margin-top: var(--space-16); }
+.tab {
+  padding: var(--space-8) var(--space-16);
+  border: 1px solid var(--color-border-default); border-radius: var(--radius-full);
+  background: var(--color-surface-overlay);
+  font: inherit; font-size: var(--text-body-14); font-weight: 500;
+  color: var(--color-content-muted); cursor: pointer;
+  transition: background .14s ease, color .14s ease, border-color .14s ease;
+}
+.tab:hover { background: var(--color-state-hover-brand); }
+.tab[aria-selected="true"] { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-content-on-fill); }
+
+/* ---------- 원본 이미지 ---------- */
+.source { margin-top: var(--space-16); display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: var(--space-24); align-items: start; }
+.source img { width: 100%; border-radius: var(--radius-lg); box-shadow: var(--elevation-md); }
+.facts { display: flex; flex-direction: column; gap: var(--space-10); }
+.fact { display: flex; flex-direction: column; gap: 2px; }
+.fact dt { font-size: var(--text-caption-11); color: var(--color-content-neutral-subtle); }
+.fact dd { font-size: var(--text-caption-12); line-height: 1.55; word-break: break-all; }
+
+/* ---------- 카드 3종 ---------- */
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-24); margin-top: var(--space-16); align-items: start; }
+.cards figcaption { margin-top: var(--space-8); font-size: var(--text-caption-11); color: var(--color-content-neutral-subtle); }
+
+/* 카카오톡 — 노란 대화방의 말풍선 안 카드 */
+.kakao { background: #b2c7d9; padding: var(--space-16); border-radius: var(--radius-lg); }
+.kakao .bubble { width: 232px; border-radius: 10px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.kakao .bubble img { width: 100%; aspect-ratio: 1200 / 630; object-fit: cover; }
+.kakao .b { padding: 9px 11px 11px; }
+.kakao .t { font-size: 13px; font-weight: 600; line-height: 1.35; color: #1a1a1a;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.kakao .d { margin-top: 3px; font-size: 11px; line-height: 1.4; color: #8a8a8a;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.kakao .u { margin-top: 5px; font-size: 10px; color: #b0b0b0; }
+
+/* 슬랙 — 왼쪽 회색 바 + 작은 썸네일 */
+.slack { background: #fff; padding: var(--space-16); border: 1px solid var(--color-neutral-border); border-radius: var(--radius-lg); }
+.slack .unfurl { border-left: 4px solid #dddddd; padding-left: 12px; }
+.slack .site { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #1d1c1d; }
+.slack .site i { width: 14px; height: 14px; border-radius: 3px; background: var(--color-primary); display: block; }
+.slack .t { margin-top: 3px; font-size: 14px; font-weight: 700; color: #1264a3; line-height: 1.4; }
+.slack .d { margin-top: 2px; font-size: 13px; line-height: 1.5; color: #1d1c1d; }
+.slack .unfurl img { margin-top: 8px; width: 100%; border-radius: 8px; }
+
+/* X — 이미지 위에 제목이 얹힌 큰 카드 */
+.x { background: #fff; padding: var(--space-16); border: 1px solid var(--color-neutral-border); border-radius: var(--radius-lg); }
+.x .card { border: 1px solid #cfd9de; border-radius: 16px; overflow: hidden; }
+.x .card img { width: 100%; aspect-ratio: 1200 / 630; object-fit: cover; }
+.x .b { padding: 10px 12px 12px; background: #fff; }
+.x .u { font-size: 12px; color: #536471; }
+.x .t { margin-top: 2px; font-size: 14px; line-height: 1.4; color: #0f1419;
+  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.x .d { margin-top: 2px; font-size: 13px; line-height: 1.4; color: #536471;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ---------- 표 ---------- */
+table { width: 100%; border-collapse: collapse; margin-top: var(--space-16); font-size: var(--text-body-14); }
+th, td { padding: var(--space-8) var(--space-10); text-align: left; vertical-align: top; border-bottom: 1px solid var(--color-border-subtle); }
+th { font-size: var(--text-caption-11); font-weight: 600; color: var(--color-content-neutral-subtle); white-space: nowrap; }
+td.mono { font-size: var(--text-caption-12); }
+.tag { display: inline-block; padding: 1px var(--space-6); border-radius: var(--radius-xs); background: var(--color-surface-02); font-size: var(--text-caption-11); color: var(--color-content-muted); }
+
+pre {
+  margin-top: var(--space-16); padding: var(--space-16);
+  background: var(--color-surface-01); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: var(--text-caption-12); line-height: 1.7;
+  overflow-x: auto; letter-spacing: 0;
+}
+ul { margin-top: var(--space-12); padding-left: 1.1em; font-size: var(--text-body-14); line-height: 1.75; color: var(--color-content-muted); }
+li + li { margin-top: var(--space-4); }
+
+@media (max-width: 880px) {
+  .cards { grid-template-columns: 1fr; }
+  .source { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<h1>공유 미리보기 (OG)</h1>
+<p class="lead">
+  링크를 카카오톡 · 슬랙 · X 에 붙였을 때 펼쳐지는 카드입니다.
+  20개 화면 + <span class="mono">index.html</span> 의 <span class="mono">&lt;head&gt;</span> 에 OG · Twitter 메타를 넣었고,
+  카드 이미지는 <span class="mono">assets/og/*.jpg</span> 7종입니다.
+</p>
+
+<section>
+  <h2>화면별 카드</h2>
+  <p class="note">아래 탭을 눌러 화면을 바꿔 보세요. 카드 렌더는 각 서비스를 흉내 낸 근사치입니다.</p>
+  <div class="tabs" id="tabs" role="tablist"></div>
+
+  <div class="source">
+    <img id="srcImg" src="../assets/og/og-default.jpg" alt="">
+    <dl class="facts" id="facts"></dl>
+  </div>
+
+  <div class="cards">
+    <figure>
+      <div class="kakao">
+        <div class="bubble">
+          <img id="kkImg" src="../assets/og/og-default.jpg" alt="">
+          <div class="b">
+            <p class="t" id="kkT"></p>
+            <p class="d" id="kkD"></p>
+            <p class="u" id="kkU"></p>
+          </div>
+        </div>
+      </div>
+      <figcaption>카카오톡 — 제목 2줄 · 설명 2줄에서 잘립니다</figcaption>
+    </figure>
+
+    <figure>
+      <div class="slack">
+        <div class="unfurl">
+          <p class="site"><i></i>센트립</p>
+          <p class="t" id="slT"></p>
+          <p class="d" id="slD"></p>
+          <img id="slImg" src="../assets/og/og-default.jpg" alt="">
+        </div>
+      </div>
+      <figcaption>슬랙 — 제목이 링크색으로, 이미지는 아래에 크게</figcaption>
+    </figure>
+
+    <figure>
+      <div class="x">
+        <div class="card">
+          <img id="xImg" src="../assets/og/og-default.jpg" alt="">
+          <div class="b">
+            <p class="u" id="xU"></p>
+            <p class="t" id="xT"></p>
+            <p class="d" id="xD"></p>
+          </div>
+        </div>
+      </div>
+      <figcaption>X — <span class="mono">summary_large_image</span> · 제목 1줄에서 잘립니다</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>이미지 7종</h2>
+  <p class="note">1200×630 · JPEG 품질 90 · 70~300KB. 사진 위에 깊은 그린 스크림(왼쪽 88% → 오른쪽 12%)을 깔고 틸 오라를 한 점 얹었습니다. 글은 왼쪽 80px 여백에 맞춰 제목 60 / 설명 26, 자간 -3%. 로고 · 제목 · 설명 세 덩어리만 둡니다.</p>
+  <p class="note">
+    취향 검사 카드만 사진 대신 <b>취향 테스트 표지(<span class="mono">#stage-intro</span>)의 배경</b>을 그대로 옮겼습니다 —
+    다크 그린 세로 그라디언트 + 오로라 세 덩어리(screen) + 점 그리드 별밭 + 필름 그레인, 오른쪽에는 방랑자 타입 캐릭터를 원판 없이 올렸습니다.
+    나머지 배경 사진은 <span class="mono">assets/og/photo/</span> 에 따로 두었습니다 — 전부 Unsplash 에서 받았고
+    원본 주소는 <span class="mono">assets/og/photo/SOURCES.md</span> 에 있습니다.
+    화면 안에서 쓰는 <span class="mono">assets/place</span> · <span class="mono">assets/route</span> 사진들은
+    출처 기록이 없어 공유 카드에는 쓰지 않았습니다 — 공유 카드는 카카오톡·페이스북이 이미지를 가져가
+    캐시·재배포하는 실제 공개 배포라서입니다.
+  </p>
+  <table>
+    <thead><tr><th>이미지</th><th>배경 사진</th><th>쓰는 화면</th></tr></thead>
+    <tbody id="imgTable"></tbody>
+  </table>
+</section>
+
+<section>
+  <h2>화면별 메타</h2>
+  <table>
+    <thead><tr><th>화면</th><th>og:url</th><th>og:image</th><th>비고</th></tr></thead>
+    <tbody id="metaTable"></tbody>
+  </table>
+</section>
+
+<section>
+  <h2>넣은 메타</h2>
+  <pre id="snippet"></pre>
+</section>
+
+<section>
+  <h2>개발 이식 때</h2>
+  <ul>
+    <li><b>절대 주소로.</b> 카카오톡은 상대 경로 <span class="mono">og:image</span> 를 못 읽습니다. 프로토타입에는 <span class="mono">https://scentrip.vercel.app</span> 을 기준으로 적어 두었으니, 도메인이 정해지면 전 화면에서 이 문자열만 바꾸면 됩니다.</li>
+    <li><b>이미지 위치.</b> <span class="mono">assets/og/*.jpg</span> → Next.js <span class="mono">public/og/</span> 로 옮기면 메타에 적힌 <span class="mono">/og/*.jpg</span> 와 맞습니다.</li>
+    <li><b>상세 3종은 동적으로.</b> 소식 상세 · 장소 상세 · 동선 상세는 글/장소/동선마다 제목 · 설명 · 이미지가 달라야 합니다. 각 파일 <span class="mono">&lt;head&gt;</span> 주석에 무엇으로 채울지 적어 두었습니다. 소식 상세만 <span class="mono">og:type=article</span> 입니다.</li>
+    <li><b>취향 결과 공유.</b> 16유형 결과는 유형별 카드가 있어야 제 몫을 합니다 — <span class="mono">og:title</span> 을 “나는 OOO 타입”으로, 이미지는 유형 캐릭터로 16장을 따로 뽑는 것을 권합니다. 지금은 공통 <span class="mono">og-taste.jpg</span> 하나입니다.</li>
+    <li><b>로그인이 필요한 화면</b>(내 여행 · 마이페이지 · 동선 만들기)은 공유될 일이 적습니다. 카드는 기본 이미지로 두되 <span class="mono">robots: noindex</span> 를 함께 검토해 주세요.</li>
+    <li><b>캐시.</b> 카카오톡 · 페이스북은 OG 를 캐시합니다. 이미지를 바꾸면 파일명을 바꾸거나 각 디버거에서 캐시를 지워야 새 카드가 보입니다.</li>
+    <li><b>사진 출처.</b> 공유 카드 배경 6장은 Unsplash 에서 받아 <span class="mono">assets/og/photo/</span> 에 두고 원본 주소를 <span class="mono">SOURCES.md</span> 에 적었습니다. 화면 안 사진(<span class="mono">assets/place</span> · <span class="mono">assets/route</span> · <span class="mono">assets/home</span> · <span class="mono">assets/about</span>)은 출처 기록이 없으니 정식 오픈 전에 확인하거나 교체해 주세요.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>이미지 다시 뽑기</h2>
+  <p class="note">문구만 바꿀 때는 <span class="mono">tools/make-og.py</span> 의 <span class="mono">PAGES</span> 를 고치고 다시 돌리면 됩니다. Pretendard 는 처음 한 번 자동으로 내려받습니다.</p>
+  <pre>python3 -m pip install Pillow
+python3 tools/make-og.py</pre>
+</section>
+
+<script>
+// 화면 → 배포 경로 · 이미지 · 제목 · 설명 · 비고 (각 화면 head 의 메타와 같은 값)
+const PAGES = [
+  ["홈", "home.html", "/", "og-home", "오늘, 내 취향에 닿는 여행지 · 센트립", "AI 매칭도로 골라 주는 여행 장소 · 동선 · 소식을 한 화면에서 만나요.", ""],
+  ["향 취향 검사", "onboarding-test.html", "/taste", "og-taste", "당신의 여행은 어떤 향인가요? · 센트립", "12개의 질문으로 찾는 16가지 향 유형. 1분이면 내 여행 취향을 알 수 있어요.", "결과는 유형별 카드 권장"],
+  ["탐색 · 장소", "place-recommend.html", "/explore", "og-places", "취향 매칭도로 고른 여행 장소 · 센트립", "지역 · 특징 · 취향으로 좁혀 보는 여행 장소 추천.", ""],
+  ["탐색 · 동선", "route.html", "/explore?tab=routes", "og-routes", "하루가 자연스럽게 이어지는 동선 · 센트립", "AI가 짜 주는 일차별 코스를 그대로 내 여행으로 가져와요.", ""],
+  ["소식", "news.html", "/news", "og-news", "여행 소식 · 센트립", "취향 매칭순으로 만나는 여행 이야기. 읽다 보면 다음 여행이 그려져요.", ""],
+  ["소식 상세", "news-detail.html", "/news/[slug]", "og-news", "여행 소식 · 센트립", "취향 매칭순으로 만나는 여행 이야기. 읽다 보면 다음 여행이 그려져요.", "동적 · og:type=article"],
+  ["장소 상세", "place-detail.html", "/explore/[id]", "og-places", "여행 장소 · 센트립", "취향 매칭도, 리뷰, 주변 추천까지 한 번에.", "동적"],
+  ["장소 리뷰", "place-reviews.html", "/explore/[id]/reviews", "og-places", "장소 리뷰 · 센트립", "다녀온 사람들의 별점과 리뷰를 모아서 봅니다.", "동적"],
+  ["동선 상세", "route-detail.html", "/planner/[id]", "og-routes", "여행 동선 · 센트립", "일차별 타임라인과 지도로 보는 여행 동선.", "동적"],
+  ["동선 만들기 · 조건", "route-conditions.html", "/planner", "og-routes", "동선 만들기 · 센트립", "지역 · 일정 · 취향을 고르면 AI가 동선을 짜 드려요.", "로그인 필요"],
+  ["동선 만들기 · 장소", "route-create.html", "/planner", "og-routes", "동선 만들기 · 센트립", "찜한 장소를 골라 나만의 동선을 만들어요.", "로그인 필요"],
+  ["AI 맞춤 동선", "route-result.html", "/planner", "og-routes", "AI 맞춤 동선 · 센트립", "조건에 맞춰 짜인 일차별 코스를 확인하고 저장해요.", "동적 · 로그인 필요"],
+  ["내 여행 · 장소", "my-trip.html", "/dashboard", "og-default", "내 여행 · 센트립", "찜한 장소와 저장한 동선을 한곳에서 관리해요.", "로그인 필요"],
+  ["내 여행 · 동선", "my-trip-routes.html", "/dashboard?tab=routes", "og-default", "내 동선 · 센트립", "저장한 동선을 다시 열어 보고 이어서 다듬어요.", "로그인 필요"],
+  ["마이페이지", "mypage.html", "/mypage", "og-default", "마이페이지 · 센트립", "계정 설정과 내가 쓴 리뷰를 관리해요.", "로그인 필요"],
+  ["센트립 소개", "about.html", "/about", "og-about", "센트립 소개", "좋아하는 향을 따라가면, 나에게 맞는 여행이 보입니다.", ""],
+  ["로그인", "login.html", "/login", "og-default", "로그인 · 센트립", "로그인하면 취향 매칭 추천과 찜 · 동선 저장을 쓸 수 있어요.", ""],
+  ["회원가입", "signup.html", "/signup", "og-default", "회원가입 · 센트립", "가입하면 검사 결과가 저장되고 취향 추천이 열려요.", ""],
+  ["이용약관", "terms.html", "/terms", "og-default", "이용약관 · 센트립", "센트립 서비스 이용약관입니다.", ""],
+  ["개인정보처리방침", "privacy.html", "/privacy", "og-default", "개인정보처리방침 · 센트립", "센트립 개인정보처리방침입니다.", ""],
+  ["루트", "index.html", "/", "og-default", "센트립 — 취향으로 찾는 여행", "향 취향 검사로 나에게 맞는 여행 장소와 동선을 추천받아요.", "홈으로 이동"],
+];
+const BASE = "https://scentrip.vercel.app";
+const [NAME, FILE, PATH, IMG, TITLE, DESC, NOTE] = [0, 1, 2, 3, 4, 5, 6];
+
+// 탭 — 이미지가 다른 대표 화면만
+const TABS = ["홈", "향 취향 검사", "탐색 · 장소", "탐색 · 동선", "소식", "센트립 소개", "로그인"];
+const src = (img) => `../assets/og/${img}.jpg`;
+
+function show(name) {
+  const p = PAGES.find((x) => x[NAME] === name);
+  const url = BASE + p[PATH];
+  [...tabs.children].forEach((b) => b.setAttribute("aria-selected", String(b.textContent === name)));
+
+  srcImg.src = src(p[IMG]); srcImg.alt = `${p[NAME]} 공유 카드 이미지`;
+  facts.innerHTML = [
+    ["화면", `screens/${p[FILE]}`],
+    ["og:url", url],
+    ["og:image", `${BASE}/og/${p[IMG]}.jpg`],
+    ["og:title", p[TITLE]],
+    ["og:description", p[DESC]],
+  ].map(([k, v]) => `<div class="fact"><dt>${k}</dt><dd class="mono">${v}</dd></div>`).join("");
+
+  for (const el of [kkImg, slImg, xImg]) el.src = src(p[IMG]);
+  kkT.textContent = slT.textContent = xT.textContent = p[TITLE];
+  kkD.textContent = slD.textContent = xD.textContent = p[DESC];
+  kkU.textContent = "scentrip.vercel.app";
+  xU.textContent = "scentrip.vercel.app";
+
+  snippet.textContent = [
+    `<meta name="description" content="${p[DESC]}">`,
+    `<meta property="og:type" content="${p[FILE] === "news-detail.html" ? "article" : "website"}">`,
+    `<meta property="og:site_name" content="센트립">`,
+    `<meta property="og:locale" content="ko_KR">`,
+    `<meta property="og:url" content="${url}">`,
+    `<meta property="og:title" content="${p[TITLE]}">`,
+    `<meta property="og:description" content="${p[DESC]}">`,
+    `<meta property="og:image" content="${BASE}/og/${p[IMG]}.jpg">`,
+    `<meta property="og:image:type" content="image/jpeg">`,
+    `<meta property="og:image:width" content="1200">`,
+    `<meta property="og:image:height" content="630">`,
+    `<meta property="og:image:alt" content="…">`,
+    `<meta name="twitter:card" content="summary_large_image">`,
+    `<meta name="twitter:title" content="${p[TITLE]}">`,
+    `<meta name="twitter:description" content="${p[DESC]}">`,
+    `<meta name="twitter:image" content="${BASE}/og/${p[IMG]}.jpg">`,
+  ].join("\n");
+}
+
+tabs.innerHTML = TABS.map((n) => `<button class="tab" type="button" role="tab" aria-selected="false">${n}</button>`).join("");
+tabs.addEventListener("click", (e) => { const b = e.target.closest(".tab"); if (b) show(b.textContent); });
+
+// 이미지 7종 표
+const byImg = {};
+PAGES.forEach((p) => (byImg[p[IMG]] ||= []).push(p[NAME]));
+// 카드 → 배경 사진 (assets/og/photo/ · 전부 Unsplash, 주소는 SOURCES.md)
+const PHOTO = {
+  "og-default": "lake-mist.jpg — 안개 낀 호수와 침엽수림",
+  "og-home": "green-avenue.jpg — 초록 가로수길",
+  "og-about": "forest-path.jpg — 햇살 드는 숲길",
+  "og-places": "harbor-town.jpg — 바닷가 포구 마을",
+  "og-routes": "fern-boardwalk.jpg — 고사리 사이 나무 데크길",
+  "og-news": "window-bookshelf.jpg — 창가 책장",
+  "og-taste": "— (사진 없음 · 취향 테스트 표지 배경 + 방랑자 캐릭터)",
+};
+imgTable.innerHTML = Object.entries(byImg).map(([img, names]) => `
+  <tr>
+    <td class="mono">${img}.jpg</td>
+    <td class="mono">${PHOTO[img]}</td>
+    <td>${names.join(" · ")}</td>
+  </tr>`).join("");
+
+// 화면별 메타 표
+metaTable.innerHTML = PAGES.map((p) => `
+  <tr>
+    <td>${p[NAME]}<br><span class="note mono">${p[FILE]}</span></td>
+    <td class="mono">${p[PATH]}</td>
+    <td class="mono">${p[IMG]}.jpg</td>
+    <td>${p[NOTE] ? `<span class="tag">${p[NOTE]}</span>` : ""}</td>
+  </tr>`).join("");
+
+show("홈");
+</script>
+</body>
+</html>
