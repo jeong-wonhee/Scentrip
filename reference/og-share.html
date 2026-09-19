@@ -190,7 +190,7 @@ li + li { margin-top: var(--space-4); }
 <section>
   <h2>화면별 메타</h2>
   <table>
-    <thead><tr><th>화면</th><th>og:url</th><th>og:image</th><th>비고</th></tr></thead>
+    <thead><tr><th>화면</th><th>이식 후 서비스 경로</th><th>og:image</th><th>비고</th></tr></thead>
     <tbody id="metaTable"></tbody>
   </table>
 </section>
@@ -203,12 +203,14 @@ li + li { margin-top: var(--space-4); }
 <section>
   <h2>개발 이식 때</h2>
   <ul>
-    <li><b>절대 주소로.</b> 카카오톡은 상대 경로 <span class="mono">og:image</span> 를 못 읽습니다. 프로토타입에는 <span class="mono">https://scentrip.vercel.app</span> 을 기준으로 적어 두었으니, 도메인이 정해지면 전 화면에서 이 문자열만 바꾸면 됩니다.</li>
-    <li><b>이미지 위치.</b> <span class="mono">assets/og/*.jpg</span> → Next.js <span class="mono">public/og/</span> 로 옮기면 메타에 적힌 <span class="mono">/og/*.jpg</span> 와 맞습니다.</li>
+    <li><b>절대 주소로.</b> 카카오톡은 상대 경로 <span class="mono">og:image</span> 를 못 읽습니다. 지금은 프로토타입이 올라가 있는 <span class="mono">https://jeong-wonhee.github.io/Scentrip</span> 을 가리킵니다 — 그래야 이 링크를 공유했을 때 카드가 제대로 뜹니다.</li>
+    <li><b>이식할 때.</b> 전 화면에서 <span class="mono">https://jeong-wonhee.github.io/Scentrip</span> 을 서비스 도메인으로 바꾸고, <span class="mono">og:url</span> 은 위 표의 서비스 경로로, <span class="mono">og:image</span> 는 <span class="mono">assets/og/*.jpg</span> 를 <span class="mono">public/og/</span> 로 옮겨 <span class="mono">/og/*.jpg</span> 로 바꾸면 됩니다. 화면마다 <span class="mono">&lt;head&gt;</span> 주석에 그 화면의 서비스 경로를 적어 뒀습니다.</li>
     <li><b>상세 3종은 동적으로.</b> 소식 상세 · 장소 상세 · 동선 상세는 글/장소/동선마다 제목 · 설명 · 이미지가 달라야 합니다. 각 파일 <span class="mono">&lt;head&gt;</span> 주석에 무엇으로 채울지 적어 두었습니다. 소식 상세만 <span class="mono">og:type=article</span> 입니다.</li>
     <li><b>취향 결과 공유.</b> 16유형 결과는 유형별 카드가 있어야 제 몫을 합니다 — <span class="mono">og:title</span> 을 “나는 OOO 타입”으로, 이미지는 유형 캐릭터로 16장을 따로 뽑는 것을 권합니다. 지금은 공통 <span class="mono">og-taste.jpg</span> 하나입니다.</li>
     <li><b>로그인이 필요한 화면</b>(내 여행 · 마이페이지 · 동선 만들기)은 공유될 일이 적습니다. 카드는 기본 이미지로 두되 <span class="mono">robots: noindex</span> 를 함께 검토해 주세요.</li>
-    <li><b>캐시.</b> 카카오톡 · 페이스북은 OG 를 캐시합니다. 이미지를 바꾸면 파일명을 바꾸거나 각 디버거에서 캐시를 지워야 새 카드가 보입니다.</li>
+    <li><b>캐시.</b> 카카오톡 · 페이스북은 OG 를 캐시합니다. 한 번 잘못 뜬 카드는 고쳐도 그대로 남으니 캐시를 지워야 합니다 —
+      카카오톡은 <a href="https://developers.kakao.com/tool/clear/og" target="_blank" rel="noopener">developers.kakao.com/tool/clear/og</a>,
+      페이스북은 <a href="https://developers.facebook.com/tools/debug/" target="_blank" rel="noopener">Sharing Debugger</a> 에서 URL 을 넣고 새로 긁게 하면 됩니다.</li>
     <li><b>사진 출처.</b> 공유 카드 배경 6장은 Unsplash 에서 받아 <span class="mono">assets/og/photo/</span> 에 두고 원본 주소를 <span class="mono">SOURCES.md</span> 에 적었습니다. 화면 안 사진(<span class="mono">assets/place</span> · <span class="mono">assets/route</span> · <span class="mono">assets/home</span> · <span class="mono">assets/about</span>)은 출처 기록이 없으니 정식 오픈 전에 확인하거나 교체해 주세요.</li>
   </ul>
 </section>
@@ -245,7 +247,10 @@ const PAGES = [
   ["개인정보처리방침", "privacy.html", "/privacy", "og-default", "개인정보처리방침 · 센트립", "센트립 개인정보처리방침입니다.", ""],
   ["루트", "index.html", "/", "og-default", "센트립 — 취향으로 찾는 여행", "향 취향 검사로 나에게 맞는 여행 장소와 동선을 추천받아요.", "홈으로 이동"],
 ];
-const BASE = "https://scentrip.vercel.app";
+// 지금 프로토타입이 올라가 있는 곳 — og:url · og:image 가 가리키는 주소
+const BASE = "https://jeong-wonhee.github.io/Scentrip";
+// 이식될 서비스 (경로 대조용, 메타에는 아직 안 쓴다)
+const SERVICE = "https://scentrip.vercel.app";
 const [NAME, FILE, PATH, IMG, TITLE, DESC, NOTE] = [0, 1, 2, 3, 4, 5, 6];
 
 // 탭 — 이미지가 다른 대표 화면만
@@ -254,14 +259,15 @@ const src = (img) => `../assets/og/${img}.jpg`;
 
 function show(name) {
   const p = PAGES.find((x) => x[NAME] === name);
-  const url = BASE + p[PATH];
+  const url = BASE + "/" + (p[FILE] === "index.html" ? "" : "screens/" + p[FILE]);
   [...tabs.children].forEach((b) => b.setAttribute("aria-selected", String(b.textContent === name)));
 
   srcImg.src = src(p[IMG]); srcImg.alt = `${p[NAME]} 공유 카드 이미지`;
   facts.innerHTML = [
     ["화면", `screens/${p[FILE]}`],
     ["og:url", url],
-    ["og:image", `${BASE}/og/${p[IMG]}.jpg`],
+    ["og:image", `${BASE}/assets/og/${p[IMG]}.jpg`],
+    ["이식 후 og:url", `${SERVICE}${p[PATH]}`],
     ["og:title", p[TITLE]],
     ["og:description", p[DESC]],
   ].map(([k, v]) => `<div class="fact"><dt>${k}</dt><dd class="mono">${v}</dd></div>`).join("");
@@ -269,8 +275,8 @@ function show(name) {
   for (const el of [kkImg, slImg, xImg]) el.src = src(p[IMG]);
   kkT.textContent = slT.textContent = xT.textContent = p[TITLE];
   kkD.textContent = slD.textContent = xD.textContent = p[DESC];
-  kkU.textContent = "scentrip.vercel.app";
-  xU.textContent = "scentrip.vercel.app";
+  kkU.textContent = "jeong-wonhee.github.io";
+  xU.textContent = "jeong-wonhee.github.io";
 
   snippet.textContent = [
     `<meta name="description" content="${p[DESC]}">`,
@@ -280,7 +286,7 @@ function show(name) {
     `<meta property="og:url" content="${url}">`,
     `<meta property="og:title" content="${p[TITLE]}">`,
     `<meta property="og:description" content="${p[DESC]}">`,
-    `<meta property="og:image" content="${BASE}/og/${p[IMG]}.jpg">`,
+    `<meta property="og:image" content="${BASE}/assets/og/${p[IMG]}.jpg">`,
     `<meta property="og:image:type" content="image/jpeg">`,
     `<meta property="og:image:width" content="1200">`,
     `<meta property="og:image:height" content="630">`,
@@ -288,7 +294,7 @@ function show(name) {
     `<meta name="twitter:card" content="summary_large_image">`,
     `<meta name="twitter:title" content="${p[TITLE]}">`,
     `<meta name="twitter:description" content="${p[DESC]}">`,
-    `<meta name="twitter:image" content="${BASE}/og/${p[IMG]}.jpg">`,
+    `<meta name="twitter:image" content="${BASE}/assets/og/${p[IMG]}.jpg">`,
   ].join("\n");
 }
 
