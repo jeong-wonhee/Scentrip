@@ -317,6 +317,7 @@ a.btn { text-decoration: none; }
 .input[aria-invalid="true"] { border-color: var(--color-error); background: var(--color-error-subtle); }
 .err-msg { display: none; align-items: center; gap: var(--space-6); font-size: 13px; font-weight: 600; color: var(--color-content-error); }
 .err-msg.show { display: flex; }
+.err-msg svg { width: 16px; height: 16px; flex: none; }   /* 크기를 안 주면 SVG 기본 크기로 커진다 */
 
 /* ============================================================
    Toast / Modal
@@ -698,8 +699,8 @@ a.btn { text-decoration: none; }
     </div>
     <div class="field">
       <label for="nameInput">이름</label>
-      <input class="input" id="nameInput" type="text" maxlength="20" data-autofocus>
-      <p class="hint">2자 이상 12자 이하, 한글·영문·숫자를 사용할 수 있어요.</p>
+      <input class="input" id="nameInput" type="text" autocomplete="nickname" spellcheck="false" placeholder="2~12자 · 한글, 영문, 숫자" data-autofocus>
+      <p class="hint">2자 이상 12자 이하, 공백 없이 한글·영문·숫자를 쓸 수 있어요.</p>
       <p class="err-msg" id="nameErr">
         <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-8,56a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm8,104a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z"/></svg>
         <span id="nameErrText">이름을 확인해 주세요.</span>
@@ -719,6 +720,7 @@ a.btn { text-decoration: none; }
   <span id="toastMsg"></span>
 </div>
 
+<script src="../reference/nickname.js"></script>
 <script>
 /* ============================================================
    0. 데이터 (프로토타입: 브라우저 메모리)
@@ -908,19 +910,18 @@ $('[data-edit-name]').addEventListener('click', () => {
   $('#nameErr').classList.remove('show'); $('#nameInput').setAttribute('aria-invalid','false');
   openModal('nameModal');
 });
-const NICK_RE = /^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+( [가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+)*$/;
+/* 닉네임 규칙은 가입 화면과 같다 — reference/nickname.js (2~12자 · 한글 완성형/영문/숫자 · 공백·특수문자 불가 · 금칙어·중복 불가) */
+const Nick = window.ScentripNick;
 $('#nameSave').addEventListener('click', () => {
-  const v = $('#nameInput').value.trim().replace(/\s+/g,' ');
-  const len = charLen(v);
-  let msg = '';
-  if (len < 2 || len > 12) msg = '이름은 2자 이상 12자 이하로 입력해 주세요.';
-  else if (!NICK_RE.test(v)) msg = '한글·영문·숫자와 한 칸 공백만 사용할 수 있어요.';
-  if (msg){
-    $('#nameErrText').textContent = msg;
+  const r = Nick.check($('#nameInput').value, { current: state.user.nickname });   // 지금 내 닉네임이면 중복으로 보지 않는다
+  $('#nameInput').value = r.value;   // 앞뒤 공백 제거
+  if (!r.ok){
+    $('#nameErrText').textContent = r.msg;
     $('#nameErr').classList.add('show'); $('#nameInput').setAttribute('aria-invalid','true'); $('#nameInput').focus();
     return;
   }
-  state.user.nickname = v;
+  // TODO(개발): 저장 시 서버에서 중복·금칙어를 한 번 더 확인한다 (소문자로 접은 값에 unique)
+  state.user.nickname = r.value;
   renderIdentity();
   closeModal();
   toast('이름이 변경되었습니다');
