@@ -462,7 +462,7 @@
 
 ### [SCT-050] P0 | 회원가입 | 닉네임 검증 문구 누락 — '닉네임을 입력해 주세요'
 - 위치: https://scentrip.vercel.app/signup — 닉네임 입력 아래 (비운 채로 포커스 이동)
-- 기대(디자인): '닉네임을 입력해 주세요' (오류는 빨간 경고 아이콘 + aria-invalid=true) — 근거 `reference/nickname.js:42, 66` · `screens/signup.html:329-349`
+- 기대(디자인): '닉네임을 입력해 주세요' (오류는 빨간 경고 아이콘 + aria-invalid=true) — 근거 `reference/nickname.js:50, 74` · `screens/signup.html:329-349`
 - 실제(배포): 문구 없음 — 기본 안내문 그대로, aria-invalid 없음 — 증거 `qa/screens/signup-A-02-blur-empty-1440-dev.png`
 - 뷰포트: all
 - 수정 가이드: 검증 규칙별 문구 노출
@@ -470,7 +470,7 @@
 
 ### [SCT-051] P0 | 회원가입 | 닉네임 검증 문구 누락 — '2자 이상 입력해 주세요'
 - 위치: https://scentrip.vercel.app/signup — 닉네임 입력 아래 ('가' 입력)
-- 기대(디자인): '2자 이상 입력해 주세요' (오류는 빨간 경고 아이콘 + aria-invalid=true) — 근거 `reference/nickname.js:46, 70` · `screens/signup.html:329-349`
+- 기대(디자인): '2자 이상 입력해 주세요' (오류는 빨간 경고 아이콘 + aria-invalid=true) — 근거 `reference/nickname.js:54, 78` · `screens/signup.html:329-349`
 - 실제(배포): 문구 없음 — 기본 안내문 그대로, aria-invalid 없음 — 증거 `qa/screens/signup-A-03-one-char-1440-dev.png`
 - 뷰포트: all
 - 수정 가이드: 검증 규칙별 문구 노출
@@ -478,7 +478,7 @@
 
 ### [SCT-052] P0 | 회원가입 | 닉네임 검증 문구 누락 — '한글, 영문, 숫자만 쓸 수 있어요'
 - 위치: https://scentrip.vercel.app/signup — 닉네임 입력 아래 ('ab!' 입력)
-- 기대(디자인): '한글, 영문, 숫자만 쓸 수 있어요' (오류는 빨간 경고 아이콘 + aria-invalid=true) — 근거 `reference/nickname.js:45, 69` · `screens/signup.html:329-349`
+- 기대(디자인): '한글, 영문, 숫자만 쓸 수 있어요' (오류는 빨간 경고 아이콘 + aria-invalid=true) — 근거 `reference/nickname.js:53, 77` · `screens/signup.html:329-349`
 - 실제(배포): 문구 없음 — 기본 안내문 그대로, aria-invalid 없음 — 증거 `qa/screens/signup-A-05-special-1440-dev.png`
 - 뷰포트: all
 - 수정 가이드: 검증 규칙별 문구 노출
@@ -486,7 +486,7 @@
 
 ### [SCT-053] P0 | 회원가입 | 닉네임 검증 문구 누락 — '공백 없이 입력해 주세요'
 - 위치: https://scentrip.vercel.app/signup — 닉네임 입력 아래 ('ab cd' 입력 — 한 칸이든 두 칸이든 불가)
-- 기대(디자인): '공백 없이 입력해 주세요' (오류는 빨간 경고 아이콘 + aria-invalid=true) — 근거 `reference/nickname.js:43, 67` · `screens/signup.html:329-349`
+- 기대(디자인): '공백 없이 입력해 주세요' (오류는 빨간 경고 아이콘 + aria-invalid=true) — 근거 `reference/nickname.js:51, 75` · `screens/signup.html:329-349`
 - 규칙 갱신(2026-09-20): 공백 한 칸 허용 → 공백 전면 불가. 앞뒤 공백은 검사 전에 자동 제거한다. 증거 스크린샷은 두 칸 공백으로 찍은 것이지만 배포본 상태(문구 없음)는 그대로다.
 - 실제(배포): 문구 없음 — 기본 안내문 그대로, aria-invalid 없음 — 증거 `qa/screens/signup-A-06-double-space-1440-dev.png`
 - 뷰포트: all
@@ -495,7 +495,7 @@
 
 ### [SCT-054] P0 | 회원가입 | 닉네임 검증 문구 누락 — '이미 사용 중인 닉네임이에요'
 - 위치: https://scentrip.vercel.app/signup — 닉네임 입력 아래 ('향기' 입력 (원본 샘플 중복 목록))
-- 기대(디자인): '이미 사용 중인 닉네임이에요' (오류는 빨간 경고 아이콘 + aria-invalid=true) — 근거 `reference/nickname.js:39, 49, 75` · `screens/signup.html:329-349`
+- 기대(디자인): '이미 사용 중인 닉네임이에요' (오류는 빨간 경고 아이콘 + aria-invalid=true) — 근거 `reference/nickname.js:47, 57, 84` · `screens/signup.html:329-349`
 - 실제(배포): 문구 없음 — 기본 안내문 그대로, aria-invalid 없음 — 증거 `qa/screens/signup-A-09-taken-1440-dev.png`
 - 뷰포트: all
 - 수정 가이드: 검증 규칙별 문구 노출
@@ -503,7 +503,7 @@
 
 ### [SCT-055] P0 | 회원가입 | 닉네임 검증 문구 누락 — '사용할 수 있는 닉네임이에요'
 - 위치: https://scentrip.vercel.app/signup — 닉네임 입력 아래 ('qa검수A' 입력 (성공 표시, 체크 아이콘))
-- 기대(디자인): '사용할 수 있는 닉네임이에요' (오류는 빨간 경고 아이콘 + aria-invalid=true) — 근거 `reference/nickname.js:50, 77` · `screens/signup.html:329-349`
+- 기대(디자인): '사용할 수 있는 닉네임이에요' (오류는 빨간 경고 아이콘 + aria-invalid=true) — 근거 `reference/nickname.js:58, 86` · `screens/signup.html:329-349`
 - 실제(배포): 문구 없음 — 기본 안내문 그대로, aria-invalid 없음 — 증거 `qa/screens/signup-A-10-valid-1440-dev.png`
 - 뷰포트: all
 - 수정 가이드: 검증 규칙별 문구 노출
@@ -511,7 +511,7 @@
 
 ### [SCT-056] P0 | 회원가입 | 닉네임 12자 초과 처리 불일치 (입력 차단 vs 오류 안내)
 - 위치: https://scentrip.vercel.app/signup — 닉네임에 13자 입력
-- 기대(디자인): 13자까지 입력되고 카운터 '13/12'(초과 색) + '12자 이하로 입력해 주세요' — 근거 `reference/nickname.js:47, 71` · `screens/signup.html:332-333, 347`
+- 기대(디자인): 13자까지 입력되고 카운터 '13/12'(초과 색) + '12자 이하로 입력해 주세요' — 근거 `reference/nickname.js:55, 79` · `screens/signup.html:332-333, 347`
 - 실제(배포): maxlength=12로 12자에서 입력 차단, 안내 없음 — 증거 `qa/screens/signup-A-04-13chars-1440-dev.png`
 - 뷰포트: all
 - 수정 가이드: 입력은 허용하고 초과 안내
@@ -519,7 +519,8 @@
 
 ### [SCT-057] P0 | 회원가입 | 금칙어 검증 문구 불일치
 - 위치: https://scentrip.vercel.app/signup — 'admin' / '센트립' 입력
-- 기대(디자인): 사용할 수 없는 단어가 들어 있어요 — 근거 `reference/nickname.js:26-36, 48, 74` · `screens/signup.html:329-349`
+- 기대(디자인): 사용할 수 없는 단어가 들어 있어요 — 근거 `reference/nickname.js:28-38, 43-44, 56, 82-83` · `screens/signup.html:329-349`
+- 규칙 갱신(2026-09-20): master·staff·support·sex 네 단어는 앞뒤에 영문이 붙으면 다른 낱말로 보고 통과시킨다 (mastercard·supporter·sexy). 나머지 35개는 포함 검사 그대로.
 - 실제(배포): 운영자로 오해할 수 있는 이름이나 부적절한 표현은 사용할 수 없어요. — 증거 `qa/screens/signup-A-07-banned-1440-dev.png`
 - 뷰포트: all
 - 수정 가이드: 문구 교체
