@@ -37,15 +37,15 @@
 
 | # | 구분 | 항목 | 위치 | 기대(원본) | 근거 | 실제(배포) | 증거 | 뷰포트 |
 |---|---|---|---|---|---|---|---|---|
-| F425 | 확인필요 | Google 로그인 취소(cancel) 실제 플로우 | /login → Google 화면에서 취소 | login.html?error=cancel → 'Google 로그인이 취소되었습니다. 다시 시도해 주세요.' | `screens/login.html:157` | 사용자 수동 로그인 과정이라 실제 취소 경로 미실행 (URL 파라미터 처리는 1단계 티켓) | - | all |
+| F425 | 확인필요 | Google 로그인 취소(cancel) 실제 플로우 | /login → Google 화면에서 취소 | login.html?error=cancel → 'Google 로그인이 취소되었습니다. 다시 시도해 주세요.' | `screens/login.html:179` | 사용자 수동 로그인 과정이라 실제 취소 경로 미실행 (URL 파라미터 처리는 1단계 티켓) | - | all |
 
 ## 취향 테스트
 
 | # | 구분 | 항목 | 위치 | 기대(원본) | 근거 | 실제(배포) | 증거 | 뷰포트 |
 |---|---|---|---|---|---|---|---|---|
-| F417 | P0 | 회원 결과 CTA 이동 경로 불일치 (탐색 → 내 여행) | https://scentrip.vercel.app/taste?result=latest — '내 여행에서 추천 보기' | '여행지 둘러보기' → 탐색 장소 추천(place-recommend.html) | `screens/onboarding-test.html:2196` | /dashboard (내 여행) | qa/screens/taste-A-member-first-WHAN-result-1440-dev.png | all |
-| F418 | P0 | 비회원 결과 가입 CTA 복귀 경로 불일치 | https://scentrip.vercel.app/taste (비로그인 결과) — '가입하고 여행지 추천받기' | login.html?next=place-recommend.html&from=test → 가입 후 탐색으로, 검사 결과 저장 안내 | `screens/onboarding-test.html:2198` | /login?next=/dashboard → 가입 후 내 여행 | qa/screens/login-B-from-test-1440-dev.png | all |
-| F419 | P0 | 재검사(결과 있는 회원) CTA 상태 미구현 | 계정 A(WHAN 결과 보유)로 /taste 재검사 → CLDR 결과 | '새로운 결과가 나왔어요' / '이 결과로 프로필을 업데이트하면 새 취향에 맞는 여행지를 추천받아요. 저장 전까지는 기존 취향이 그대로 유지돼요.' / [업데이트하고 추천받기] [다시 검사하기] | `screens/onboarding-test.html:2158-2165` | 첫 검사와 같은 CTA 'qa검수A님 취향의 여행 장소를 더 만나보세요 / 내 여행에서 추천 보기' — 업데이트 확인 단계 없음 | qa/screens/taste-A-member-retest-CLDR-result-1440-dev.png | all |
+| F417 | P0 | 회원 결과 CTA 이동 경로 불일치 (탐색 → 내 여행) | https://scentrip.vercel.app/taste?result=latest — '내 여행에서 추천 보기' | '여행지 둘러보기' → 탐색 장소 추천(place-recommend.html) | `screens/onboarding-test.html:2219` | /dashboard (내 여행) | qa/screens/taste-A-member-first-WHAN-result-1440-dev.png | all |
+| F418 | P0 | 비회원 결과 가입 CTA 복귀 경로 불일치 | https://scentrip.vercel.app/taste (비로그인 결과) — '가입하고 여행지 추천받기' | login.html?next=place-recommend.html&from=test → 가입 후 탐색으로, 검사 결과 저장 안내 | `screens/onboarding-test.html:2221` | /login?next=/dashboard → 가입 후 내 여행 | qa/screens/login-B-from-test-1440-dev.png | all |
+| F419 | P0 | 재검사(결과 있는 회원) CTA 상태 미구현 | 계정 A(WHAN 결과 보유)로 /taste 재검사 → CLDR 결과 | '새로운 결과가 나왔어요' / '이 결과로 프로필을 업데이트하면 새 취향에 맞는 여행지를 추천받아요. 저장 전까지는 기존 취향이 그대로 유지돼요.' / [업데이트하고 추천받기] [다시 검사하기] | `screens/onboarding-test.html:2181-2188` | 첫 검사와 같은 CTA 'qa검수A님 취향의 여행 장소를 더 만나보세요 / 내 여행에서 추천 보기' — 업데이트 확인 단계 없음 | qa/screens/taste-A-member-retest-CLDR-result-1440-dev.png | all |
 
 ## 홈
 
@@ -57,21 +57,21 @@
 
 | # | 구분 | 항목 | 위치 | 기대(원본) | 근거 | 실제(배포) | 증거 | 뷰포트 |
 |---|---|---|---|---|---|---|---|---|
-| F415 | P0 | '글 속 장소로 동선 만들기'가 조건 입력 대신 막힘 화면으로 이동 | https://scentrip.vercel.app/news/green-rest-guide → 동선 만들기 CTA → /planner?story=green-rest-guide | 글 속 장소를 담아 조건 입력(route-conditions.html?mode=picked, 하단 "선택한 장소" 바)으로 이동 | `screens/news-detail.html:275, 400-405` | '낙동강제방(강서30리벚꽃길) · 위치 확인 중 / 정확한 위치가 확인되지 않아 이 장소를 포함한 동선은 아직 만들 수 없습니다.' + [다른 장소 찾아보기] [장소 지정 없이 새 동선 만들기] — 조건 입력으로 못 감 | qa/screens/flow-news-detail-cta-1440-dev.png | all |
+| F415 | P0 | '글 속 장소로 동선 만들기'가 조건 입력 대신 막힘 화면으로 이동 | https://scentrip.vercel.app/news/green-rest-guide → 동선 만들기 CTA → /planner?story=green-rest-guide | 글 속 장소를 담아 조건 입력(route-conditions.html?mode=picked, 하단 "선택한 장소" 바)으로 이동 | `screens/news-detail.html:298, 423-428` | '낙동강제방(강서30리벚꽃길) · 위치 확인 중 / 정확한 위치가 확인되지 않아 이 장소를 포함한 동선은 아직 만들 수 없습니다.' + [다른 장소 찾아보기] [장소 지정 없이 새 동선 만들기] — 조건 입력으로 못 감 | qa/screens/flow-news-detail-cta-1440-dev.png | all |
 
 ## 장소 상세
 
 | # | 구분 | 항목 | 위치 | 기대(원본) | 근거 | 실제(배포) | 증거 | 뷰포트 |
 |---|---|---|---|---|---|---|---|---|
-| F421 | P0 | '카카오맵에서 보기'가 OpenStreetMap 링크로 대체 | https://scentrip.vercel.app/explore/tour_00031 — 지도 영역 외부 링크 | map.kakao.com/link/search/{주소} 새 탭 | `screens/place-detail.html:269` | openstreetmap.org/?mlat…&mlon… 새 탭 (지도 제목 옆 + 정보 박스 아래 2곳) | qa/screens/place-detail-member-1440-dev.png | all |
+| F421 | P0 | '카카오맵에서 보기'가 OpenStreetMap 링크로 대체 | https://scentrip.vercel.app/explore/tour_00031 — 지도 영역 외부 링크 | map.kakao.com/link/search/{주소} 새 탭 | `screens/place-detail.html:292` | openstreetmap.org/?mlat…&mlon… 새 탭 (지도 제목 옆 + 정보 박스 아래 2곳) | qa/screens/place-detail-member-1440-dev.png | all |
 
 ## 동선 상세
 
 | # | 구분 | 항목 | 위치 | 기대(원본) | 근거 | 실제(배포) | 증거 | 뷰포트 |
 |---|---|---|---|---|---|---|---|---|
 | F412 | P0 | 홈에서 들어온 동선 상세의 breadcrumb가 진입 경로를 반영하지 않음 | https://scentrip.vercel.app/ → 동선 카드 클릭 → /planner/green-rest | 홈 진입: '홈 › {동선 이름}' (홈 링크 → /), 헤더 선택 메뉴 없음 | `screens/route-detail.html:605-610 (renderCrumb · from=home)` | '탐색 › 여행 동선' (진입 경로와 무관하게 고정) | qa/screens/flow-home-route-detail-1440-dev.png | all |
-| F413 | P0 | 내 여행에서 들어온 내 동선 상세의 breadcrumb·하단 버튼 불일치 | https://scentrip.vercel.app/dashboard?tab=routes → 저장 동선 카드 → /planner/{uuid} | breadcrumb '내 여행 › 내 동선 › {동선 이름}' (내 동선 → 내 동선 탭), 헤더 '내 여행' 선택, 하단 버튼 '편집하기' | `screens/route-detail.html:605-610, 708` | breadcrumb '내 여행 › 여행 동선'(현재 동선 이름 없음), 하단 버튼 '이 일정 수정하기' | qa/screens/flow-mytrip-route-detail-1440-dev.png | all |
-| F414 | P0 | '이 동선으로 여행 만들기'가 결과 화면 대신 장소 선택 화면으로 이동 | https://scentrip.vercel.app/planner/river-forest → 하단 CTA | 동선을 담아 AI 맞춤 동선 결과 화면(route-result.html?open=1)으로 이동 — 여행 조건 모달이 열린 상태 | `screens/route-detail.html:470-472` | /planner?template=river-forest — "여행 동선을 만들 장소를 선택해주세요" 장소 선택 화면 (총 6개 장소) | qa/screens/flow-route-detail-cta-1440-dev.png | all |
+| F413 | P0 | 내 여행에서 들어온 내 동선 상세의 breadcrumb·하단 버튼 불일치 | https://scentrip.vercel.app/dashboard?tab=routes → 저장 동선 카드 → /planner/{uuid} | breadcrumb '내 여행 › 내 동선 › {동선 이름}' (내 동선 → 내 동선 탭), 헤더 '내 여행' 선택, 하단 버튼 '편집하기' | `screens/route-detail.html:628-633, 731` | breadcrumb '내 여행 › 여행 동선'(현재 동선 이름 없음), 하단 버튼 '이 일정 수정하기' | qa/screens/flow-mytrip-route-detail-1440-dev.png | all |
+| F414 | P0 | '이 동선으로 여행 만들기'가 결과 화면 대신 장소 선택 화면으로 이동 | https://scentrip.vercel.app/planner/river-forest → 하단 CTA | 동선을 담아 AI 맞춤 동선 결과 화면(route-result.html?open=1)으로 이동 — 여행 조건 모달이 열린 상태 | `screens/route-detail.html:493-495` | /planner?template=river-forest — "여행 동선을 만들 장소를 선택해주세요" 장소 선택 화면 (총 6개 장소) | qa/screens/flow-route-detail-cta-1440-dev.png | all |
 | F422 | P0 | 구간 '길찾기'(카카오맵 길찾기 새 탭)가 페이지 내 지도 앵커로 대체 | https://scentrip.vercel.app/planner/river-forest — 이동 구간 우측 링크 | map.kakao.com/link/to/{다음 장소},{위도},{경도} 새 탭 | `screens/route-detail.html:655, screens/route-result.html (tl-link)` | '지도 보기' → #route-detail-map (같은 페이지, 1440에서는 화면에 안 보임) | qa/screens/route-detail-member-1440-dev.png | all |
 
 ## 동선 만들기 · 장소 선택
@@ -84,14 +84,14 @@
 
 | # | 구분 | 항목 | 위치 | 기대(원본) | 근거 | 실제(배포) | 증거 | 뷰포트 |
 |---|---|---|---|---|---|---|---|---|
-| F304 | P0 | '동선 만들기'가 모달 대신 /planner?mode=saved-places로 이동 | https://scentrip.vercel.app/dashboard — 필터 바 우측 '동선 만들기' | '동선 만들기' 모달 → 모드 선택 | `screens/my-trip.html:368-371` | 모달 없이 /planner?mode=saved-places 이동 | qa/screens/ov-route-make-mytrip-1440-dev.png | all |
+| F304 | P0 | '동선 만들기'가 모달 대신 /planner?mode=saved-places로 이동 | https://scentrip.vercel.app/dashboard — 필터 바 우측 '동선 만들기' | '동선 만들기' 모달 → 모드 선택 | `screens/my-trip.html:405-408` | 모달 없이 /planner?mode=saved-places 이동 | qa/screens/ov-route-make-mytrip-1440-dev.png | all |
 
 ## 마이페이지
 
 | # | 구분 | 항목 | 위치 | 기대(원본) | 근거 | 실제(배포) | 증거 | 뷰포트 |
 |---|---|---|---|---|---|---|---|---|
-| F416 | P0 | 메뉴 이동이 브라우저 기록에 남지 않아 뒤로가기로 이전 탭에 못 돌아감 | https://scentrip.vercel.app/mypage#account → 내 리뷰 → 고객센터 → 브라우저 뒤로 | 뷰마다 history.pushState → 뒤로가기 시 이전 뷰(#reviews)로 | `screens/mypage.html:1218` | 해시만 바뀌고 기록이 쌓이지 않아 뒤로가기 한 번에 마이페이지를 벗어남(이전 페이지로 이동) | qa/raw/flows-dev.json | all |
-| F424 | P0 | 회원탈퇴 완료 후 로그아웃·홈 이동이 안 되고 사이트 전체가 무한 리다이렉트 | https://scentrip.vercel.app/mypage#withdraw → '탈퇴' 입력 → [회원탈퇴] → 확인 모달 [계정 삭제] (계정 B design.sadie@gmail.com 실제 탈퇴) | 탈퇴 처리 후 비회원 상태로 홈(home.html) 이동 — 이후 모든 화면 정상 이용 | `screens/mypage.html:1195-1198` | 삭제 직후 ERR_TOO_MANY_REDIRECTS 오류 화면. 남은 세션 쿠키(sb-…-auth-token) 때문에 / → /signup, /login → /signup, /signup → /login 이 반복 (예: /mypage → /signup?next=%2Fmypage → /login?next=%2Fmypage → …). 브라우저 쿠키를 직접 지우기 전까지 홈 포함 전 화면 접근 불가. (계정 데이터는 삭제됨 — 리뷰 사라짐 확인, 쿠키 삭제 후 같은 Google 계정 로그인 시 가입 화면으로 정상 이동) | qa/screens/withdraw-B-04-after-delete-1440-dev.png | all |
+| F416 | P0 | 메뉴 이동이 브라우저 기록에 남지 않아 뒤로가기로 이전 탭에 못 돌아감 | https://scentrip.vercel.app/mypage#account → 내 리뷰 → 고객센터 → 브라우저 뒤로 | 뷰마다 history.pushState → 뒤로가기 시 이전 뷰(#reviews)로 | `screens/mypage.html:1241` | 해시만 바뀌고 기록이 쌓이지 않아 뒤로가기 한 번에 마이페이지를 벗어남(이전 페이지로 이동) | qa/raw/flows-dev.json | all |
+| F424 | P0 | 회원탈퇴 완료 후 로그아웃·홈 이동이 안 되고 사이트 전체가 무한 리다이렉트 | https://scentrip.vercel.app/mypage#withdraw → '탈퇴' 입력 → [회원탈퇴] → 확인 모달 [계정 삭제] (계정 B design.sadie@gmail.com 실제 탈퇴) | 탈퇴 처리 후 비회원 상태로 홈(home.html) 이동 — 이후 모든 화면 정상 이용 | `screens/mypage.html:1218-1221` | 삭제 직후 ERR_TOO_MANY_REDIRECTS 오류 화면. 남은 세션 쿠키(sb-…-auth-token) 때문에 / → /signup, /login → /signup, /signup → /login 이 반복 (예: /mypage → /signup?next=%2Fmypage → /login?next=%2Fmypage → …). 브라우저 쿠키를 직접 지우기 전까지 홈 포함 전 화면 접근 불가. (계정 데이터는 삭제됨 — 리뷰 사라짐 확인, 쿠키 삭제 후 같은 Google 계정 로그인 시 가입 화면으로 정상 이동) | qa/screens/withdraw-B-04-after-delete-1440-dev.png | all |
 
 ## 부록 A. 원본 링크 전수 대조 (1440, 정적 a[href])
 

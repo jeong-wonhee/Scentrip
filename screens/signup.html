@@ -297,6 +297,7 @@ a { color: inherit; }
   </div>
 </div>
 
+<script src="../reference/nickname.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -320,40 +321,40 @@ function syncAgree() {
 $("agreeAll").addEventListener("change", () => { items.forEach((c) => { c.checked = $("agreeAll").checked; }); syncAgree(); });
 items.forEach((c) => c.addEventListener("change", syncAgree));
 
-/* ---------- 닉네임 (명세 10 — 금칙어·중복은 샘플 목록으로 시늉만) ---------- */
-const BANNED = ["운영자", "관리자", "admin", "센트립", "scentrip"];
-const TAKEN = ["향기", "여행자", "나무향"];
+/* ---------- 닉네임 (명세 10 — 규칙은 reference/nickname.js 한 곳에서 관리) ---------- */
+const Nick = window.ScentripNick;   // 2~12자 · 한글 완성형/영문/숫자 · 공백·특수문자 불가 · 금칙어·중복 불가 (대소문자 무시)
 const ICON_ERR = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-8,56a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm8,104a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z"/></svg>';
 const ICON_OK = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></svg>';
-function checkNick(raw) {
-  const v = raw.trim();
-  if (!v) return { ok: false, msg: "닉네임을 입력해 주세요" };
-  if (v.length < 2) return { ok: false, msg: "2자 이상 입력해 주세요" };
-  if (v.length > 12) return { ok: false, msg: "12자 이하로 입력해 주세요" };
-  if (!/^[가-힣a-zA-Z0-9 ]+$/.test(v)) return { ok: false, msg: "한글, 영문, 숫자만 쓸 수 있어요" };
-  if (/ {2,}/.test(v)) return { ok: false, msg: "공백은 한 칸만 쓸 수 있어요" };
-  const low = v.toLowerCase();
-  if (BANNED.some((w) => low.includes(w))) return { ok: false, msg: "사용할 수 없는 단어가 들어 있어요" };
-  if (TAKEN.includes(low)) return { ok: false, msg: "이미 사용 중인 닉네임이에요" };   // TODO(개발): 중복 허용 여부 결정 후 서버 확인
-  return { ok: true, msg: "사용할 수 있는 닉네임이에요" };
-}
-let nickOk = false, touched = false;
+let nickOk = false, touched = false, composing = false;
 function renderNick() {
-  const v = $("nick").value.trim();
-  $("nickCount").textContent = `${v.length}/12`;
-  $("nickCount").classList.toggle("is-over", v.length > 12);
-  const r = checkNick($("nick").value);
+  const v = Nick.normalize($("nick").value);   // 앞뒤 공백은 검사 전에 지운다
+  const n = Nick.len(v);
+  $("nickCount").textContent = `${n}/${Nick.MAX}`;
+  $("nickCount").classList.toggle("is-over", n > Nick.MAX);
+  const r = Nick.check(v);
   nickOk = r.ok;
-  const show = touched || v.length > 0;
+  update();
   const m = $("nickMsg");
+  if (composing) {   // 한글 조합 중(ㅇ → 여 → 여행)에는 아직 완성 전이라 판정을 미룬다
+    m.classList.remove("is-err", "is-ok");
+    m.textContent = "프로필과 리뷰에 표시돼요.";
+    $("nick").setAttribute("aria-invalid", "false");
+    return;
+  }
+  const show = touched || n > 0;
   m.classList.toggle("is-err", show && !r.ok);
   m.classList.toggle("is-ok", r.ok);
   m.innerHTML = show ? (r.ok ? ICON_OK : ICON_ERR) + `<span>${r.msg}</span>` : "프로필과 리뷰에 표시돼요.";
   $("nick").setAttribute("aria-invalid", show && !r.ok ? "true" : "false");
-  update();
 }
 $("nick").addEventListener("input", renderNick);
-$("nick").addEventListener("blur", () => { touched = true; renderNick(); });
+$("nick").addEventListener("compositionstart", () => { composing = true; });
+$("nick").addEventListener("compositionend", () => { composing = false; renderNick(); });
+$("nick").addEventListener("blur", () => {
+  touched = true; composing = false;
+  $("nick").value = Nick.normalize($("nick").value);   // 앞뒤 공백은 입력칸에서도 지운다
+  renderNick();
+});
 $("nick").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) $("submitBtn").click(); });
 
 /* 필수 약관 + 유효한 닉네임이어야 가입 버튼 활성 (명세 10·20) */
@@ -374,7 +375,7 @@ $("submitBtn").addEventListener("click", () => {
     $("submitSpin").hidden = true;
     $("submitLabel").textContent = "가입 완료하기";
     if ($("qaSave").value === "fail") { $("alert").hidden = false; update(); return; }
-    complete($("nick").value.trim());
+    complete(Nick.normalize($("nick").value));
   }, 1000);
 });
 
