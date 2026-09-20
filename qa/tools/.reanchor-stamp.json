@@ -1,0 +1,12 @@
+{
+ "base": "05d8256",
+ "docs": {
+  "qa/00-page-map.md": "8de1392dec93e66255e338caac81a51139a2f36049568a191854045560752624",
+  "qa/01-text.md": "19e51f13b3619a1820c8f060adb27fc3ede96c58f5b46347db60c677188b70cf",
+  "qa/02-style.md": "c620b02dee2310d7afac1010d8776d8315ba62e8f239fb0eb97003bc5609dcf0",
+  "qa/03-width.md": "62a1cc08296af90a4deb8924ed8fc6f5029d361042c844b9d2fef4ebeb0d685b",
+  "qa/04-flow.md": "e2e0e216aebb405b8c61b99e365c8288d571efb4bac90095aa394cceb7888bc9",
+  "qa/QA-REPORT.md": "aacd7d0c4610bad44632cadea4297c88e1701c6160bc066e4c2f5f4040a74e77",
+  "qa/README.md": "d98070f184774abf5ba367eefbc216eb23493ee9128a5c62eeaa3a6a98950717"
+ }
+}

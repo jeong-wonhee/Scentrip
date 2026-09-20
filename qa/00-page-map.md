@@ -20,13 +20,13 @@
 
 | ID | 컴포넌트 | 원본 근거 | 배포본 대응 | 상태 |
 |---|---|---|---|---|
-| G-01 | 헤더/내비 (로고 → 홈, 소식·탐색·내 여행) | `home.html:303` 외 전 화면 | 전 화면 header (로고·소식·탐색·내 여행) | 대응 |
-| G-02 | 헤더 우측 비회원 `로그인` 버튼 → login | `home.html:316` | `/login` 링크 | 대응 |
-| G-03 | 헤더 우측 회원 프로필 필(이름+아바타) + 프로필 팝오버(계정 설정/내 리뷰/고객센터/로그아웃) | `home.html:317-` `.profile-pop` | `/mypage#account` `#reviews` `#support` 문자열 번들에 존재 | [확인필요] 로그인 필요 |
+| G-01 | 헤더/내비 (로고 → 홈, 소식·탐색·내 여행) | `home.html:325` 외 전 화면 | 전 화면 header (로고·소식·탐색·내 여행) | 대응 |
+| G-02 | 헤더 우측 비회원 `로그인` 버튼 → login | `home.html:338` | `/login` 링크 | 대응 |
+| G-03 | 헤더 우측 회원 프로필 필(이름+아바타) + 프로필 팝오버(계정 설정/내 리뷰/고객센터/로그아웃) | `home.html:339-` `.profile-pop` | `/mypage#account` `#reviews` `#support` 문자열 번들에 존재 | [확인필요] 로그인 필요 |
 | G-04 | 언어 변경 지구본 버튼 + 메뉴(5개 언어) + 토스트 | `reference/lang.js` (login·signup 상단 바 포함, onboarding-test 제외) | 1440 헤더에서 버튼 미발견 (`/api/language` 는 번들에 있음) | [확인필요] 1단계에서 재확인 — 미구현 가능성 |
 | G-05 | 비회원 로그인 모달 (저장·찜·도움돼요·리뷰·동선 가져오기 시) + 실패 6종 안내 | `reference/login-modal.js` | "나의 향 취향을 여행으로 이어가요" 모달 마크업 전 화면 존재. 탐색 하트 클릭 시 노출 여부 미확인 | 대응 / [확인필요] 트리거 |
 | G-06 | 첫 방문 튜토리얼(코치마크) — 홈·소식·탐색·내 여행 | `reference/tour.js` (`?tour=1`) | 미확인 (가입 직후 신규 회원만) | [확인필요] 로그인 필요 |
-| G-07 | 푸터 (센트립 소개 · 이용약관 · 개인정보처리방침) | `home.html:435-` | `/about` `/terms` `/privacy` | 대응 |
+| G-07 | 푸터 (센트립 소개 · 이용약관 · 개인정보처리방침) | `home.html:457-` | `/about` `/terms` `/privacy` | 대응 |
 | G-08 | 토스트 (`.toast`) | `components.css` | 화면별 확인 | 1단계 |
 | G-09 | 파비콘 | `assets/logo/favicon*.png/svg` | `/favicon.ico` · `/icon.svg` | 대응 (2단계 비교) |
 
@@ -51,7 +51,7 @@
 | P-03 | `onboarding-test.html` | 표지(인트로) "당신의 여행은 어떤 향인가요?" | 그대로 | `/taste` | 대응 |
 | P-03a | 〃 | 문항 진행 (12문항, 크로스페이드) | 테스트 시작하기 | `/taste` 시작 후 1번 문항 확인 | 대응 |
 | P-03b | 〃 | 로딩 ("12개의 답을 향으로 옮기고 있어요") | 12문항 응답 | `/taste` 응답 완료 후 | [확인필요] 1단계에서 끝까지 진행 |
-| P-03c | 〃 | 결과 — 16유형 × 결과 섹션 | `?type=코드` | `/taste` 응답 직후 · `/taste?result=latest` (회원) | 대응 — 축별 3문항 다수결(`onboarding-test.html:1896`)이라 답을 골라 16유형 모두 재현. 비회원으로 16회 진행 |
+| P-03c | 〃 | 결과 — 16유형 × 결과 섹션 | `?type=코드` | `/taste` 응답 직후 · `/taste?result=latest` (회원) | 대응 — 축별 3문항 다수결(`onboarding-test.html:1919`)이라 답을 골라 16유형 모두 재현. 비회원으로 16회 진행 |
 | P-03d | 〃 | 결과 CTA 3종: guest · member-first · member-retest | `?type=…&state=` | guest = 비회원 응답 · member-first = 결과 없는 신규 회원의 첫 검사 · member-retest = 결과 있는 회원의 재검사 | 대응 — member-first 는 계정당 1회 |
 
 ### 홈 · 소식
